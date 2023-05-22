@@ -68,7 +68,6 @@ in
     docker
     kubectl
     ngrok
-    vscode
     terraform
     tldr
     gcc
