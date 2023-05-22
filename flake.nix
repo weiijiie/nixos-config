@@ -59,7 +59,7 @@
       # Available through 'nixos-rebuild --flake .#your-hostname'
       nixosConfigurations = {
         # windows laptop
-        nixos = nixpkgs.lib.nixosSystem {
+        aldehyde = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs outputs; };
           modules = [
             ./hosts/aldehyde

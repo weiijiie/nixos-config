@@ -55,7 +55,7 @@
     };
   };
 
-  networking.hostName = "nixos";
+  networking.hostName = "aldehyde";
 
   wsl = {
     enable = true;
