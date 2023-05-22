@@ -102,8 +102,6 @@
       permitRootLogin = "no";
       passwordAuthentication = false;
     };
-
-    vscode-server.enable = true;
   };
   
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
