@@ -83,6 +83,7 @@
   };
 
   programs.zsh.enable = true;
+  programs.vim.defaultEditor = true;
 
   users.defaultUserShell = pkgs.zsh;
 
