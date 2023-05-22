@@ -343,9 +343,6 @@ in
           {
             name = "reegnz/jq-zsh-plugin";
           }
-          {
-            name = "tribela/vim-transparent";
-          }
         ];
       };
     };
