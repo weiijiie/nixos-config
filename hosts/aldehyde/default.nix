@@ -77,7 +77,7 @@
   programs = {
     zsh.enable = true;
     vim.defaultEditor = true;
-    # NIX_LD is a workaround for remote vs-code to work, as per: https://nixos.wiki/wiki/Visual_Studio_Code#Remote_WSL
+    # nix-ld is a workaround for remote vs-code to work, as per: https://nixos.wiki/wiki/Visual_Studio_Code#Remote_WSL
     nix-ld.enable = true;
   };
 
@@ -116,5 +116,5 @@
   };
   
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
-  system.stateVersion = "22.05";
+  system.stateVersion = "22.11";
 }
