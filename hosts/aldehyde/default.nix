@@ -80,10 +80,21 @@
     ];
 
     shells = [ pkgs.zsh ];
+
+    variables = {
+      NIX_LD_LIBRARY_PATH = lib.makeLibraryPath [
+        pkgs.stdenv.cc.cc
+      ];
+      NIX_LD = lib.fileContents "${pkgs.stdenv.cc}/nix-support/dynamic-linker";
+    };
   };
 
-  programs.zsh.enable = true;
-  programs.vim.defaultEditor = true;
+  programs = {
+    zsh.enable = true;
+    vim.defaultEditor = true;
+    nix-ld.enable = true;
+  };
+
 
   users.defaultUserShell = pkgs.zsh;
 
