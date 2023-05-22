@@ -61,7 +61,7 @@
     enable = true;
     defaultUser = "weijie";
     startMenuLaunchers = true;
-    # nativeSystemd = true;
+    nativeSystemd = true;
     
     wslConf = {
       automount.root = "/mnt";
