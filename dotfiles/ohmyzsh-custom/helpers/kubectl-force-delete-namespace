@@ -1,0 +1,31 @@
+# Deletes a Kubernetes namespace stuck in the "Terminating state"
+kubectl-force-delete-namespace() {
+    local namespace
+    namespace="$1"
+
+    if [[ -z ${namespace} ]]; then
+        echo "Usage: $0 <namespace-to-be-deleted>"
+        return
+    fi
+
+    local resources
+    resources="$(kubectl get-all --namespace "${namespace}" --output name 2> /dev/null)"
+
+    if [[ "${resources}" != "No resources found." ]]; then
+        echo "Following resources still found in namespace:"
+        echo "${resources}"
+        read "reply?You may have dangling resources if you force delete. Are you sure [yn]? "
+
+        if ! [[ "${reply}" =~ ^[Yy]$ ]]; then
+            echo "Exiting"
+            return
+        fi
+    fi
+
+    echo "Force deleting namespace ${namespace}..." 
+
+    kubectl get namespace "${namespace}" -o json \
+        | tr -d "\n" | sed "s/\"finalizers\": \[[^]]\+\]/\"finalizers\": []/" \
+        | kubectl replace --raw "/api/v1/namespaces/${namespace}/finalize" -f -
+
+}

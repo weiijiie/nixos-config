@@ -1,0 +1,30 @@
+#! /bin/bash
+
+intellij() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: $0 <project-to-mount>"
+        return
+    fi
+
+    local workdir
+    if [[ "$1" = /* ]]; then
+        workdir="$1"
+    else
+        workdir="$(pwd)/$1"
+    fi
+
+    local state_path="${HOME}/misc/intellij/projector-docker"
+
+    docker run --rm -p 8888:8887 \
+        -v "${state_path}":/home/projector-user \
+        -v "${workdir}":"/project/${workdir}" \
+        -v "${JAVA_HOME}":/home/projector-user/jdk \
+        -v /etc/hadoop:/etc/hadoop \
+        -e JAVA_HOME=/home/projector-user/jdk \
+        --label workdir="${workdir}" \
+        -it -d \
+        registry.jetbrains.team/p/prj/containers/projector-idea-u
+
+    projector.exe http://localhost:8888 >> "${state_path}/projector.log" 2>&1 &
+    sleep 1
+}

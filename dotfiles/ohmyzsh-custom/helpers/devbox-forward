@@ -1,0 +1,11 @@
+#! /bin/bash
+
+devbox-forward() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: $0 <port>"
+        return
+    fi
+
+    PORT="$1"
+    ssh -NT -L "${PORT}:127.0.0.1:${PORT}" huang.weijie@10.37.155.236
+}

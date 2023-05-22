@@ -1,0 +1,7 @@
+#! /bin/bash
+
+fix-zsh-autocomplete() {
+    rm "${HOME}/.zplug/zcompdump"
+    rm "${HOME}/.zcompdump-$(hostname)-"*
+    source "${HOME}/.zshrc"
+}

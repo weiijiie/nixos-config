@@ -1,0 +1,28 @@
+#! /bin/bash
+
+goland() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: $0 <project-to-mount>"
+        return
+    fi
+
+    local workdir
+    if [[ "$1" = /* ]]; then
+        workdir="$1"
+    else
+        workdir="$(pwd)/$1"
+    fi
+
+    local state_path="${HOME}/misc/goland/projector-docker"
+
+    docker run --rm -p 8887:8887 \
+        -v "${state_path}":/home/projector-user \
+        -v "${workdir}":/project \
+        -v "$(go env GOPATH)/pkg":/home/projector-user/go/pkg \
+        --label workdir="${workdir}" \
+        -it -d \
+        registry.jetbrains.team/p/prj/containers/projector-goland
+    
+    projector.exe http://localhost:8887 >> "${state_path}/projector.log" 2>&1 &
+    sleep 1
+}

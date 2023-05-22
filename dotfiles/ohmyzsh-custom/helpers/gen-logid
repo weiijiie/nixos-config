@@ -1,0 +1,3 @@
+#! /bin/bash
+
+echo "$@" "$(date -u +%Y%m%d%H%M%S)000000000000$(date -u +%3N)ABCD"
