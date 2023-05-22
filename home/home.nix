@@ -172,7 +172,12 @@ in
 
         set termguicolors
         colorscheme xcodedarkhc 
-        
+
+        " transparent background
+        highlight Normal guibg=NONE ctermbg=NONE
+        highlight NonText guibg=NONE ctermbg=NONE
+        highlight EndOfBuffer guibg=NONE ctermbg=NONE
+
         " vim airline theme
         let g:airline_theme='bubblegum'
 
