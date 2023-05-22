@@ -74,6 +74,13 @@
     docker-desktop.enable = true;
   };
 
+  programs = {
+    zsh.enable = true;
+    vim.defaultEditor = true;
+    # NIX_LD is a workaround for remote vs-code to work, as per: https://nixos.wiki/wiki/Visual_Studio_Code#Remote_WSL
+    nix-ld.enable = true;
+  };
+
   environment = {
     systemPackages = [
       pkgs.python3
@@ -88,13 +95,6 @@
       NIX_LD = lib.fileContents "${pkgs.stdenv.cc}/nix-support/dynamic-linker";
     };
   };
-
-  programs = {
-    zsh.enable = true;
-    vim.defaultEditor = true;
-    nix-ld.enable = true;
-  };
-
 
   users.defaultUserShell = pkgs.zsh;
 
