@@ -8,7 +8,7 @@ let
     installPhase = ''
       mkdir -p $out/
       cp -rv $src/* $out/
-    ''
+    '';
   };
 in
 {
@@ -141,7 +141,7 @@ in
         rainbow
         ale
         nerdtree
-        outputs.packages.vim-colors-xcode
+        outputs.packages."x86_64-linux".vim-colors-xcode
       ];
 
       extraConfig = ''
