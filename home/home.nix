@@ -289,6 +289,9 @@ in
         ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=244"
         ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=25
 
+        # zsh-vi-mode
+        source ${pkgs.zsh-vi-mode}/share/zsh-vi-mode/zsh-vi-mode.plugin.zsh
+
         # addding helper functions to fpath
         fpath=( "${zshCustomDir}/helpers" "''${fpath[@]}" )
         autoload -Uz ${zshCustomDir}/helpers/*
@@ -335,9 +338,6 @@ in
           }
           {
             name = "reegnz/jq-zsh-plugin";
-          }
-          {
-            name = "jeffreytse/zsh-vi-mode";
           }
         ];
       };
