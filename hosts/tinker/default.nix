@@ -87,13 +87,17 @@
     zsh.enable = true;
     vim.defaultEditor = true;
     # nix-ld is a workaround for remote vs-code to work, as per: https://nixos.wiki/wiki/Visual_Studio_Code#Remote_WSL
-    nix-ld.enable = true;
+    nix-ld = {
+      enable = true;
+      package = pkgs.nix-ld-rs;
+    };
   };
 
   environment = {
-    systemPackages = [
-      pkgs.python3
-      pkgs.perl
+    systemPackages = with pkgs; [
+      python3
+      perl
+      wget
     ];
 
     shells = [ pkgs.zsh ];

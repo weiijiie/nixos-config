@@ -53,7 +53,6 @@ in
   home.packages = [
     coreutils
     moreutils
-    perl
     wget
     tree
     nginx
