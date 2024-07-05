@@ -3,13 +3,13 @@
 
   inputs = {
     # Nixpkgs
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-22.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     # Also see the 'unstable-packages' overlay at 'overlays/default.nix'.
 
     # Home manager
     home-manager = {
-      url = "github:nix-community/home-manager/release-22.11";
+      url = "github:nix-community/home-manager/release-24.05";
       # We want to use the same set of nixpkgs as our system.
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -58,11 +58,18 @@
       # NixOS configuration entrypoint
       # Available through 'nixos-rebuild --flake .#your-hostname'
       nixosConfigurations = {
-        # windows laptop
+        # old windows laptop
         aldehyde = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs outputs; };
           modules = [
             ./hosts/aldehyde
+          ];
+        };
+        # framework laptop
+        tinker = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit inputs outputs; };
+          modules = [
+            ./hosts/tinker
           ];
         };
       };
@@ -75,6 +82,25 @@
           extraSpecialArgs = { inherit inputs outputs; };
           modules = [
             ./home/home.nix
+            {
+                home = {
+                  username = "weijie";
+                  homeDirectory = "/home/weijie";
+                };
+            }
+          ];
+        };
+        "wj@tinker" = home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
+          extraSpecialArgs = { inherit inputs outputs; };
+          modules = [
+            ./home/home.nix
+            {
+                home = {
+                  username = "wj";
+                  homeDirectory = "/home/wj";
+                };
+            }
           ];
         };
       };

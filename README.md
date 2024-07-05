@@ -11,7 +11,7 @@ TODO
 Run:
 
 ```bash
- sudo nixos-rebuild switch --flake github:weiijiie/nixos-config/main#hostname
+ sudo nixos-rebuild switch --flake github:weiijiie/nixos-config/main#${HOSTNAME}
  ```
 
 To apply the latest system configuration
@@ -21,7 +21,7 @@ To apply the latest system configuration
 Run:
 
 ```bash
-home-manager switch --flake github:weiijiie/nixos-config/main#username@hostname
+home-manager switch --flake github:weiijiie/nixos-config/main#${USERNAME}@${HOSTNAME}
 ```
 
-To apply the latest home-manager configuration. If you don't have home-manager installed, try running `nix develop github:weiijiie/nixos-config/main` first.
+To apply the latest home-manager configuration. If you don't have home-manager installed, try running `nix --extra-experimental-features nix-command --extra-experimental-features flakes develop github:weiijiie/nixos-config/main` first.
