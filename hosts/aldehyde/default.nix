@@ -87,20 +87,6 @@
     ];
 
     shells = [ pkgs.zsh ];
-
-    variables = 
-    let
-      # witchcrafty workaround to IFD being blocked, see: https://github.com/Mic92/nix-ld/issues/19 
-      nix-ld-so = pkgs.runCommand "ld.so" {} ''
-        ln -s "$(cat '${pkgs.stdenv.cc}/nix-support/dynamic-linker')" $out 
-      '';
-    in
-    {
-      NIX_LD_LIBRARY_PATH = lib.makeLibraryPath [
-        pkgs.stdenv.cc.cc
-      ];
-      NIX_LD = toString nix-ld-so;
-    };
   };
 
   users.defaultUserShell = pkgs.zsh;
