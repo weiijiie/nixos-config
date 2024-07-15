@@ -69,6 +69,7 @@ in
     bottom
     grpc
     gotools
+    delve
   ];
 
   # Enable home-manager
