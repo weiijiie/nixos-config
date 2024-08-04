@@ -53,9 +53,9 @@ in
   home.packages = [
     coreutils
     moreutils
+    manix
     wget
     tree
-    nginx
     jq
     yq-go
     tokei
@@ -70,6 +70,7 @@ in
     grpc
     gotools
     delve
+    nil
   ];
 
   # Enable home-manager
