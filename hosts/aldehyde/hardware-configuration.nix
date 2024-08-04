@@ -11,40 +11,38 @@
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
-  fileSystems."/" =
-    { device = "/dev/disk/by-uuid/b963f776-689d-40d6-8f92-3426d897b7e3";
-      fsType = "ext4";
-    };
+  fileSystems."/" = {
+    device = "/dev/disk/by-uuid/b963f776-689d-40d6-8f92-3426d897b7e3";
+    fsType = "ext4";
+  };
 
-  fileSystems."/usr/lib/wsl/drivers" =
-    { device = "none";
-      fsType = "9p";
-    };
+  fileSystems."/usr/lib/wsl/drivers" = {
+    device = "none";
+    fsType = "9p";
+  };
 
-  fileSystems."/usr/lib/wsl/lib" =
-    { device = "none";
-      fsType = "overlay";
-    };
+  fileSystems."/usr/lib/wsl/lib" = {
+    device = "none";
+    fsType = "overlay";
+  };
 
-  fileSystems."/mnt/wsl" =
-    { device = "none";
-      fsType = "tmpfs";
-    };
+  fileSystems."/mnt/wsl" = {
+    device = "none";
+    fsType = "tmpfs";
+  };
 
-  fileSystems."/mnt/c" =
-    { device = "drvfs";
-      fsType = "9p";
-    };
+  fileSystems."/mnt/c" = {
+    device = "drvfs";
+    fsType = "9p";
+  };
 
-  fileSystems."/var/lib/docker" =
-    { device = "/var/lib/docker";
-      fsType = "none";
-      options = [ "bind" ];
-    };
+  fileSystems."/var/lib/docker" = {
+    device = "/var/lib/docker";
+    fsType = "none";
+    options = [ "bind" ];
+  };
 
-  swapDevices =
-    [ { device = "/dev/disk/by-uuid/20ed551f-b7c4-4653-81f8-de2e164eef3f"; }
-    ];
+  swapDevices = [{ device = "/dev/disk/by-uuid/20ed551f-b7c4-4653-81f8-de2e164eef3f"; }];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's

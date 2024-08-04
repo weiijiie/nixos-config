@@ -10,8 +10,7 @@ let
       cp -rv $src/* $out/
     '';
   };
-in
-{
+in {
   imports = [
     # If you want to use modules your own flake exports (from modules/home-manager):
     # outputs.homeManagerModules.example
@@ -71,6 +70,7 @@ in
     gotools
     delve
     nil
+    nixfmt-classic
   ];
 
   # Enable home-manager
@@ -83,19 +83,17 @@ in
       userName = "Huang Weijie";
 
       aliases = {
-        ll = "log --pretty=format:'%C(yellow)%h\ %C(green)%ad%Cred%d\ %Creset%s%Cblue\ [%cn]' --decorate --date=short --graph";
+        ll =
+          "log --pretty=format:'%C(yellow)%h %C(green)%ad%Cred%d %Creset%s%Cblue [%cn]' --decorate --date=short --graph";
         l = "log --all --oneline --graph --decorate";
-        cidiff = "log --date=format:\"%Y-%m-%d %H:%M\" --pretty=\"%C(cyan)%h%Creset %C(blue)[%ad]%Creset: %C(green)%s%Creset\"";
+        cidiff = ''
+          log --date=format:"%Y-%m-%d %H:%M" --pretty="%C(cyan)%h%Creset %C(blue)[%ad]%Creset: %C(green)%s%Creset"'';
       };
 
       extraConfig = {
-        merge = {
-          conflictstyle = "diff3";
-        };
+        merge = { conflictstyle = "diff3"; };
 
-        diff = {
-          colorMoved = "default";
-        };
+        diff = { colorMoved = "default"; };
       };
 
       delta = {
@@ -120,13 +118,11 @@ in
         };
       };
     };
-    
+
     vim = {
       enable = true;
 
-      settings = {
-        background = "dark";
-      };
+      settings = { background = "dark"; };
 
       plugins = with pkgs.vimPlugins; [
         vim-airline
@@ -152,16 +148,16 @@ in
         set showcmd             " show command in bottom bar
         set number              " show line numbers 
         set scrolloff=2
-        
+
         set ai "Auto indent
         set si "Smart indent
         set wrap "Wrap lines
-        
+
         filetype indent on      " load filetype-specific indent files
         set wildmenu            " visual autocomplete for command menu
         set lazyredraw          " redraw only when we need to.
         set showmatch           " highlight matching [{()}]
-        
+
         set incsearch           " search as characters are entered
         set hlsearch            " highlight matches
 
@@ -185,7 +181,7 @@ in
         let g:airline_powerline_fonts=1
         let g:airline_left_sep = "\uE0B8"
         let g:airline_right_sep = "\uE0BE"
-        
+
         set guifont=Cascadia\ Mono\ PL
 
         " Enable completion where available.
@@ -237,24 +233,18 @@ in
       compression = true;
     };
 
-    fzf = {
-      enable = true;
-    };
+    fzf = { enable = true; };
 
     bat = {
       enable = true;
-      config = {
-        theme = "Monokai Extended"; 
-      };
+      config = { theme = "Monokai Extended"; };
     };
 
-    eza = {
-      enable = true;
-    };
+    eza = { enable = true; };
 
     direnv = {
       enable = true;
-      stdlib = '' 
+      stdlib = ''
         : "''${XDG_CACHE_HOME:="''${HOME}/.cache"}"
         declare -A direnv_layout_dirs
         direnv_layout_dir() {
@@ -267,9 +257,7 @@ in
         }
       '';
       enableZshIntegration = true;
-      nix-direnv = {
-        enable = true;
-      };
+      nix-direnv = { enable = true; };
     };
 
     autojump = {
@@ -277,9 +265,7 @@ in
       enableZshIntegration = true;
     };
 
-    go = {
-      enable = true;
-    };
+    go = { enable = true; };
 
     zsh = {
       enable = true;
@@ -297,7 +283,7 @@ in
 
       initExtra = ''
         if [ -e $HOME/.nix-profile/etc/profile.d/nix.sh ]; then . $HOME/.nix-profile/etc/profile.d/nix.sh; fi
-        
+
         path+=("''${HOME}/.local/bin")
         path+=("''${HOME}/go/bin")
 
@@ -319,42 +305,26 @@ in
           ZSH_CUSTOM="${zshCustomDir}"
         '';
 
-        plugins = [
-          "git"
-          "docker"
-          "aws"
-          "kubectl"
-          "colored-man-pages"
-        ];
+        plugins = [ "git" "docker" "aws" "kubectl" "colored-man-pages" ];
       };
 
-      plugins = [
-        {
-          name = "powerlevel10k-config";
-          src = cleanSource ../dotfiles;
-          file = ".p10k.zsh";
-        }
-      ];
+      plugins = [{
+        name = "powerlevel10k-config";
+        src = cleanSource ../dotfiles;
+        file = ".p10k.zsh";
+      }];
 
       zplug = {
         enable = true;
         plugins = [
-          {
-            name = "djui/alias-tips";
-          }
+          { name = "djui/alias-tips"; }
           {
             name = "romkatv/powerlevel10k";
-            tags = [ as:theme depth:1 ];
+            tags = [ "as:theme" "depth:1" ];
           }
-          {
-            name = "zdharma-continuum/fast-syntax-highlighting";
-          }
-          {
-            name = "zsh-users/zsh-autosuggestions";
-          }
-          {
-            name = "reegnz/jq-zsh-plugin";
-          }
+          { name = "zdharma-continuum/fast-syntax-highlighting"; }
+          { name = "zsh-users/zsh-autosuggestions"; }
+          { name = "reegnz/jq-zsh-plugin"; }
         ];
       };
     };

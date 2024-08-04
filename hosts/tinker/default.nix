@@ -71,10 +71,8 @@
     defaultUser = "wj";
     startMenuLaunchers = true;
     nativeSystemd = true;
-    
-    wslConf = {
-      automount.root = "/mnt";
-    };
+
+    wslConf = { automount.root = "/mnt"; };
 
     # Enable native Docker support
     docker-native.enable = true;
@@ -93,19 +91,11 @@
       package = pkgs.nix-ld-rs;
     };
 
-    ssh = {
-      startAgent = true;
-    };
+    ssh = { startAgent = true; };
   };
 
   environment = {
-    systemPackages = with pkgs; [
-      python3
-      perl
-      wget
-      man-pages
-      man-pages-posix
-    ];
+    systemPackages = with pkgs; [ python3 perl wget man-pages man-pages-posix ];
 
     shells = [ pkgs.zsh ];
 
@@ -116,9 +106,7 @@
   users.users = {
     wj = {
       isNormalUser = true;
-      openssh.authorizedKeys.keys = [
-        (builtins.readFile ../../home/ssh.pub)
-      ];
+      openssh.authorizedKeys.keys = [ (builtins.readFile ../../home/ssh.pub) ];
     };
   };
 
@@ -143,7 +131,7 @@
     dina-font
     proggyfonts
   ];
-  
+
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "24.05";
 }

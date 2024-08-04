@@ -11,66 +11,64 @@
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
 
-  fileSystems."/mnt/wsl" =
-    { device = "none";
-      fsType = "tmpfs";
-    };
+  fileSystems."/mnt/wsl" = {
+    device = "none";
+    fsType = "tmpfs";
+  };
 
-  fileSystems."/usr/lib/wsl/drivers" =
-    { device = "drivers";
-      fsType = "9p";
-    };
+  fileSystems."/usr/lib/wsl/drivers" = {
+    device = "drivers";
+    fsType = "9p";
+  };
 
-  fileSystems."/lib/modules" =
-    { device = "none";
-      fsType = "tmpfs";
-    };
+  fileSystems."/lib/modules" = {
+    device = "none";
+    fsType = "tmpfs";
+  };
 
-  fileSystems."/lib/modules/5.15.153.1-microsoft-standard-WSL2" =
-    { device = "none";
-      fsType = "overlay";
-    };
+  fileSystems."/lib/modules/5.15.153.1-microsoft-standard-WSL2" = {
+    device = "none";
+    fsType = "overlay";
+  };
 
-  fileSystems."/" =
-    { device = "/dev/disk/by-uuid/f14e0262-b9db-4421-be94-8c24de718720";
-      fsType = "ext4";
-    };
+  fileSystems."/" = {
+    device = "/dev/disk/by-uuid/f14e0262-b9db-4421-be94-8c24de718720";
+    fsType = "ext4";
+  };
 
-  fileSystems."/mnt/wslg" =
-    { device = "none";
-      fsType = "tmpfs";
-    };
+  fileSystems."/mnt/wslg" = {
+    device = "none";
+    fsType = "tmpfs";
+  };
 
-  fileSystems."/mnt/wslg/distro" =
-    { device = "/mnt/wslg/distro";
-      fsType = "none";
-      options = [ "bind" ];
-    };
+  fileSystems."/mnt/wslg/distro" = {
+    device = "/mnt/wslg/distro";
+    fsType = "none";
+    options = [ "bind" ];
+  };
 
-  fileSystems."/usr/lib/wsl/lib" =
-    { device = "none";
-      fsType = "overlay";
-    };
+  fileSystems."/usr/lib/wsl/lib" = {
+    device = "none";
+    fsType = "overlay";
+  };
 
-  fileSystems."/mnt/wslg/.X11-unix" =
-    { device = "/mnt/wslg/.X11-unix";
-      fsType = "none";
-      options = [ "bind" ];
-    };
+  fileSystems."/mnt/wslg/.X11-unix" = {
+    device = "/mnt/wslg/.X11-unix";
+    fsType = "none";
+    options = [ "bind" ];
+  };
 
-  fileSystems."/mnt/wslg/doc" =
-    { device = "none";
-      fsType = "overlay";
-    };
+  fileSystems."/mnt/wslg/doc" = {
+    device = "none";
+    fsType = "overlay";
+  };
 
-  fileSystems."/mnt/c" =
-    { device = "C:\134";
-      fsType = "9p";
-    };
+  fileSystems."/mnt/c" = {
+    device = "C:134";
+    fsType = "9p";
+  };
 
-  swapDevices =
-    [ { device = "/dev/disk/by-uuid/ec44a0c6-9fd6-4d12-ad58-cf2e17e8b01f"; }
-    ];
+  swapDevices = [{ device = "/dev/disk/by-uuid/ec44a0c6-9fd6-4d12-ad58-cf2e17e8b01f"; }];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's

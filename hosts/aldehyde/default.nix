@@ -62,10 +62,8 @@
     defaultUser = "weijie";
     startMenuLaunchers = true;
     nativeSystemd = true;
-    
-    wslConf = {
-      automount.root = "/mnt";
-    };
+
+    wslConf = { automount.root = "/mnt"; };
 
     # Enable native Docker support
     docker-native.enable = true;
@@ -82,9 +80,7 @@
   };
 
   environment = {
-    systemPackages = [
-      pkgs.python3
-    ];
+    systemPackages = [ pkgs.python3 ];
 
     shells = [ pkgs.zsh ];
   };
@@ -94,9 +90,7 @@
   users.users = {
     weijie = {
       isNormalUser = true;
-      openssh.authorizedKeys.keys = [
-        (builtins.readFile ../../home/ssh.pub)
-      ];
+      openssh.authorizedKeys.keys = [ (builtins.readFile ../../home/ssh.pub) ];
     };
   };
 
@@ -107,7 +101,7 @@
       passwordAuthentication = false;
     };
   };
-  
+
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "22.11";
 }

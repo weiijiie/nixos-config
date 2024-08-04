@@ -31,20 +31,16 @@
         "aarch64-darwin"
         "x86_64-darwin"
       ];
-    in
-    rec {
+    in {
       # Your custom packages
       # Acessible through 'nix build', 'nix shell', etc
-      packages = forAllSystems (system:
-        let pkgs = nixpkgs.legacyPackages.${system};
-        in import ./pkgs { inherit pkgs; }
-      );
+      packages = forAllSystems
+        (system: let pkgs = nixpkgs.legacyPackages.${system}; in import ./pkgs { inherit pkgs; });
       # Devshell for bootstrapping
       # Acessible through 'nix develop' or 'nix-shell' (legacy)
       devShells = forAllSystems (system:
         let pkgs = nixpkgs.legacyPackages.${system};
-        in import ./shell.nix { inherit pkgs; }
-      );
+        in import ./shell.nix { inherit pkgs; });
 
       # Your custom packages and modifications, exported as overlays
       overlays = import ./overlays { inherit inputs; };
@@ -61,16 +57,12 @@
         # old windows laptop
         aldehyde = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs outputs; };
-          modules = [
-            ./hosts/aldehyde
-          ];
+          modules = [ ./hosts/aldehyde ];
         };
         # framework laptop
         tinker = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs outputs; };
-          modules = [
-            ./hosts/tinker
-          ];
+          modules = [ ./hosts/tinker ];
         };
       };
 
@@ -78,28 +70,30 @@
       # Available through 'home-manager --flake .#your-username@your-hostname'
       homeConfigurations = {
         "weijie@aldehyde" = home-manager.lib.homeManagerConfiguration {
-          pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
+          # Home-manager requires 'pkgs' instance
+          pkgs = nixpkgs.legacyPackages.x86_64-linux;
           extraSpecialArgs = { inherit inputs outputs; };
           modules = [
             ./home/home.nix
             {
-                home = {
-                  username = "weijie";
-                  homeDirectory = "/home/weijie";
-                };
+              home = {
+                username = "weijie";
+                homeDirectory = "/home/weijie";
+              };
             }
           ];
         };
         "wj@tinker" = home-manager.lib.homeManagerConfiguration {
-          pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
+          # Home-manager requires 'pkgs' instance
+          pkgs = nixpkgs.legacyPackages.x86_64-linux;
           extraSpecialArgs = { inherit inputs outputs; };
           modules = [
             ./home/home.nix
             {
-                home = {
-                  username = "wj";
-                  homeDirectory = "/home/wj";
-                };
+              home = {
+                username = "wj";
+                homeDirectory = "/home/wj";
+              };
             }
           ];
         };
