@@ -83,13 +83,16 @@
               home-manager = {
                 useGlobalPkgs = true;
                 useUserPackages = true;
-                users.weijiehuang = import ./home/home.nix;
-              };
-            }
-            {
-              programs.git = {
-                userEmail = "weijie.huang@mixpanel.com";
-                userName = "weijie-mxpl";
+                users.weijiehuang = [
+                  import
+                  ./home/home.nix
+                  {
+                    programs.git = {
+                      userEmail = "weijie.huang@mixpanel.com";
+                      userName = "weijie-mxpl";
+                    };
+                  }
+                ];
               };
             }
           ];
