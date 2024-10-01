@@ -10,13 +10,16 @@
     # Home manager
     home-manager = {
       url = "github:nix-community/home-manager/release-24.05";
-      # We want to use the same set of nixpkgs as our system.
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL/main";
-      # We want to use the same set of nixpkgs as our system.
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nix-darwin = {
+      url = "github:LnL7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -36,7 +39,7 @@
       # Acessible through 'nix build', 'nix shell', etc
       packages = forAllSystems
         (system: let pkgs = nixpkgs.legacyPackages.${system}; in import ./pkgs { inherit pkgs; });
-        
+
       # Devshell for bootstrapping
       # Acessible through 'nix develop' or 'nix-shell' (legacy)
       devShells = forAllSystems (system:
@@ -66,6 +69,30 @@
         tinker = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs outputs; };
           modules = [ ./hosts/tinker ];
+        };
+      };
+
+      darwinConfigurations = {
+        # work laptop
+        mixpanel = inputs.nix-darwin.lib.darwinSystem {
+          specialArgs = { inherit inputs outputs; };
+          modules = [
+            ./hosts/mixpanel
+            home-manager.darwinModules.home-manager
+            {
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                users.weijiehuang = import ./home/home.nix;
+              };
+            }
+            {
+              programs.git = {
+                userEmail = "weijie.huang@mixpanel.com";
+                userName = "weijie-mxpl";
+              };
+            }
+          ];
         };
       };
 

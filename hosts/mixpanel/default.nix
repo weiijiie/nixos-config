@@ -1,18 +1,4 @@
-{ inputs, outputs, lib, config, pkgs, modulesPath, ... }: {
-  imports = [
-    inputs.nixos-wsl.nixosModules.wsl
-    ./hardware-configuration.nix
-
-    # If you want to use modules from your own flake exports (from modules/nixos):
-    # outputs.nixosModules.example
-
-    # Or modules from other flakes (such as nixos-hardware):
-    # inputs.hardware.nixosModules.common-cpu-amd
-    # inputs.hardware.nixosModules.common-ssd
-
-    "${modulesPath}/profiles/minimal.nix"
-  ];
-
+{ inputs, outputs, lib, config, pkgs, ... }: {
   nixpkgs = {
     # You can add overlays here
     overlays = [
@@ -55,52 +41,41 @@
     };
   };
 
-  networking.hostName = "aldehyde";
-
-  wsl = {
-    enable = true;
-    defaultUser = "weijie";
-    startMenuLaunchers = true;
-    nativeSystemd = true;
-
-    wslConf = { automount.root = "/mnt"; };
-
-    # Enable native Docker support
-    docker-native.enable = true;
-
-    # Enable integration with Docker Desktop (needs to be installed)
-    docker-desktop.enable = true;
-  };
+  networking.hostName = "mixpanel";
 
   programs = {
     zsh.enable = true;
     vim.defaultEditor = true;
-    # nix-ld is a workaround for remote vs-code to work, as per: https://nixos.wiki/wiki/Visual_Studio_Code#Remote_WSL
-    nix-ld.enable = true;
+    ssh = { startAgent = true; };
   };
 
   environment = {
-    systemPackages = [ pkgs.python3 ];
+    systemPackages = with pkgs; [ python3 perl wget ];
     shells = [ pkgs.zsh ];
   };
 
-  users.defaultUserShell = pkgs.zsh;
-
-  users.users = {
-    weijie = {
-      isNormalUser = true;
-      openssh.authorizedKeys.keys = [ (builtins.readFile ../../home/ssh.pub) ];
-    };
-  };
-
+  # Auto upgrade nix package and the daemon service.
   services = {
-    openssh = {
-      enable = true;
-      permitRootLogin = "no";
-      passwordAuthentication = false;
-    };
+    nix-daemon.enable = true;
+    karabiner-elements.enable = true;
   };
 
-  # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
-  system.stateVersion = "22.11";
+  fonts.packages = with pkgs; [
+    noto-fonts
+    noto-fonts-cjk
+    noto-fonts-emoji
+    liberation_ttf
+    fira-code
+    fira-code-symbols
+    mplus-outline-fonts.githubRelease
+    dina-font
+    proggyfonts
+  ];
+
+  # Used for backwards compatibility, please read the changelog before changing.
+  # $ darwin-rebuild changelog
+  system.stateVersion = 5;
+
+  # The platform the configuration will be used on.
+  nixpkgs.hostPlatform = "aarch64-darwin";
 }

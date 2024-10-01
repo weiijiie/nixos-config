@@ -96,9 +96,7 @@
 
   environment = {
     systemPackages = with pkgs; [ python3 perl wget man-pages man-pages-posix ];
-
     shells = [ pkgs.zsh ];
-
   };
 
   users.defaultUserShell = pkgs.zsh;
