@@ -295,6 +295,9 @@ in {
         # addding helper functions to fpath
         fpath=( "${zshCustomDir}/helpers" "''${fpath[@]}" )
         autoload -Uz ${zshCustomDir}/helpers/*
+
+        # kitty SSH issue workaround: https://wiki.archlinux.org/title/Kitty#Terminal_issues_with_SSH
+        [ "$TERM" = "xterm-kitty" ] && alias ssh="kitty +kitten ssh"
       '';
 
       oh-my-zsh = {
