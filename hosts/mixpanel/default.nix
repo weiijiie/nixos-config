@@ -69,7 +69,15 @@
       cleanup = "uninstall";
     };
 
-    casks = [];
+    casks = [
+      "scroll-reverser"
+      "alt-tab"
+      "rectangle"
+      "arc"
+      "notion"
+      "spotify"
+      "telegram"
+    ];
   };
 
   fonts = {

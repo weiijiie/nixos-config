@@ -16,6 +16,20 @@ Run:
 
 To apply the latest system configuration
 
+## nix-darwin
+
+To bootstrap:
+
+```bash
+nix run nix-darwin -- switch --flake github:weiijiie/nixos-config/main#${HOSTNAME}
+```
+
+After setup:
+
+```bash
+darwin-rebuild switch --flake github:weiijiie/nixos-config/main#${HOSTNAME}
+```
+
 ## home-manager
 
 Run:
