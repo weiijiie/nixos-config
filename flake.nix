@@ -144,4 +144,18 @@
         };
       };
     };
+    "weijie_huang@devbox-5372" = home-manager.lib.homeManagerConfiguration {
+      # Home-manager requires 'pkgs' instance
+      pkgs = nixpkgs.legacyPackages.x86_64-linux;
+      extraSpecialArgs = { inherit inputs outputs; };
+      modules = [
+        ./home/mixpanel/devbox.nix
+        {
+          home = {
+            username = "weijie_huang";
+            homeDirectory = "/home/weijie_huang";
+          };
+        }
+      ];
+    };
 }
