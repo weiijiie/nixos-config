@@ -1,4 +1,4 @@
-{ inputs, outputs, lib, config, pkgs, ... }: {
+{ inputs, outputs, lib, config, pkgs, modulesPath, ... }: {
   nixpkgs = {
     # You can add overlays here
     overlays = [
@@ -33,6 +33,8 @@
     # Making legacy nix commands consistent as well, awesome!
     nixPath = lib.mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry;
 
+    package = pkgs.nix;
+
     settings = {
       # Enable flakes and new 'nix' command
       experimental-features = "nix-command flakes";
@@ -45,8 +47,7 @@
 
   programs = {
     zsh.enable = true;
-    vim.defaultEditor = true;
-    ssh = { startAgent = true; };
+    vim.enable = true;
   };
 
   environment = {
@@ -57,24 +58,49 @@
   # Auto upgrade nix package and the daemon service.
   services = {
     nix-daemon.enable = true;
-    karabiner-elements.enable = true;
   };
 
-  fonts.packages = with pkgs; [
-    noto-fonts
-    noto-fonts-cjk
-    noto-fonts-emoji
-    liberation_ttf
-    fira-code
-    fira-code-symbols
-    mplus-outline-fonts.githubRelease
-    dina-font
-    proggyfonts
-  ];
+  # does not actually install homebrew - just manages it
+  # need to install homebrew manually first 
+  homebrew = {
+    enable = true;
+
+    onActivation = {
+      cleanup = "uninstall";
+    };
+
+    casks = [];
+  };
+
+  fonts = {
+    packages = with pkgs; [
+      noto-fonts
+      noto-fonts-cjk
+      noto-fonts-emoji
+      liberation_ttf
+      fira-code
+      fira-code-symbols
+      mplus-outline-fonts.githubRelease
+      dina-font
+      proggyfonts
+      (nerdfonts.override {
+        fonts = [
+          "CascadiaCode"
+          "CascadiaMono"
+          "IBMPlexMono"
+          "JetBrainsMono"
+        ];
+      })
+    ];
+  };
 
   # Used for backwards compatibility, please read the changelog before changing.
   # $ darwin-rebuild changelog
   system.stateVersion = 5;
+
+  system.keyboard.enableKeyMapping = true;
+  system.keyboard.remapCapsLockToEscape = true;
+  system.defaults.NSGlobalDomain.ApplePressAndHoldEnabled = false;
 
   # The platform the configuration will be used on.
   nixpkgs.hostPlatform = "aarch64-darwin";

@@ -22,9 +22,13 @@
       url = "github:LnL7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    mac-app-util = {
+      url = "github:hraban/mac-app-util";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, nix-darwin, mac-app-util, ... }@inputs:
     let
       inherit (self) outputs;
       forAllSystems = nixpkgs.lib.genAttrs [
@@ -74,27 +78,12 @@
 
       darwinConfigurations = {
         # work laptop
-        mixpanel = inputs.nix-darwin.lib.darwinSystem {
+        mixpanel = nix-darwin.lib.darwinSystem {
+          system = "aarch64-darwin";
           specialArgs = { inherit inputs outputs; };
           modules = [
+            mac-app-util.darwinModules.default
             ./hosts/mixpanel
-            home-manager.darwinModules.home-manager
-            {
-              home-manager = {
-                useGlobalPkgs = true;
-                useUserPackages = true;
-                users.weijiehuang = [
-                  import
-                  ./home/home.nix
-                  {
-                    programs.git = {
-                      userEmail = "weijie.huang@mixpanel.com";
-                      userName = "weijie-mxpl";
-                    };
-                  }
-                ];
-              };
-            }
           ];
         };
       };
@@ -107,7 +96,8 @@
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
           extraSpecialArgs = { inherit inputs outputs; };
           modules = [
-            ./home/home.nix
+            ./home/common.nix
+            ./home/personal-git.nix
             {
               home = {
                 username = "weijie";
@@ -121,7 +111,8 @@
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
           extraSpecialArgs = { inherit inputs outputs; };
           modules = [
-            ./home/home.nix
+            ./home/common.nix
+            ./home/personal-git.nix
             {
               home = {
                 username = "wj";
@@ -132,19 +123,25 @@
         };
         "weijiehuang@mixpanel" = home-manager.lib.homeManagerConfiguration {
           # Home-manager requires 'pkgs' instance
-          pkgs = nixpkgs.legacyPackages.x86_64-linux;
+          pkgs = nixpkgs.legacyPackages.aarch64-darwin;
           extraSpecialArgs = { inherit inputs outputs; };
           modules = [
-            ./home/home.nix
+            mac-app-util.homeManagerModules.default
+            ./home/common.nix
+            ./home/macos/programs.nix
+            ./home/mixpanel/macbook.nix
             {
               home = {
                 username = "weijiehuang";
                 homeDirectory = "/Users/weijiehuang";
               };
+              programs.git = {
+                userEmail = nixpkgs.lib.mkForce "weijie.huang@mixpanel.com";
+                userName = nixpkgs.lib.mkForce "weijie-mxpl";
+              };
             }
           ];
         };
-
       };
     };
 }

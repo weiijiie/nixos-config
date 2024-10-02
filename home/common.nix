@@ -10,6 +10,8 @@ let
       cp -rv $src/* $out/
     '';
   };
+  # custom packages
+  customPkgs = import ../pkgs { inherit pkgs; };
 in {
   imports = [
     # If you want to use modules your own flake exports (from modules/home-manager):
@@ -62,7 +64,6 @@ in {
     docker
     kubectl
     ngrok
-    terraform
     tldr
     gcc
     bottom
@@ -79,8 +80,6 @@ in {
   programs = {
     git = {
       enable = true;
-      userEmail = "43085321+weiijiie@users.noreply.github.com";
-      userName = "Huang Weijie";
 
       aliases = {
         ll =
@@ -136,8 +135,7 @@ in {
         rainbow
         ale
         nerdtree
-        # TODO: probably bad... refactor this
-        outputs.packages."x86_64-linux".vim-colors-xcode
+        customPkgs.vim-colors-xcode
       ];
 
       extraConfig = ''
