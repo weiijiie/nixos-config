@@ -62,7 +62,7 @@ in
     };
 
     zsh.shellAliases = {
-      devbox = "ssh ${devboxAlias}";
+      devbox = "ssh -t ${devboxAlias} 'zsh -l'";
     };
   };
 }
