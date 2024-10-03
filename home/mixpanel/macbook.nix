@@ -1,6 +1,3 @@
-let
-  devboxAlias = "weijie";
-in 
 {
   programs = {
     git = {
@@ -19,7 +16,7 @@ in
       serverAliveInterval = 5;
       serverAliveCountMax = 2;
 
-      extraConfig = ''  
+      extraConfig = ''
         UseKeychain yes
         ServerAliveCountMax 2
       '';
@@ -50,19 +47,15 @@ in
           user = "weijie_huang";
         };
 
-        ${devboxAlias} = {
+        devbox = {
           hostname = "devbox-5372";
           user = "weijie_huang";
           forwardAgent = true;
-          extraOptions = {
-            ProxyJump = "us-west2-a-oslogin-bastion";
-          };
+          extraOptions = { ProxyJump = "us-west2-a-oslogin-bastion"; };
         };
       };
     };
 
-    zsh.shellAliases = {
-      devbox = "ssh -t ${devboxAlias} 'zsh -l'";
-    };
+    zsh.shellAliases = { devbox = "ssh -t devbox 'zsh -l'"; };
   };
 }

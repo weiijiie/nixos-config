@@ -23,9 +23,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    mac-app-util = {
-      url = "github:hraban/mac-app-util";
-    };
+    mac-app-util = { url = "github:hraban/mac-app-util"; };
   };
 
   outputs = { self, nixpkgs, home-manager, nix-darwin, mac-app-util, ... }@inputs:
@@ -81,10 +79,7 @@
         mixpanel = nix-darwin.lib.darwinSystem {
           system = "aarch64-darwin";
           specialArgs = { inherit inputs outputs; };
-          modules = [
-            mac-app-util.darwinModules.default
-            ./hosts/mixpanel
-          ];
+          modules = [ mac-app-util.darwinModules.default ./hosts/mixpanel ];
         };
       };
 
