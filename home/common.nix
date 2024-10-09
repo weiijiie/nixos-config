@@ -56,6 +56,7 @@ in {
     moreutils
     manix
     wget
+    dig
     tree
     jq
     yq-go

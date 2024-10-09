@@ -13,6 +13,7 @@
       bottom
       nil
       nixfmt-classic
+      bazel-buildtools
     ];
   };
 
