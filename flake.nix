@@ -92,7 +92,7 @@
           extraSpecialArgs = { inherit inputs outputs; };
           modules = [
             ./home/common.nix
-            ./home/personal-git.nix
+            ./home/personal.nix
             {
               home = {
                 username = "weijie";
@@ -107,7 +107,7 @@
           extraSpecialArgs = { inherit inputs outputs; };
           modules = [
             ./home/common.nix
-            ./home/personal-git.nix
+            ./home/personal.nix
             {
               home = {
                 username = "wj";
