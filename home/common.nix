@@ -268,7 +268,7 @@ in {
 
     zsh = {
       enable = true;
-      enableCompletion = true;
+      enableCompletion = false;
 
       initExtraFirst = ''
         # resolve issues where zsh-vi-mode overrides fzf key bindings
@@ -313,11 +313,23 @@ in {
         plugins = [ "git" "docker" "aws" "kubectl" "colored-man-pages" ];
       };
 
-      plugins = [{
-        name = "powerlevel10k-config";
-        src = cleanSource ../dotfiles;
-        file = ".p10k.zsh";
-      }];
+      plugins = [
+        {
+          name = "powerlevel10k-config";
+          src = cleanSource ../dotfiles;
+          file = ".p10k.zsh";
+        }
+        {
+          name = "zsh-autocomplete";
+          file = "zsh-autocomplete.plugin.zsh";
+          src = pkgs.fetchFromGitHub {
+            owner = "marlonrichert";
+            repo = "zsh-autocomplete";
+            rev = "762afacbf227ecd173e899d10a28a478b4c84a3f";
+            sha256 = "";
+          };
+        }
+      ];
 
       zplug = {
         enable = true;
