@@ -297,6 +297,9 @@ in {
         fpath=( "${zshCustomDir}/helpers" "''${fpath[@]}" )
         autoload -Uz ${zshCustomDir}/helpers/*
 
+        # ctrl+j for "jq-zsh-plugin": https://github.com/reegnz/jq-zsh-plugin
+        bindkey `^j` jq-complete
+
         # kitty SSH issue workaround: https://wiki.archlinux.org/title/Kitty#Terminal_issues_with_SSH
         [ "$TERM" = "xterm-kitty" ] && alias ssh="kitty +kitten ssh"
       '';
@@ -325,7 +328,6 @@ in {
             tags = [ "as:theme" "depth:1" ];
           }
           { name = "zdharma-continuum/fast-syntax-highlighting"; }
-          { name = "zsh-users/zsh-autosuggestions"; }
           { name = "reegnz/jq-zsh-plugin"; }
         ];
       };
