@@ -29,15 +29,19 @@
           # devbox setup
           source ~/.gcpdevbox
           source ~/analytics/google-cloud/scripts/kube.sh
+
+          function gcloud() {
+            if [[ "$1" == "compute" && "$2" == "ssh" ]]; then
+                TERM=xterm-256-color command gcloud "$@"
+            else
+                command gcloud "$@"
+            fi
+          }
         '';
 
         envExtra = ''
           source $HOME/analytics/.shellenv
         '';
-
-        shellAliases = common.programs.zsh.shellAliases // {
-          "gcloud compute ssh" = "TERM=xterm-256color gcloud compute ssh";
-        };
       };
     };
   }) (import ../common.nix args))
