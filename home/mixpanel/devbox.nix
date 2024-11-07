@@ -34,6 +34,11 @@
         envExtra = ''
           source $HOME/analytics/.shellenv
         '';
+
+        shellAliases = common.programs.zsh.shellAliases // {
+          devbox = "ssh -t devbox 'zsh -l'";
+          "gcloud compute ssh" = "TERM=xterm-256color gcloud compute ssh";
+        };
       };
     };
   }) (import ../common.nix args))
