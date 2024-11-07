@@ -246,12 +246,16 @@ in {
             sha256 = "sha256-o8IQszQ4/PLX1FlUvJpowR2Tev59N8lI20VymZ+Hp4w=";
           };
         }
+        {
+          name = "you-should-use";
+          src = pkgs.zsh-you-should-use;
+          file = "share/zsh/plugins/you-should-use/you-should-use.plugin.zsh";
+        }
       ];
 
       zplug = {
         enable = true;
         plugins = [
-          { name = "djui/alias-tips"; }
           {
             name = "romkatv/powerlevel10k";
             tags = [ "as:theme" "depth:1" ];
