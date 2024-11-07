@@ -185,6 +185,8 @@ in {
       enable = true;
       enableCompletion = false;
 
+      shellAliases = { };
+
       initExtraFirst = ''
         # resolve issues where zsh-vi-mode overrides fzf key bindings
         zvm_after_init() {
