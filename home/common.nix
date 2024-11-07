@@ -227,7 +227,7 @@ in {
           ZSH_CUSTOM="${zshCustomDir}"
         '';
 
-        plugins = [ "git" "docker" "aws" "kubectl" "colored-man-pages" ];
+        plugins = [ "git" "docker" "aws" "gcloud" "kubectl" "colored-man-pages" ];
       };
 
       plugins = [
