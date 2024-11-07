@@ -32,7 +32,7 @@
 
           function gcloud() {
             if [[ "$1" == "compute" && "$2" == "ssh" ]]; then
-                TERM=xterm-256-color command gcloud "$@"
+                TERM=xterm-256color command gcloud "$@"
             else
                 command gcloud "$@"
             fi
