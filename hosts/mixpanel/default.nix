@@ -50,7 +50,10 @@
   };
 
   programs = {
-    zsh.enable = true;
+    zsh = {
+      enable = true;
+      enableGlobalCompInit = false;
+    };
     vim.enable = true;
   };
 

@@ -212,15 +212,26 @@ in {
         ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=244"
         ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=25
 
-        # zsh-vi-mode
-        source ${pkgs.zsh-vi-mode}/share/zsh-vi-mode/zsh-vi-mode.plugin.zsh
-
         # addding helper functions to fpath
         fpath=( "${zshCustomDir}/helpers" "''${fpath[@]}" )
         autoload -Uz ${zshCustomDir}/helpers/*
 
         # ctrl+j for "jq-zsh-plugin": https://github.com/reegnz/jq-zsh-plugin
-        bindkey "^j" jq-complete
+        bindkey -v '^j' jq-complete
+
+        # fix for zsh-autocomplete: https://nixos.wiki/wiki/Zsh#Troubleshooting
+        if [[ "''${terminfo[kcuu1]}" != "" ]]; then
+          bindkey -v "''${terminfo[kcuu1]}" up-line-or-search
+        else
+          bindkey -v '^[[A' up-line-or-search
+        fi 
+
+        # customize zsh-autocomplete tab behavior
+        # adding `-v` to these commands (and to other bindkeys above) so that
+        # they are added to zle `viins` keymap instead of `emacs`. probably
+        # there is a better way of doing this
+        bindkey -v              '^I'         menu-complete
+        bindkey -v "$terminfo[kcbt]" reverse-menu-complete
 
         # kitty SSH issue workaround: https://wiki.archlinux.org/title/Kitty#Terminal_issues_with_SSH
         [ "$TERM" = "xterm-kitty" ] && alias ssh="kitty +kitten ssh"
@@ -236,6 +247,11 @@ in {
       };
 
       plugins = [
+        {
+          name = "vi-mode";
+          src = pkgs.zsh-vi-mode;
+          file = "share/zsh-vi-mode/zsh-vi-mode.plugin.zsh";
+        }
         {
           name = "powerlevel10k";
           src = pkgs.zsh-powerlevel10k;
@@ -261,12 +277,17 @@ in {
           src = pkgs.zsh-you-should-use;
           file = "share/zsh/plugins/you-should-use/you-should-use.plugin.zsh";
         }
+        {
+          name = "jq-zsh-plugin";
+          src = pkgs.fetchFromGitHub {
+            owner = "reegnz";
+            repo = "jq-zsh-plugin";
+            rev = "48befbcd91229e48171d4aac5215da205c1f497e";
+            sha256 = "sha256-q/xQZ850kifmd8rCMW+aAEhuA43vB9ZAW22sss9e4SE=";
+          };
+          file = "jq.plugin.zsh";
+        }
       ];
-
-      zplug = {
-        enable = true;
-        plugins = [{ name = "reegnz/jq-zsh-plugin"; }];
-      };
     };
 
     gpg.enable = true;

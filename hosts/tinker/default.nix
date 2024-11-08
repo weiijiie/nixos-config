@@ -82,7 +82,10 @@
   };
 
   programs = {
-    zsh.enable = true;
+    zsh = {
+      enable = true;
+      enableGlobalCompInit = false;
+    };
 
     vim.defaultEditor = true;
     # nix-ld is a workaround for remote vs-code to work, as per: https://nixos.wiki/wiki/Visual_Studio_Code#Remote_WSL
@@ -130,12 +133,7 @@
       dina-font
       proggyfonts
       (nerdfonts.override {
-        fonts = [
-          "CascadiaCode"
-          "CascadiaMono"
-          "IBMPlexMono"
-          "JetBrainsMono"
-        ];
+        fonts = [ "CascadiaCode" "CascadiaMono" "IBMPlexMono" "JetBrainsMono" ];
       })
     ];
   };
