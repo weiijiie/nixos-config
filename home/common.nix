@@ -184,6 +184,8 @@ in {
     zsh = {
       enable = true;
       enableCompletion = false;
+      autosuggestion.enable = true;
+      syntaxHighlighting.enable = true;
 
       shellAliases = { };
 
@@ -238,7 +240,13 @@ in {
         }
         {
           name = "zsh-autocomplete";
-          src = pkgs.zsh-autocomplete;
+          src = pkgs.fetchFromGitHub {
+            owner = "marlonrichert";
+            repo = "zsh-autocomplete";
+            rev = "762afacbf227ecd173e899d10a28a478b4c84a3f";
+            sha256 = "sha256-o8IQszQ4/PLX1FlUvJpowR2Tev59N8lI20VymZ+Hp4w=";
+          };
+          file = "zsh-autocomplete.plugin.zsh";
         }
         {
           name = "you-should-use";
@@ -254,7 +262,6 @@ in {
             name = "romkatv/powerlevel10k";
             tags = [ "as:theme" "depth:1" ];
           }
-          { name = "zdharma-continuum/fast-syntax-highlighting"; }
           { name = "reegnz/jq-zsh-plugin"; }
         ];
       };
