@@ -184,7 +184,6 @@ in {
     zsh = {
       enable = true;
       enableCompletion = false;
-      autosuggestion.enable = true;
       syntaxHighlighting.enable = true;
 
       shellAliases = { };
@@ -260,6 +259,16 @@ in {
           name = "powerlevel10k-config";
           src = cleanSource ../dotfiles;
           file = ".p10k.zsh";
+        }
+        {
+          name = "zsh-autosuggestions";
+          src = pkgs.fetchFromGitHub {
+            owner = "zsh-users";
+            repo = "zsh-autosuggestions";
+            rev = "c3d4e576c9c86eac62884bd47c01f6faed043fc5";
+            sha256 = "sha256-B+Kz3B7d97CM/3ztpQyVkE6EfMipVF8Y4HJNfSRXHtU=";
+          };
+          file = "zsh-autosuggestions.plugin.zsh";
         }
         {
           name = "zsh-autocomplete";
