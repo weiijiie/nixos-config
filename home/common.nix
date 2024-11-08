@@ -147,10 +147,7 @@ in {
       compression = true;
     };
 
-    fzf = {
-      enable = true;
-      enableZshIntegration = true;
-    };
+    fzf = { enable = true; };
 
     bat = {
       enable = true;
@@ -199,6 +196,13 @@ in {
             . ${fzf}/share/fzf/completion.zsh
             . ${fzf}/share/fzf/key-bindings.zsh
           fi
+
+          # customize zsh-autocomplete tab behavior
+          # adding `-v` to these commands (and to other bindkeys above) so that
+          # they are added to zle `viins` keymap instead of `emacs`. probably
+          # there is a better way of doing this
+          bindkey -v              '^I'         menu-complete
+          bindkey -v "$terminfo[kcbt]" reverse-menu-complete
         }
       '';
 
@@ -226,13 +230,6 @@ in {
           bindkey -v '^[[A' up-line-or-search
         fi 
 
-        # customize zsh-autocomplete tab behavior
-        # adding `-v` to these commands (and to other bindkeys above) so that
-        # they are added to zle `viins` keymap instead of `emacs`. probably
-        # there is a better way of doing this
-        bindkey -v              '^I'         menu-complete
-        bindkey -v "$terminfo[kcbt]" reverse-menu-complete
-
         # kitty SSH issue workaround: https://wiki.archlinux.org/title/Kitty#Terminal_issues_with_SSH
         [ "$TERM" = "xterm-kitty" ] && alias ssh="kitty +kitten ssh"
       '';
@@ -243,7 +240,7 @@ in {
           ZSH_CUSTOM="${zshCustomDir}"
         '';
 
-        plugins = [ "git" "docker" "aws" "gcloud" "kubectl" "colored-man-pages" ];
+        plugins = [ "git" "docker" "aws" "gcloud" "kubectl" "colored-man-pages" "fzf" ];
       };
 
       plugins = [
@@ -271,6 +268,16 @@ in {
             sha256 = "sha256-o8IQszQ4/PLX1FlUvJpowR2Tev59N8lI20VymZ+Hp4w=";
           };
           file = "zsh-autocomplete.plugin.zsh";
+        }
+        {
+          name = "fzf-tab";
+          src = pkgs.fetchFromGitHub {
+            owner = "Aloxaf";
+            repo = "fzf-tab";
+            rev = "c7fb028ec0bbc1056c51508602dbd61b0f475ac3";
+            sha256 = "sha256-Qv8zAiMtrr67CbLRrFjGaPzFZcOiMVEFLg1Z+N6VMhg=";
+          };
+          file = "fzf-tab.plugin.zsh";
         }
         {
           name = "you-should-use";
