@@ -201,8 +201,10 @@ in {
           # adding `-v` to these commands (and to other bindkeys above) so that
           # they are added to zle `viins` keymap instead of `emacs`. probably
           # there is a better way of doing this
-          bindkey -v              '^I'         menu-complete
-          bindkey -v "$terminfo[kcbt]" reverse-menu-complete
+          bindkey -v              '^I' menu-select
+          bindkey -v "$terminfo[kcbt]" menu-select 
+          bindkey -M menuselect              '^I' menu-complete
+          bindkey -M menuselect "$terminfo[kcbt]" reverse-menu-complete 
         }
       '';
 
