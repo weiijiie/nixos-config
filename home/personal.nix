@@ -4,5 +4,5 @@
     userName = "Huang Weijie";
   };
 
-  home.packages = with pkgs; [ imagemagick ];
+  home.packages = with pkgs; [ imagemagickBig ];
 }
