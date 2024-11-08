@@ -147,7 +147,10 @@ in {
       compression = true;
     };
 
-    fzf = { enable = true; };
+    fzf = {
+      enable = true;
+      enableZshIntegration = true;
+    };
 
     bat = {
       enable = true;
@@ -234,6 +237,11 @@ in {
 
       plugins = [
         {
+          name = "powerlevel10k";
+          src = pkgs.zsh-powerlevel10k;
+          file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
+        }
+        {
           name = "powerlevel10k-config";
           src = cleanSource ../dotfiles;
           file = ".p10k.zsh";
@@ -257,13 +265,7 @@ in {
 
       zplug = {
         enable = true;
-        plugins = [
-          {
-            name = "romkatv/powerlevel10k";
-            tags = [ "as:theme" "depth:1" ];
-          }
-          { name = "reegnz/jq-zsh-plugin"; }
-        ];
+        plugins = [{ name = "reegnz/jq-zsh-plugin"; }];
       };
     };
 
