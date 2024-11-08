@@ -200,10 +200,12 @@ in {
           # adding `-v` to these commands (and to other bindkeys above) so that
           # they are added to zle `viins` keymap instead of `emacs`. probably
           # there is a better way of doing this
-          bindkey -v              '^I' menu-select
+          # bindkey -v              '^I' menu-select
           bindkey -v "$terminfo[kcbt]" menu-select 
           bindkey -M menuselect              '^I' menu-complete
           bindkey -M menuselect "$terminfo[kcbt]" reverse-menu-complete 
+
+          source ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
         }
       '';
 
@@ -279,16 +281,6 @@ in {
             sha256 = "sha256-o8IQszQ4/PLX1FlUvJpowR2Tev59N8lI20VymZ+Hp4w=";
           };
           file = "zsh-autocomplete.plugin.zsh";
-        }
-        {
-          name = "fzf-tab";
-          src = pkgs.fetchFromGitHub {
-            owner = "Aloxaf";
-            repo = "fzf-tab";
-            rev = "c7fb028ec0bbc1056c51508602dbd61b0f475ac3";
-            sha256 = "sha256-Qv8zAiMtrr67CbLRrFjGaPzFZcOiMVEFLg1Z+N6VMhg=";
-          };
-          file = "fzf-tab.plugin.zsh";
         }
         {
           name = "you-should-use";
