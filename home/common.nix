@@ -235,6 +235,9 @@ in {
 
         # kitty SSH issue workaround: https://wiki.archlinux.org/title/Kitty#Terminal_issues_with_SSH
         [ "$TERM" = "xterm-kitty" ] && alias ssh="kitty +kitten ssh"
+
+        # zsh-autocomplete configuration
+        zstyle ':autocomplete:*' min-input 3 # don't start autocompletion immediately
       '';
 
       oh-my-zsh = {
