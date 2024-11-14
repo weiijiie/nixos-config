@@ -1,3 +1,5 @@
+#! /bin/bash
+
 git-select-checkout() {
   git branch --sort=-committerdate --format='%(HEAD) %(refname:short) (%(color:green)%(committerdate:relative)%(color:reset))' |
     grep --invert-match '\*' |

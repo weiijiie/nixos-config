@@ -183,7 +183,8 @@ in {
 
     zsh = {
       enable = true;
-      enableCompletion = false;
+      enableCompletion = true;
+      autosuggestion.enable = true;
       syntaxHighlighting.enable = true;
 
       shellAliases = { };
@@ -195,15 +196,6 @@ in {
             . ${fzf}/share/fzf/completion.zsh
             . ${fzf}/share/fzf/key-bindings.zsh
           fi
-
-          # customize zsh-autocomplete tab behavior
-          # adding `-v` to these commands (and to other bindkeys above) so that
-          # they are added to zle `viins` keymap instead of `emacs`. probably
-          # there is a better way of doing this
-          # bindkey -v              '^I' menu-select
-          bindkey -v "$terminfo[kcbt]" menu-select 
-          bindkey -M menuselect              '^I' menu-complete
-          bindkey -M menuselect "$terminfo[kcbt]" reverse-menu-complete 
 
           source ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
         }
@@ -235,9 +227,6 @@ in {
 
         # kitty SSH issue workaround: https://wiki.archlinux.org/title/Kitty#Terminal_issues_with_SSH
         [ "$TERM" = "xterm-kitty" ] && alias ssh="kitty +kitten ssh"
-
-        # zsh-autocomplete configuration
-        zstyle ':autocomplete:*' min-input 3 # don't start autocompletion immediately
       '';
 
       oh-my-zsh = {
@@ -264,26 +253,6 @@ in {
           name = "powerlevel10k-config";
           src = cleanSource ../dotfiles;
           file = ".p10k.zsh";
-        }
-        {
-          name = "zsh-autosuggestions";
-          src = pkgs.fetchFromGitHub {
-            owner = "zsh-users";
-            repo = "zsh-autosuggestions";
-            rev = "c3d4e576c9c86eac62884bd47c01f6faed043fc5";
-            sha256 = "sha256-B+Kz3B7d97CM/3ztpQyVkE6EfMipVF8Y4HJNfSRXHtU=";
-          };
-          file = "zsh-autosuggestions.plugin.zsh";
-        }
-        {
-          name = "zsh-autocomplete";
-          src = pkgs.fetchFromGitHub {
-            owner = "marlonrichert";
-            repo = "zsh-autocomplete";
-            rev = "762afacbf227ecd173e899d10a28a478b4c84a3f";
-            sha256 = "sha256-o8IQszQ4/PLX1FlUvJpowR2Tev59N8lI20VymZ+Hp4w=";
-          };
-          file = "zsh-autocomplete.plugin.zsh";
         }
         {
           name = "you-should-use";
