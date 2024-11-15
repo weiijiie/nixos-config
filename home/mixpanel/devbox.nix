@@ -45,7 +45,7 @@
 
         shellAliases = common.programs.zsh.shellAliases // {
           shadow =
-            "kubectl get pods --selector role=lqs-shadow -o json | ${pkgs.jq}bin/jq -r '.items[0].metadata.name'";
+            "kubectl get pods --selector role=lqs-shadow -o json | ${pkgs.jq}/bin/jq -r '.items[0].metadata.name'";
         };
       };
     };
