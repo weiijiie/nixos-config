@@ -16,4 +16,5 @@ alias kdelfns="kubectl-force-delete-namespace"
 alias "g-"="git checkout -"
 alias gbas="git branch --sort=-committerdate --format='%(HEAD) %(refname:short) (%(color:green)%(committerdate:relative)%(color:reset))'"
 alias "gco?"="git-select-checkout"
+alias gdiffs="git-stepwise-diff"
 
