@@ -79,6 +79,7 @@ in
     delve
     nixd
     nixfmt-rfc-style
+    cachix
   ];
 
   # Enable home-manager

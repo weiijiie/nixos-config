@@ -31,6 +31,10 @@
     mac-app-util = {
       url = "github:hraban/mac-app-util";
     };
+
+    pre-commit-hooks = {
+      url = "github:cachix/git-hooks.nix";
+    };
   };
 
   outputs =
@@ -71,16 +75,19 @@
         let
           pkgs = nixpkgs.legacyPackages.${system};
         in
-        import ./shell.nix { inherit pkgs; }
+        import ./shell.nix { inherit self pkgs system; }
       );
 
-      formatter = forAllSystems (
-        system:
-        let
-          pkgs = nixpkgs.legacyPackages.${system};
-        in
-        pkgs.nixfmt-rfc-style
-      );
+      formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
+
+      checks = forAllSystems (system: {
+        pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
+          src = ./.;
+          hooks = {
+            nixfmt-rfc-style.enable = true;
+          };
+        };
+      });
 
       # Your custom packages and modifications, exported as overlays
       overlays = import ./overlays { inherit inputs; };
