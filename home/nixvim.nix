@@ -40,6 +40,12 @@
         };
       };
 
+      clipboard = {
+        providers.wl-copy = {
+          enable = true;
+        };
+      };
+
       plugins = {
         lualine.enable = true;
         mini = {
@@ -83,6 +89,27 @@
           };
         };
       };
+
+      extraConfigLua = with pkgs; ''
+        if vim.fn.has("wsl") == 1 then
+            vim.g.clipboard = {
+                name = "wl-clipboard (wsl)",
+                copy = {
+                    ["+"] = '${wl-clipboard}/bin/wl-copy --foreground --type text/plain',
+                    ["*"] = '${wl-clipboard}/bin/wl-copy --foreground --primary --type text/plain',
+                },
+                paste = {
+                    ["+"] = (function()
+                        return vim.fn.systemlist('${wl-clipboard}/bin/wl-paste --no-newline | ${gnused}/bin/sed -e "s/\r$//"', {'''}, 1) -- '1' keeps empty lines
+                    end),
+                    ["*"] = (function() 
+                        return vim.fn.systemlist('${wl-clipboard}/bin/wl-paste --primary --no-newline | ${gnused}/bin/sed -e "s/\r$//"', {'''}, 1)
+                    end),
+                },
+                cache_enabled = true
+            }
+        end
+      '';
     };
   };
 }
