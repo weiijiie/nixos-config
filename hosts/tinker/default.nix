@@ -74,18 +74,12 @@
 
     wslConf = { automount.root = "/mnt"; };
 
-    # Enable native Docker support
-    docker-native.enable = true;
-
     # Enable integration with Docker Desktop (needs to be installed)
     # docker-desktop.enable = true;
   };
 
   programs = {
-    zsh = {
-      enable = true;
-      enableGlobalCompInit = false;
-    };
+    zsh = { enable = true; };
 
     vim.defaultEditor = true;
     # nix-ld is a workaround for remote vs-code to work, as per: https://nixos.wiki/wiki/Visual_Studio_Code#Remote_WSL

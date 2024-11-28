@@ -1,8 +1,13 @@
-{ inputs, outputs, lib, config, pkgs, ... }:
-with pkgs;
-with lib;
+{
+  inputs,
+  outputs,
+  lib,
+  config,
+  pkgs,
+  ...
+}:
 let
-  zshCustomDir = stdenv.mkDerivation {
+  zshCustomDir = lib.stdenv.mkDerivation {
     name = "ohmyzsh-custom-dir";
     src = ../dotfiles/ohmyzsh-custom;
     installPhase = ''
@@ -12,7 +17,8 @@ let
   };
   # custom packages
   customPkgs = import ../pkgs { inherit pkgs; };
-in {
+in
+{
   imports = [
     # If you want to use modules your own flake exports (from modules/home-manager):
     # outputs.homeManagerModules.example
@@ -51,7 +57,7 @@ in {
     };
   };
 
-  home.packages = [
+  home.packages = with pkgs; [
     coreutils
     moreutils
     manix
@@ -71,8 +77,8 @@ in {
     grpc
     gotools
     delve
-    nil
-    nixfmt-classic
+    nixd
+    nixfmt-rfc-style
   ];
 
   # Enable home-manager
@@ -83,17 +89,19 @@ in {
       enable = true;
 
       aliases = {
-        ll =
-          "log --pretty=format:'%C(yellow)%h %C(green)%ad%Cred%d %Creset%s%Cblue [%cn]' --decorate --date=short --graph";
+        ll = "log --pretty=format:'%C(yellow)%h %C(green)%ad%Cred%d %Creset%s%Cblue [%cn]' --decorate --date=short --graph";
         l = "log --all --oneline --graph --decorate";
-        cidiff = ''
-          log --date=format:"%Y-%m-%d %H:%M" --pretty="%C(cyan)%h%Creset %C(blue)[%ad]%Creset: %C(green)%s%Creset"'';
+        cidiff = ''log --date=format:"%Y-%m-%d %H:%M" --pretty="%C(cyan)%h%Creset %C(blue)[%ad]%Creset: %C(green)%s%Creset"'';
       };
 
       extraConfig = {
-        merge = { conflictstyle = "diff3"; };
+        merge = {
+          conflictstyle = "diff3";
+        };
 
-        diff = { colorMoved = "default"; };
+        diff = {
+          colorMoved = "default";
+        };
       };
 
       delta = {
@@ -147,14 +155,20 @@ in {
       compression = true;
     };
 
-    fzf = { enable = true; };
+    fzf = {
+      enable = true;
+    };
 
     bat = {
       enable = true;
-      config = { theme = "Monokai Extended"; };
+      config = {
+        theme = "Monokai Extended";
+      };
     };
 
-    eza = { enable = true; };
+    eza = {
+      enable = true;
+    };
 
     direnv = {
       enable = true;
@@ -171,7 +185,9 @@ in {
         }
       '';
       enableZshIntegration = true;
-      nix-direnv = { enable = true; };
+      nix-direnv = {
+        enable = true;
+      };
     };
 
     autojump = {
@@ -179,7 +195,9 @@ in {
       enableZshIntegration = true;
     };
 
-    go = { enable = true; };
+    go = {
+      enable = true;
+    };
 
     zsh = {
       enable = true;
@@ -189,7 +207,7 @@ in {
 
       shellAliases = { };
 
-      initExtraFirst = ''
+      initExtraFirst = with pkgs; ''
         # resolve issues where zsh-vi-mode overrides fzf key bindings
         zvm_after_init() {
           if [[ $options[zle] = on ]]; then
@@ -197,7 +215,7 @@ in {
             . ${fzf}/share/fzf/key-bindings.zsh
           fi
 
-          source ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
+          source ${zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
         }
       '';
 
@@ -235,7 +253,16 @@ in {
           ZSH_CUSTOM="${zshCustomDir}"
         '';
 
-        plugins = [ "git" "docker" "aws" "gcloud" "kubectl" "colored-man-pages" "fzf" "gh" ];
+        plugins = [
+          "git"
+          "docker"
+          "aws"
+          "gcloud"
+          "kubectl"
+          "colored-man-pages"
+          "fzf"
+          "gh"
+        ];
       };
 
       plugins = [
@@ -251,7 +278,7 @@ in {
         }
         {
           name = "powerlevel10k-config";
-          src = cleanSource ../dotfiles;
+          src = lib.cleanSource ../dotfiles;
           file = ".p10k.zsh";
         }
         {

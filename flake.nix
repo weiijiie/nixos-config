@@ -23,10 +23,26 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    mac-app-util = { url = "github:hraban/mac-app-util"; };
+    nixvim = {
+      url = "github:nix-community/nixvim";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+
+    mac-app-util = {
+      url = "github:hraban/mac-app-util";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, nix-darwin, mac-app-util, ... }@inputs:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      home-manager,
+      nix-darwin,
+      nixvim,
+      mac-app-util,
+      ...
+    }@inputs:
     let
       inherit (self) outputs;
       forAllSystems = nixpkgs.lib.genAttrs [
@@ -36,17 +52,35 @@
         "aarch64-darwin"
         "x86_64-darwin"
       ];
-    in {
+    in
+    {
       # Your custom packages
       # Acessible through 'nix build', 'nix shell', etc
-      packages = forAllSystems
-        (system: let pkgs = nixpkgs.legacyPackages.${system}; in import ./pkgs { inherit pkgs; });
+      packages = forAllSystems (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        import ./pkgs { inherit pkgs; }
+      );
 
       # Devshell for bootstrapping
       # Acessible through 'nix develop' or 'nix-shell' (legacy)
-      devShells = forAllSystems (system:
-        let pkgs = nixpkgs.legacyPackages.${system};
-        in import ./shell.nix { inherit pkgs; });
+      devShells = forAllSystems (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        import ./shell.nix { inherit pkgs; }
+      );
+
+      formatter = forAllSystems (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        pkgs.nixfmt-rfc-style
+      );
 
       # Your custom packages and modifications, exported as overlays
       overlays = import ./overlays { inherit inputs; };
@@ -64,12 +98,16 @@
       nixosConfigurations = {
         # old windows laptop
         aldehyde = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit inputs outputs; };
+          specialArgs = {
+            inherit inputs outputs;
+          };
           modules = [ ./hosts/aldehyde ];
         };
         # framework laptop
         tinker = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit inputs outputs; };
+          specialArgs = {
+            inherit inputs outputs;
+          };
           modules = [ ./hosts/tinker ];
         };
       };
@@ -78,8 +116,13 @@
         # work laptop
         mixpanel = nix-darwin.lib.darwinSystem {
           system = "aarch64-darwin";
-          specialArgs = { inherit inputs outputs; };
-          modules = [ mac-app-util.darwinModules.default ./hosts/mixpanel ];
+          specialArgs = {
+            inherit inputs outputs;
+          };
+          modules = [
+            mac-app-util.darwinModules.default
+            ./hosts/mixpanel
+          ];
         };
       };
 
@@ -89,8 +132,11 @@
         "weijie@aldehyde" = home-manager.lib.homeManagerConfiguration {
           # Home-manager requires 'pkgs' instance
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
-          extraSpecialArgs = { inherit inputs outputs; };
+          extraSpecialArgs = {
+            inherit inputs outputs;
+          };
           modules = [
+            nixvim.homeManagerModules.nixvim
             ./home/common.nix
             ./home/personal.nix
             {
@@ -104,8 +150,11 @@
         "wj@tinker" = home-manager.lib.homeManagerConfiguration {
           # Home-manager requires 'pkgs' instance
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
-          extraSpecialArgs = { inherit inputs outputs; };
+          extraSpecialArgs = {
+            inherit inputs outputs;
+          };
           modules = [
+            nixvim.homeManagerModules.nixvim
             ./home/common.nix
             ./home/personal.nix
             {
@@ -119,8 +168,11 @@
         "weijiehuang@mixpanel" = home-manager.lib.homeManagerConfiguration {
           # Home-manager requires 'pkgs' instance
           pkgs = nixpkgs.legacyPackages.aarch64-darwin;
-          extraSpecialArgs = { inherit inputs outputs; };
+          extraSpecialArgs = {
+            inherit inputs outputs;
+          };
           modules = [
+            nixvim.homeManagerModules.nixvim
             mac-app-util.homeManagerModules.default
             ./home/common.nix
             ./home/macos/programs.nix
@@ -140,8 +192,11 @@
         "weijie_huang@devbox-5372" = home-manager.lib.homeManagerConfiguration {
           # Home-manager requires 'pkgs' instance
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
-          extraSpecialArgs = { inherit inputs outputs; };
+          extraSpecialArgs = {
+            inherit inputs outputs;
+          };
           modules = [
+            nixvim.homeManagerModules.nixvim
             ./home/mixpanel/devbox.nix
             {
               home = {
