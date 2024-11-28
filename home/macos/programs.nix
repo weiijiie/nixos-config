@@ -1,4 +1,4 @@
-{ pkgs, ... }: 
+{ pkgs, ... }:
 {
   programs = {
     kitty = {
@@ -6,7 +6,7 @@
       package = pkgs.unstable.kitty;
       shellIntegration.enableZshIntegration = true;
 
-      font =  {
+      font = {
         name = "CaskaydiaMono Nerd Font";
         size = 14.0;
       };

@@ -127,10 +127,19 @@ in
       };
     };
 
+    nixvim = {
+      enable = true;
+
+      colorschemes.catppuccin.enable = true;
+      plugins.lualine.enable = true;
+    };
+
     vim = {
       enable = true;
 
-      settings = { background = "dark"; };
+      settings = {
+        background = "dark";
+      };
 
       plugins = with pkgs.vimPlugins; [
         vim-airline

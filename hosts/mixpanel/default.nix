@@ -1,4 +1,13 @@
-{ inputs, outputs, lib, config, pkgs, modulesPath, ... }: {
+{
+  inputs,
+  outputs,
+  lib,
+  config,
+  pkgs,
+  modulesPath,
+  ...
+}:
+{
   nixpkgs = {
     # You can add overlays here
     overlays = [
@@ -45,7 +54,11 @@
 
   networking = {
     hostName = "mixpanel";
-    knownNetworkServices = [ "USB 10/100/1000 LAN" "Thunderbolt Bridge" "Wi-Fi" ];
+    knownNetworkServices = [
+      "USB 10/100/1000 LAN"
+      "Thunderbolt Bridge"
+      "Wi-Fi"
+    ];
     search = [ "corp.mixpanel.com" ];
   };
 
@@ -58,21 +71,37 @@
   };
 
   environment = {
-    systemPackages = with pkgs; [ python3 perl wget ];
+    systemPackages = with pkgs; [
+      python3
+      perl
+      wget
+    ];
     shells = [ pkgs.zsh ];
   };
 
   # Auto upgrade nix package and the daemon service.
-  services = { nix-daemon.enable = true; };
+  services = {
+    nix-daemon.enable = true;
+  };
 
   # does not actually install homebrew - just manages it
   # need to install homebrew manually first 
   homebrew = {
     enable = true;
 
-    onActivation = { cleanup = "uninstall"; };
+    onActivation = {
+      cleanup = "uninstall";
+    };
 
-    casks = [ "scroll-reverser" "alt-tab" "rectangle" "arc" "notion" "spotify" "telegram" ];
+    casks = [
+      "scroll-reverser"
+      "alt-tab"
+      "rectangle"
+      "arc"
+      "notion"
+      "spotify"
+      "telegram"
+    ];
   };
 
   fonts = {
@@ -87,7 +116,12 @@
       dina-font
       proggyfonts
       (nerdfonts.override {
-        fonts = [ "CascadiaCode" "CascadiaMono" "IBMPlexMono" "JetBrainsMono" ];
+        fonts = [
+          "CascadiaCode"
+          "CascadiaMono"
+          "IBMPlexMono"
+          "JetBrainsMono"
+        ];
       })
     ];
   };

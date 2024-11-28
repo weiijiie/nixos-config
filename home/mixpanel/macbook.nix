@@ -51,11 +51,15 @@
           hostname = "devbox-5372";
           user = "weijie_huang";
           forwardAgent = true;
-          extraOptions = { ProxyJump = "us-west2-a-oslogin-bastion"; };
+          extraOptions = {
+            ProxyJump = "us-west2-a-oslogin-bastion";
+          };
         };
       };
     };
 
-    zsh.shellAliases = { devbox = "ssh -t devbox 'zsh -l'"; };
+    zsh.shellAliases = {
+      devbox = "ssh -t devbox 'zsh -l'";
+    };
   };
 }

@@ -1,4 +1,13 @@
-{ inputs, outputs, lib, config, pkgs, modulesPath, ... }: {
+{
+  inputs,
+  outputs,
+  lib,
+  config,
+  pkgs,
+  modulesPath,
+  ...
+}:
+{
   imports = [
     inputs.nixos-wsl.nixosModules.wsl
     ./hardware-configuration.nix
@@ -63,7 +72,9 @@
     startMenuLaunchers = true;
     nativeSystemd = true;
 
-    wslConf = { automount.root = "/mnt"; };
+    wslConf = {
+      automount.root = "/mnt";
+    };
 
     # Enable native Docker support
     docker-native.enable = true;

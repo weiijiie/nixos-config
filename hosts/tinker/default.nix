@@ -1,4 +1,13 @@
-{ inputs, outputs, lib, config, pkgs, modulesPath, ... }: {
+{
+  inputs,
+  outputs,
+  lib,
+  config,
+  pkgs,
+  modulesPath,
+  ...
+}:
+{
   imports = [
     inputs.nixos-wsl.nixosModules.wsl
     ./hardware-configuration.nix
@@ -72,14 +81,18 @@
     startMenuLaunchers = true;
     nativeSystemd = true;
 
-    wslConf = { automount.root = "/mnt"; };
+    wslConf = {
+      automount.root = "/mnt";
+    };
 
     # Enable integration with Docker Desktop (needs to be installed)
     # docker-desktop.enable = true;
   };
 
   programs = {
-    zsh = { enable = true; };
+    zsh = {
+      enable = true;
+    };
 
     vim.defaultEditor = true;
     # nix-ld is a workaround for remote vs-code to work, as per: https://nixos.wiki/wiki/Visual_Studio_Code#Remote_WSL
@@ -88,11 +101,19 @@
       package = pkgs.nix-ld-rs;
     };
 
-    ssh = { startAgent = true; };
+    ssh = {
+      startAgent = true;
+    };
   };
 
   environment = {
-    systemPackages = with pkgs; [ python3 perl wget man-pages man-pages-posix ];
+    systemPackages = with pkgs; [
+      python3
+      perl
+      wget
+      man-pages
+      man-pages-posix
+    ];
     shells = [ pkgs.zsh ];
   };
 
@@ -127,7 +148,12 @@
       dina-font
       proggyfonts
       (nerdfonts.override {
-        fonts = [ "CascadiaCode" "CascadiaMono" "IBMPlexMono" "JetBrainsMono" ];
+        fonts = [
+          "CascadiaCode"
+          "CascadiaMono"
+          "IBMPlexMono"
+          "JetBrainsMono"
+        ];
       })
     ];
   };
