@@ -7,7 +7,7 @@
   ...
 }:
 let
-  zshCustomDir = lib.stdenv.mkDerivation {
+  zshCustomDir = pkgs.stdenv.mkDerivation {
     name = "ohmyzsh-custom-dir";
     src = ../dotfiles/ohmyzsh-custom;
     installPhase = ''
@@ -27,7 +27,7 @@ in
     # inputs.nix-colors.homeManagerModules.default
 
     # You can also split up your configuration and import pieces of it here:
-    # ./nvim.nix
+    ./nixvim.nix
   ];
 
   nixpkgs = {
@@ -126,13 +126,6 @@ in
           };
         };
       };
-    };
-
-    nixvim = {
-      enable = true;
-
-      colorschemes.catppuccin.enable = true;
-      plugins.lualine.enable = true;
     };
 
     vim = {
