@@ -11,7 +11,7 @@
         size = 14.0;
       };
 
-      theme = "moonlight";
+      themeFile = "moonlight";
 
       keybindings = {
         "ctrl+c" = "copy_and_clear_or_interrupt";

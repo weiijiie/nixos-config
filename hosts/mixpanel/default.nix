@@ -86,7 +86,7 @@
   };
 
   # does not actually install homebrew - just manages it
-  # need to install homebrew manually first 
+  # need to install homebrew manually first
   homebrew = {
     enable = true;
 
@@ -108,7 +108,7 @@
   fonts = {
     packages = with pkgs; [
       noto-fonts
-      noto-fonts-cjk
+      noto-fonts-cjk-sans
       noto-fonts-emoji
       liberation_ttf
       fira-code
