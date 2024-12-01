@@ -1,24 +1,35 @@
 # disable some of the config because it has already been
 # configured in the devbox during provisioning
-{ pkgs, ... }@args:
+{
+  outputs,
+  pkgs,
+  system,
+  ...
+}@args:
 (
   (
     common:
     common
     // {
       home = common.home // {
-        packages = with pkgs; [
-          manix
-          tree
-          yq-go
-          tokei
-          ranger
-          tldr
-          bottom
-          nil
-          nixfmt-classic
-          bazel-buildtools
-        ];
+        packages =
+          (with pkgs; [
+            manix
+            tree
+            yq-go
+            tokei
+            ranger
+            tldr
+            bottom
+            nil
+            nixfmt-classic
+            bazel-buildtools
+            delve
+            nixd
+            nixfmt-rfc-style
+            cachix
+          ])
+          ++ [ outputs.packages.${system}.nvim ];
       };
 
       programs = common.programs // {
