@@ -20,7 +20,7 @@
     smarttab = true;
     expandtab = true; # tabs are spaces
 
-    # autoindent = true; # copy indent from current line when starting new one
+    autoindent = true; # copy indent from current line when starting new one
     smartindent = true;
 
     showcmd = true;
@@ -39,6 +39,25 @@
     termguicolors = true;
     guifont = "Cascadia\ Mono\ PL";
   };
+
+  autoCmd = [
+    {
+      event = "FileType";
+      pattern = [
+        "nix"
+        "json"
+        "javascript"
+      ];
+      callback = {
+        __raw = ''
+          function()
+            vim.opt_local.tabstop = 2
+            vim.opt_local.shiftwidth = 2
+          end
+        '';
+      };
+    }
+  ];
 
   colorschemes = {
     catppuccin = {
