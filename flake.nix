@@ -45,7 +45,6 @@
     {
       self,
       nixpkgs,
-      nixpkgs-unstable,
       flake-parts,
       home-manager,
       nix-darwin,
@@ -159,82 +158,74 @@
 
         # Standalone home-manager configuration entrypoint
         # Available through 'home-manager --flake .#your-username@your-hostname'
-        homeConfigurations = {
-          "weijie@aldehyde" = home-manager.lib.homeManagerConfiguration {
-            # Home-manager requires 'pkgs' instance
-            pkgs = nixpkgs.legacyPackages.x86_64-linux;
-            extraSpecialArgs = {
-              inherit inputs outputs;
-            };
-            modules = [
-              ./home/common.nix
-              ./home/personal.nix
+        homeConfigurations =
+          let
+            mkConfig =
               {
-                home = {
-                  username = "weijie";
-                  homeDirectory = "/home/weijie";
-                };
-              }
-            ];
-          };
-          "wj@tinker" = home-manager.lib.homeManagerConfiguration {
-            # Home-manager requires 'pkgs' instance
-            pkgs = nixpkgs.legacyPackages.x86_64-linux;
-            extraSpecialArgs = {
-              inherit inputs outputs;
-              system = "x86_64-linux";
-            };
-            modules = [
-              ./home/common.nix
-              ./home/personal.nix
+                user,
+                home,
+                host,
+                system,
+                modules,
+              }:
               {
-                home = {
-                  username = "wj";
-                  homeDirectory = "/home/wj";
+                "${user}@${host}" = home-manager.lib.homeManagerConfiguration {
+                  # Home-manager requires 'pkgs' instance
+                  pkgs = nixpkgs.legacyPackages.${system};
+                  extraSpecialArgs = {
+                    inherit inputs outputs system;
+                  };
+                  modules = nixpkgs.lib.lists.flatten [
+                    ./home/common.nix
+                    modules
+                    {
+                      home = {
+                        username = user;
+                        homeDirectory = home;
+                      };
+                    }
+                  ];
                 };
-              }
-            ];
-          };
-          "weijiehuang@mixpanel" = home-manager.lib.homeManagerConfiguration {
-            # Home-manager requires 'pkgs' instance
-            pkgs = nixpkgs.legacyPackages.aarch64-darwin;
-            extraSpecialArgs = {
-              inherit inputs outputs;
-            };
+              };
+          in
+          mkConfig {
+            user = "wj";
+            host = "tinker";
+            home = "/home/wj";
+            system = "x86_64-linux";
+            modules = [ ./home/personal.nix ];
+          }
+          // mkConfig {
+            user = "weijie";
+            host = "aldehyde";
+            home = "/home/weijie";
+            system = "x86_64-linux";
+            modules = [ ./home/personal.nix ];
+          }
+          // mkConfig {
+            user = "weijiehuang";
+            host = "mixpanel";
+            home = "/Users/weijiehuang";
+            system = "aarch64-darwin";
             modules = [
               mac-app-util.homeManagerModules.default
-              ./home/common.nix
               ./home/macos/programs.nix
               ./home/mixpanel/macbook.nix
               {
-                home = {
-                  username = "weijiehuang";
-                  homeDirectory = "/Users/weijiehuang";
-                };
                 programs.git = {
                   userEmail = nixpkgs.lib.mkForce "weijie.huang@mixpanel.com";
                   userName = nixpkgs.lib.mkForce "weijie-mxpl";
                 };
               }
             ];
+          }
+          // mkConfig {
+            user = "weijie_huang";
+            host = "devbox-5372";
+            home = "/home/weijie_huang";
+            system = "x86_64-linux";
+            modules = [ ./home/mixpanel/devbox.nix ];
           };
-          "weijie_huang@devbox-5372" = home-manager.lib.homeManagerConfiguration {
-            # Home-manager requires 'pkgs' instance
-            pkgs = nixpkgs.legacyPackages.x86_64-linux;
-            extraSpecialArgs = {
-              inherit inputs outputs;
-            };
-            modules = [
-              ./home/mixpanel/devbox.nix
-              {
-                home = {
-                  username = "weijie_huang";
-                  homeDirectory = "/home/weijie_huang";
-                };
-              }
-            ];
-          };
-        };
       };
     };
 }
