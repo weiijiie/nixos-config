@@ -23,6 +23,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+    };
+
     nixvim = {
       url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
@@ -41,6 +45,8 @@
     {
       self,
       nixpkgs,
+      nixpkgs-unstable,
+      flake-parts,
       home-manager,
       nix-darwin,
       nixvim,
@@ -49,169 +55,188 @@
     }@inputs:
     let
       inherit (self) outputs;
-      forAllSystems = nixpkgs.lib.genAttrs [
-        "aarch64-linux"
-        "i686-linux"
+    in
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      imports = [
+        # To import a flake module
+        # 1. Add foo to inputs
+        # 2. Add foo as a parameter to the outputs function
+        # 3. Add here: foo.flakeModule
+      ];
+
+      systems = [
         "x86_64-linux"
+        "i686-linux"
+        "aarch64-linux"
         "aarch64-darwin"
         "x86_64-darwin"
       ];
-    in
-    {
-      # Your custom packages
-      # Acessible through 'nix build', 'nix shell', etc
-      packages = forAllSystems (
-        system:
-        let
-          pkgs = nixpkgs.legacyPackages.${system};
-        in
-        import ./pkgs { inherit pkgs; }
-      );
 
-      # Devshell for bootstrapping
-      # Acessible through 'nix develop' or 'nix-shell' (legacy)
-      devShells = forAllSystems (
-        system:
-        let
-          pkgs = nixpkgs.legacyPackages.${system};
-        in
-        import ./shell.nix { inherit self pkgs system; }
-      );
-
-      formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
-
-      checks = forAllSystems (system: {
-        pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
-          src = ./.;
-          hooks = {
-            nixfmt-rfc-style.enable = true;
+      perSystem =
+        {
+          config,
+          self',
+          inputs',
+          pkgs,
+          system,
+          ...
+        }:
+        {
+          _module.args.pkgs = import nixpkgs {
+            inherit system;
+            overlays = [
+              outputs.overlays.custom # access my own packages through `pkgs.custom`
+              outputs.overlays.modifications
+              outputs.overlays.unstable-packages # access unstable packages through `pkgs.unstable`
+            ];
           };
-        };
-      });
 
-      # Your custom packages and modifications, exported as overlays
-      overlays = import ./overlays { inherit inputs; };
-
-      # Reusable nixos modules you might want to export
-      # These are usually stuff you would upstream into nixpkgs
-      nixosModules = import ./modules/nixos;
-
-      # Reusable home-manager modules you might want to export
-      # These are usually stuff you would upstream into home-manager
-      homeManagerModules = import ./modules/home-manager;
-
-      # NixOS configuration entrypoint
-      # Available through 'nixos-rebuild --flake .#your-hostname'
-      nixosConfigurations = {
-        # old windows laptop
-        aldehyde = nixpkgs.lib.nixosSystem {
-          specialArgs = {
-            inherit inputs outputs;
+          # Custom packages acessible through 'nix build', 'nix shell', etc
+          packages = import ./pkgs {
+            inputs = inputs';
+            inherit pkgs;
           };
-          modules = [ ./hosts/aldehyde ];
-        };
-        # framework laptop
-        tinker = nixpkgs.lib.nixosSystem {
-          specialArgs = {
-            inherit inputs outputs;
-          };
-          modules = [ ./hosts/tinker ];
-        };
-      };
 
-      darwinConfigurations = {
-        # work laptop
-        mixpanel = nix-darwin.lib.darwinSystem {
-          system = "aarch64-darwin";
-          specialArgs = {
-            inherit inputs outputs;
-          };
-          modules = [
-            mac-app-util.darwinModules.default
-            ./hosts/mixpanel
-          ];
-        };
-      };
+          devShells = import ./shell.nix { inherit self pkgs system; };
 
-      # Standalone home-manager configuration entrypoint
-      # Available through 'home-manager --flake .#your-username@your-hostname'
-      homeConfigurations = {
-        "weijie@aldehyde" = home-manager.lib.homeManagerConfiguration {
-          # Home-manager requires 'pkgs' instance
-          pkgs = nixpkgs.legacyPackages.x86_64-linux;
-          extraSpecialArgs = {
-            inherit inputs outputs;
-          };
-          modules = [
-            nixvim.homeManagerModules.nixvim
-            ./home/common.nix
-            ./home/personal.nix
-            {
-              home = {
-                username = "weijie";
-                homeDirectory = "/home/weijie";
+          formatter = pkgs.nixfmt-rfc-style;
+
+          checks = {
+            pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
+              src = ./.;
+              hooks = {
+                nixfmt-rfc-style.enable = true;
               };
-            }
-          ];
-        };
-        "wj@tinker" = home-manager.lib.homeManagerConfiguration {
-          # Home-manager requires 'pkgs' instance
-          pkgs = nixpkgs.legacyPackages.x86_64-linux;
-          extraSpecialArgs = {
-            inherit inputs outputs;
+            };
+
+            nvim = nixvim.lib.${system}.check.mkTestDerivationFromNixvimModule {
+              inherit pkgs;
+              module = import ./modules/nvim;
+            };
           };
-          modules = [
-            nixvim.homeManagerModules.nixvim
-            ./home/common.nix
-            ./home/personal.nix
-            {
-              home = {
-                username = "wj";
-                homeDirectory = "/home/wj";
-              };
-            }
-          ];
         };
-        "weijiehuang@mixpanel" = home-manager.lib.homeManagerConfiguration {
-          # Home-manager requires 'pkgs' instance
-          pkgs = nixpkgs.legacyPackages.aarch64-darwin;
-          extraSpecialArgs = {
-            inherit inputs outputs;
+
+      flake = {
+        overlays = import ./overlays { inherit inputs; };
+
+        # Reusable nixos/home-manager modules you might want to export
+        # These are usually stuff you would upstream into nixpkgs
+        nixosModules = import ./modules/nixos;
+        homeManagerModules = import ./modules/home-manager;
+
+        # NixOS configuration entrypoint
+        # Available through 'nixos-rebuild --flake .#your-hostname'
+        nixosConfigurations = {
+          # old windows laptop
+          aldehyde = nixpkgs.lib.nixosSystem {
+            specialArgs = {
+              inherit inputs outputs;
+            };
+            modules = [ ./hosts/aldehyde ];
           };
-          modules = [
-            nixvim.homeManagerModules.nixvim
-            mac-app-util.homeManagerModules.default
-            ./home/common.nix
-            ./home/macos/programs.nix
-            ./home/mixpanel/macbook.nix
-            {
-              home = {
-                username = "weijiehuang";
-                homeDirectory = "/Users/weijiehuang";
-              };
-              programs.git = {
-                userEmail = nixpkgs.lib.mkForce "weijie.huang@mixpanel.com";
-                userName = nixpkgs.lib.mkForce "weijie-mxpl";
-              };
-            }
-          ];
+          # framework laptop
+          tinker = nixpkgs.lib.nixosSystem {
+            specialArgs = {
+              inherit inputs outputs;
+            };
+            modules = [ ./hosts/tinker ];
+          };
         };
-        "weijie_huang@devbox-5372" = home-manager.lib.homeManagerConfiguration {
-          # Home-manager requires 'pkgs' instance
-          pkgs = nixpkgs.legacyPackages.x86_64-linux;
-          extraSpecialArgs = {
-            inherit inputs outputs;
+
+        darwinConfigurations = {
+          # work laptop
+          mixpanel = nix-darwin.lib.darwinSystem {
+            system = "aarch64-darwin";
+            specialArgs = {
+              inherit inputs outputs;
+            };
+            modules = [
+              mac-app-util.darwinModules.default
+              ./hosts/mixpanel
+            ];
           };
-          modules = [
-            nixvim.homeManagerModules.nixvim
-            ./home/mixpanel/devbox.nix
-            {
-              home = {
-                username = "weijie_huang";
-                homeDirectory = "/home/weijie_huang";
-              };
-            }
-          ];
+        };
+
+        # Standalone home-manager configuration entrypoint
+        # Available through 'home-manager --flake .#your-username@your-hostname'
+        homeConfigurations = {
+          "weijie@aldehyde" = home-manager.lib.homeManagerConfiguration {
+            # Home-manager requires 'pkgs' instance
+            pkgs = nixpkgs.legacyPackages.x86_64-linux;
+            extraSpecialArgs = {
+              inherit inputs outputs;
+              pkgs-unstable = nixpkgs-unstable.legacyPackages.x86_64-linux;
+            };
+            modules = [
+              ./home/common.nix
+              ./home/personal.nix
+              {
+                home = {
+                  username = "weijie";
+                  homeDirectory = "/home/weijie";
+                };
+              }
+            ];
+          };
+          "wj@tinker" = home-manager.lib.homeManagerConfiguration {
+            # Home-manager requires 'pkgs' instance
+            pkgs = nixpkgs.legacyPackages.x86_64-linux;
+            extraSpecialArgs = {
+              inherit inputs outputs;
+              pkgs-unstable = nixpkgs-unstable.legacyPackages.x86_64-linux;
+            };
+            modules = [
+              ./home/common.nix
+              ./home/personal.nix
+              {
+                home = {
+                  username = "wj";
+                  homeDirectory = "/home/wj";
+                };
+              }
+            ];
+          };
+          "weijiehuang@mixpanel" = home-manager.lib.homeManagerConfiguration {
+            # Home-manager requires 'pkgs' instance
+            pkgs = nixpkgs.legacyPackages.aarch64-darwin;
+            extraSpecialArgs = {
+              inherit inputs outputs;
+              pkgs-unstable = nixpkgs-unstable.legacyPackages.aarch64-darwin;
+            };
+            modules = [
+              mac-app-util.homeManagerModules.default
+              ./home/common.nix
+              ./home/macos/programs.nix
+              ./home/mixpanel/macbook.nix
+              {
+                home = {
+                  username = "weijiehuang";
+                  homeDirectory = "/Users/weijiehuang";
+                };
+                programs.git = {
+                  userEmail = nixpkgs.lib.mkForce "weijie.huang@mixpanel.com";
+                  userName = nixpkgs.lib.mkForce "weijie-mxpl";
+                };
+              }
+            ];
+          };
+          "weijie_huang@devbox-5372" = home-manager.lib.homeManagerConfiguration {
+            # Home-manager requires 'pkgs' instance
+            pkgs = nixpkgs.legacyPackages.x86_64-linux;
+            extraSpecialArgs = {
+              inherit inputs outputs;
+              pkgs-unstable = nixpkgs-unstable.legacyPackages.x86_64-linux;
+            };
+            modules = [
+              ./home/mixpanel/devbox.nix
+              {
+                home = {
+                  username = "weijie_huang";
+                  homeDirectory = "/home/weijie_huang";
+                };
+              }
+            ];
+          };
         };
       };
     };

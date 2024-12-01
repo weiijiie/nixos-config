@@ -1,8 +1,6 @@
 {
-  inputs,
   outputs,
   lib,
-  config,
   pkgs,
   ...
 }:
@@ -15,8 +13,6 @@ let
       cp -rv $src/* $out/
     '';
   };
-  # custom packages
-  customPkgs = import ../pkgs { inherit pkgs; };
 in
 {
   imports = [
@@ -27,14 +23,14 @@ in
     # inputs.nix-colors.homeManagerModules.default
 
     # You can also split up your configuration and import pieces of it here:
-    ./nixvim.nix
+    # ../modules/nvim
   ];
 
   nixpkgs = {
     # You can add overlays here
     overlays = [
       # Add overlays your own flake exports (from overlays and pkgs dir):
-      outputs.overlays.additions
+      outputs.overlays.custom
       outputs.overlays.modifications
       outputs.overlays.unstable-packages
 
@@ -147,7 +143,7 @@ in
         rainbow
         ale
         nerdtree
-        customPkgs.vim-colors-xcode
+        custom.vim-colors-xcode
       ];
 
       extraConfig = builtins.readFile ../dotfiles/.vimrc;
