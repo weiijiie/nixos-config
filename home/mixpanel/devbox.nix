@@ -21,8 +21,6 @@
             ranger
             tldr
             bottom
-            nil
-            nixfmt-classic
             bazel-buildtools
             delve
             nixd
