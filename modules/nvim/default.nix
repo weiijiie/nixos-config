@@ -5,6 +5,9 @@
 
   imports = [
     ./settings.nix
-    ./plugins.nix
+    ./plugins.nix # misc smaller plugins
+    ./treesitter.nix
+    ./telescope.nix
+    ./quickscope.nix
   ];
 }

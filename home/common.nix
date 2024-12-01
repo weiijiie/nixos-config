@@ -127,7 +127,7 @@ in
     };
 
     vim = {
-      enable = true;
+      enable = false;
 
       settings = {
         background = "dark";

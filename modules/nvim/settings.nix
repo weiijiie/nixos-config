@@ -1,5 +1,8 @@
 { pkgs, ... }:
 {
+  viAlias = true;
+  vimAlias = true;
+
   globals.mapleader = " ";
 
   opts = {
@@ -10,6 +13,8 @@
 
     tabstop = 4; # number of visual spaces per TAB
     softtabstop = 4; # number of spaces in tab when editing
+    shiftwidth = 4;
+    smarttab = true;
     expandtab = true; # tabs are spaces
 
     showcmd = true;
@@ -35,14 +40,28 @@
   colorschemes = {
     catppuccin = {
       enable = true;
+
       settings = {
         background = {
           light = "latte";
-          dark = "macchiato";
+          dark = "mocha";
+        };
+
+        integrations = {
+          cmp = true;
+          treesitter = true;
+          mini = {
+            enabled = true;
+          };
         };
       };
     };
   };
+
+  # for quickscope autocmd to register
+  extraConfigLuaPost = ''
+    vim.cmd([[colorscheme catppuccin]])
+  '';
 
   clipboard = {
     providers.wl-copy = {
