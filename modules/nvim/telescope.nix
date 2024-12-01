@@ -4,6 +4,7 @@
 
     extensions = {
       fzf-native.enable = true;
+      file-browser.enable = true;
       live-grep-args.enable = true;
     };
 
@@ -34,6 +35,13 @@
           desc = "Find string under cursor in pwd";
         };
       };
+      "<leader>fb" = {
+        action = "file_browser";
+        options = {
+          desc = "Find files from pwd";
+        };
+      };
+
     };
 
     highlightTheme = "catppuccin";
