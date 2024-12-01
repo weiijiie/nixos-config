@@ -9,6 +9,9 @@
     number = true;
     relativenumber = true;
 
+    cursorline = true;
+    cursorlineopt = "number";
+
     scrolloff = 4; # screen lines to keep above/below the cursor
 
     tabstop = 4; # number of visual spaces per TAB
@@ -17,10 +20,10 @@
     smarttab = true;
     expandtab = true; # tabs are spaces
 
-    showcmd = true;
-
-    autoindent = true; # copy indent from current line when starting new one
+    # autoindent = true; # copy indent from current line when starting new one
     smartindent = true;
+
+    showcmd = true;
 
     # use system keyboard
     clipboard = "unnamedplus";
@@ -47,10 +50,20 @@
           dark = "mocha";
         };
 
+        transparent_background = true;
+
         integrations = {
           cmp = true;
           treesitter = true;
+          rainbow_delimiters = true;
+          which_key = true;
+          leap = true;
+
           mini = {
+            enabled = true;
+          };
+
+          telescope = {
             enabled = true;
           };
         };

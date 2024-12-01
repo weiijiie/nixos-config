@@ -5,11 +5,19 @@
 
     which-key.enable = true;
 
+    gitsigns.enable = true;
+
     web-devicons.enable = true;
 
     commentary.enable = true;
 
+    rainbow-delimiters.enable = true;
+
     nvim-surround = {
+      enable = true;
+    };
+
+    leap = {
       enable = true;
     };
 

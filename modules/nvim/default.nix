@@ -6,8 +6,11 @@
   imports = [
     ./settings.nix
     ./plugins.nix # misc smaller plugins
+    ./completions.nix
+    ./lsp.nix
     ./treesitter.nix
     ./telescope.nix
     ./quickscope.nix
+    ./avante.nix
   ];
 }

@@ -1,0 +1,6 @@
+{ ... }:
+{
+  plugins.avante = {
+    enable = true;
+  };
+}
