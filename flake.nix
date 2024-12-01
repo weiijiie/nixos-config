@@ -176,7 +176,6 @@
                     inherit inputs outputs system;
                   };
                   modules = nixpkgs.lib.lists.flatten [
-                    ./home/common.nix
                     modules
                     {
                       home = {
@@ -193,14 +192,20 @@
             host = "tinker";
             home = "/home/wj";
             system = "x86_64-linux";
-            modules = [ ./home/personal.nix ];
+            modules = [
+              ./home/common.nix
+              ./home/personal.nix
+            ];
           }
           // mkConfig {
             user = "weijie";
             host = "aldehyde";
             home = "/home/weijie";
             system = "x86_64-linux";
-            modules = [ ./home/personal.nix ];
+            modules = [
+              ./home/common.nix
+              ./home/personal.nix
+            ];
           }
           // mkConfig {
             user = "weijiehuang";
@@ -209,6 +214,7 @@
             system = "aarch64-darwin";
             modules = [
               mac-app-util.homeManagerModules.default
+              ./home/common.nix
               ./home/macos/programs.nix
               ./home/mixpanel/macbook.nix
               {
