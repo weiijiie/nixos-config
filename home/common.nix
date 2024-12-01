@@ -131,20 +131,23 @@ in
         background = "dark";
       };
 
-      plugins = with pkgs.vimPlugins; [
-        vim-airline
-        vim-airline-themes
-        vim-numbertoggle
-        vim-surround
-        vim-commentary
-        vim-go
-        vim-nix
-        quick-scope
-        rainbow
-        ale
-        nerdtree
-        custom.vim-colors-xcode
-      ];
+      plugins =
+        with pkgs;
+        with vimPlugins;
+        [
+          vim-airline
+          vim-airline-themes
+          vim-numbertoggle
+          vim-surround
+          vim-commentary
+          vim-go
+          vim-nix
+          quick-scope
+          rainbow
+          ale
+          nerdtree
+          custom.vim-colors-xcode
+        ];
 
       extraConfig = builtins.readFile ../dotfiles/.vimrc;
     };
