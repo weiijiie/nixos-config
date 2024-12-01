@@ -165,7 +165,6 @@
             pkgs = nixpkgs.legacyPackages.x86_64-linux;
             extraSpecialArgs = {
               inherit inputs outputs;
-              pkgs-unstable = nixpkgs-unstable.legacyPackages.x86_64-linux;
             };
             modules = [
               ./home/common.nix
@@ -183,7 +182,7 @@
             pkgs = nixpkgs.legacyPackages.x86_64-linux;
             extraSpecialArgs = {
               inherit inputs outputs;
-              pkgs-unstable = nixpkgs-unstable.legacyPackages.x86_64-linux;
+              system = "x86_64-linux";
             };
             modules = [
               ./home/common.nix
@@ -201,7 +200,6 @@
             pkgs = nixpkgs.legacyPackages.aarch64-darwin;
             extraSpecialArgs = {
               inherit inputs outputs;
-              pkgs-unstable = nixpkgs-unstable.legacyPackages.aarch64-darwin;
             };
             modules = [
               mac-app-util.homeManagerModules.default
@@ -225,7 +223,6 @@
             pkgs = nixpkgs.legacyPackages.x86_64-linux;
             extraSpecialArgs = {
               inherit inputs outputs;
-              pkgs-unstable = nixpkgs-unstable.legacyPackages.x86_64-linux;
             };
             modules = [
               ./home/mixpanel/devbox.nix

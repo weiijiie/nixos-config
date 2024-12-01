@@ -2,6 +2,7 @@
   outputs,
   lib,
   pkgs,
+  system,
   ...
 }:
 let
@@ -23,7 +24,6 @@ in
     # inputs.nix-colors.homeManagerModules.default
 
     # You can also split up your configuration and import pieces of it here:
-    # ../modules/nvim
   ];
 
   nixpkgs = {
@@ -53,30 +53,32 @@ in
     };
   };
 
-  home.packages = with pkgs; [
-    coreutils
-    moreutils
-    manix
-    wget
-    dig
-    tree
-    jq
-    yq-go
-    tokei
-    ranger
-    docker
-    kubectl
-    ngrok
-    tldr
-    gcc
-    bottom
-    grpc
-    gotools
-    delve
-    nixd
-    nixfmt-rfc-style
-    cachix
-  ];
+  home.packages =
+    (with pkgs; [
+      coreutils
+      moreutils
+      manix
+      wget
+      dig
+      tree
+      jq
+      yq-go
+      tokei
+      ranger
+      docker
+      kubectl
+      ngrok
+      tldr
+      gcc
+      bottom
+      grpc
+      gotools
+      delve
+      nixd
+      nixfmt-rfc-style
+      cachix
+    ])
+    ++ [ outputs.packages.${system}.nvim ];
 
   # Enable home-manager
   programs.home-manager.enable = true;
