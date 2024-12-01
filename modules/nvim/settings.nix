@@ -1,8 +1,11 @@
 { pkgs, ... }:
 {
+  globals.mapleader = " ";
+
   opts = {
     number = true;
     relativenumber = true;
+
     scrolloff = 4; # screen lines to keep above/below the cursor
 
     tabstop = 4; # number of visual spaces per TAB
@@ -11,11 +14,16 @@
 
     showcmd = true;
 
-    autoindent = true;
+    autoindent = true; # copy indent from current line when starting new one
     smartindent = true;
 
     # use system keyboard
     clipboard = "unnamedplus";
+
+    ignorecase = true; # ignore case when searching
+    smartcase = true; # if search term has mixed case, defaults to case-sensitive search
+
+    backspace = "indent,eol,start";
 
     # mouse support
     mouse = "a";
