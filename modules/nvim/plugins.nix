@@ -21,6 +21,58 @@
       enable = true;
     };
 
+    notify.enable = true;
+
+    noice = {
+      enable = true;
+      settings = {
+        cmdline = {
+          enabled = true;
+          format = {
+            search_down = {
+              view = "cmdline";
+            };
+            search_up = {
+              view = "cmdline";
+            };
+          };
+        };
+
+        views = {
+          popupmenu = {
+            relative = "editor";
+            position = {
+              row = 8;
+              column = "50%";
+            };
+            size = {
+              width = 60;
+              height = 10;
+            };
+            border = {
+              style = "rounded";
+              padding = [
+                0
+                1
+              ];
+            };
+            win_options = {
+              winhighlight = {
+                Normal = "Normal";
+                FloatBorder = "DiagnosticInfo";
+              };
+            };
+          };
+        };
+
+        override = {
+          "cmp.entry.get_documentation" = true;
+          "vim.lsp.util.convert_input_to_markdown_lines" = true;
+          "vim.lsp.util.stylize_markdown" = true;
+        };
+      };
+    };
+
     mini = {
       enable = true;
       modules = {
