@@ -9,9 +9,11 @@
 
     web-devicons.enable = true;
 
+    rainbow-delimiters.enable = true;
+
     commentary.enable = true;
 
-    rainbow-delimiters.enable = true;
+    autoclose.enable = true;
 
     nvim-surround = {
       enable = true;
@@ -21,29 +23,37 @@
       enable = true;
     };
 
-    notify.enable = true;
+    notify = {
+      enable = true;
+      backgroundColour = "#222222";
+      topDown = false;
+    };
 
     noice = {
       enable = true;
       settings = {
-        cmdline = {
-          enabled = true;
-          format = {
-            search_down = {
-              view = "cmdline";
-            };
-            search_up = {
-              view = "cmdline";
-            };
-          };
+        presets = {
+          bottom_search = true;
+          lsp_doc_border = true;
         };
 
         views = {
+          cmdline_popup = {
+            position = {
+              row = 30;
+              col = "50%";
+            };
+            size = {
+              width = 60;
+              height = "auto";
+            };
+          };
+
           popupmenu = {
             relative = "editor";
             position = {
-              row = 8;
-              column = "50%";
+              row = 33;
+              col = "50%";
             };
             size = {
               width = 60;
@@ -65,10 +75,12 @@
           };
         };
 
-        override = {
-          "cmp.entry.get_documentation" = true;
-          "vim.lsp.util.convert_input_to_markdown_lines" = true;
-          "vim.lsp.util.stylize_markdown" = true;
+        lsp = {
+          override = {
+            "cmp.entry.get_documentation" = true;
+            "vim.lsp.util.convert_input_to_markdown_lines" = true;
+            "vim.lsp.util.stylize_markdown" = true;
+          };
         };
       };
     };
