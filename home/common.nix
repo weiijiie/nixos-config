@@ -64,7 +64,6 @@ in
       jq
       yq-go
       tokei
-      ranger
       docker
       kubectl
       ngrok
@@ -79,6 +78,10 @@ in
       cachix
     ])
     ++ [ outputs.packages.${system}.nvim ];
+
+  home.sessionVariables = {
+    EDITOR = "nvim";
+  };
 
   # Enable home-manager
   programs.home-manager.enable = true;
@@ -229,6 +232,10 @@ in
     autojump = {
       enable = true;
       enableZshIntegration = true;
+    };
+
+    ranger = {
+      enable = true;
     };
 
     go = {

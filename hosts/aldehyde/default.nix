@@ -83,7 +83,10 @@
 
   programs = {
     zsh.enable = true;
-    neovim.defaultEditor = true;
+    neovim = {
+      enable = true;
+      defaultEditor = true;
+    };
     # nix-ld is a workaround for remote vs-code to work, as per: https://nixos.wiki/wiki/Visual_Studio_Code#Remote_WSL
     nix-ld.enable = true;
   };

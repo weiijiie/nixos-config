@@ -68,7 +68,10 @@
       enable = true;
       enableGlobalCompInit = false;
     };
-    vim.enable = true;
+    neovim = {
+      enable = true;
+      defaultEditor = true;
+    };
   };
 
   environment = {

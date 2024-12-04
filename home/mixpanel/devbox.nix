@@ -18,7 +18,6 @@
             tree
             yq-go
             tokei
-            ranger
             tldr
             bottom
             bazel-buildtools
