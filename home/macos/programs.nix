@@ -33,6 +33,11 @@
         tab_bar_edge = "top";
         tab_bar_style = "powerline";
       };
+
+      extraConfig = ''
+        modify_font underline_thickness 200%  
+        modify_font underline_position 2  
+      '';
     };
   };
 }

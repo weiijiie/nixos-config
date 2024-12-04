@@ -68,10 +68,6 @@
       enable = true;
       enableGlobalCompInit = false;
     };
-    neovim = {
-      enable = true;
-      defaultEditor = true;
-    };
   };
 
   environment = {
@@ -124,6 +120,9 @@
           "CascadiaCode"
           "CascadiaMono"
           "IBMPlexMono"
+          "Iosevka"
+          "IosevkaTerm"
+          "IosevkaTermSlab"
           "JetBrainsMono"
         ];
       })

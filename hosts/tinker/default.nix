@@ -157,6 +157,9 @@
           "CascadiaCode"
           "CascadiaMono"
           "IBMPlexMono"
+          "Iosevka"
+          "IosevkaTerm"
+          "IosevkaTermSlab"
           "JetBrainsMono"
         ];
       })
