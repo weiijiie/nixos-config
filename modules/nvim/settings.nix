@@ -35,9 +35,6 @@
 
     # mouse support
     mouse = "a";
-
-    termguicolors = true;
-    guifont = "Cascadia\ Mono\ PL";
   };
 
   autoCmd = [
@@ -58,37 +55,6 @@
       };
     }
   ];
-
-  colorschemes = {
-    catppuccin = {
-      enable = true;
-
-      settings = {
-        background = {
-          light = "latte";
-          dark = "mocha";
-        };
-
-        transparent_background = true;
-
-        integrations = {
-          cmp = true;
-          treesitter = true;
-          rainbow_delimiters = true;
-          which_key = true;
-          leap = true;
-
-          mini = {
-            enabled = true;
-          };
-
-          telescope = {
-            enabled = true;
-          };
-        };
-      };
-    };
-  };
 
   # for quickscope autocmd to register
   extraConfigLuaPost = ''

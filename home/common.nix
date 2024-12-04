@@ -109,7 +109,7 @@ in
         options = {
           navigate = true;
           side-by-side = true;
-          theme = "Monokai Extended";
+          theme = "Catppuccin Macchiato";
           features = "decorations";
 
           decorations = {
@@ -166,8 +166,40 @@ in
     bat = {
       enable = true;
       config = {
-        theme = "Monokai Extended";
+        theme = "Catppuccin Macchiato";
       };
+
+      themes =
+        let
+          catppuccinSrc = pkgs.fetchFromGitHub {
+            owner = "catppuccin";
+            repo = "bat";
+            rev = "d2bbee4f7e7d5bac63c054e4d8eca57954b31471";
+            sha256 = "sha256-x1yqPCWuoBSx/cI94eA+AWwhiSA42cLNUOFJl7qjhmw=";
+          };
+        in
+        builtins.listToAttrs (
+          builtins.map
+            (
+              e:
+              let
+                name = "Catppuccin ${e}";
+              in
+              {
+                inherit name;
+                value = {
+                  src = catppuccinSrc;
+                  file = "themes/${name}.tmTheme";
+                };
+              }
+            )
+            [
+              "Frappe"
+              "Latte"
+              "Macchiato"
+              "Mocha"
+            ]
+        );
     };
 
     eza = {

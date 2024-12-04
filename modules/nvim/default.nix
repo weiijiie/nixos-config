@@ -5,6 +5,7 @@
 
   imports = [
     ./settings.nix
+    ./theme.nix
     ./plugins.nix # misc smaller plugins
     ./completions.nix
     ./lsp.nix
