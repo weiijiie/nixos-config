@@ -1,4 +1,6 @@
-{
+{ pkgs, ...}: {
+  home.packages = [ pkgs.bazel ];
+
   programs = {
     git = {
       userEmail = "weijie.huang@mixpanel.com";
