@@ -76,6 +76,7 @@ in
       nixd
       nixfmt-rfc-style
       cachix
+      code2prompt
     ])
     ++ [ outputs.packages.${system}.nvim ];
 
