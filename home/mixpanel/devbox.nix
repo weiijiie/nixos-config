@@ -25,6 +25,7 @@
             nixd
             nixfmt-rfc-style
             cachix
+            custom.code2prompt
           ])
           ++ [ outputs.packages.${system}.nvim ];
       };
