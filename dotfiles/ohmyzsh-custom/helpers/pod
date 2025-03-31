@@ -1,0 +1,66 @@
+#! /bin/bash 
+
+pod() {
+    local namespace=""
+    local choose_ctx=false
+
+    # Parse flags
+    while getopts "cn:" opt; do
+      case "$opt" in
+        c) choose_ctx=true ;;
+        n) namespace=$OPTARG ;;
+        *) echo "Usage: pod [-c] [-n namespace] <search_term>" >&2; return ;;
+      esac
+    done
+    shift $((OPTIND -1))
+
+    local search="${1:-}"
+    if [[ -z "$search" ]]; then
+      echo "Usage: pod [-c] [-n namespace] <search_term>" >&2
+      return
+    fi
+
+    # Optionally pick a context
+    local kc_args=()
+    local context
+    if $choose_ctx; then
+      context=$(kubectl config get-contexts -o name | fzf)
+      kc_args=(--context "$context")
+    else
+      context=$(kubectl config current-context)
+    fi
+
+    # Namespace args (empty = current)
+    local ns_args=()
+    [[ -n "$namespace" ]] && ns_args+=( -n "$namespace" )
+
+    # Pick controller via fzf
+    local selection
+    selection=$(kubectl "${kc_args[@]}" get daemonsets,deployments,statefulsets "${ns_args[@]}" \
+      -o custom-columns=KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name --no-headers \
+      | fzf -q "$search" --header "Current context: '$context'")
+
+    read -r kind ns name <<<"$selection"
+
+    # Build selector via jq
+    local selector
+    selector=$(kubectl "${kc_args[@]}" get "$kind" "$name" -n "$ns" -o json \
+      | jq -r '
+          .spec.selector.matchLabels
+          | to_entries
+          | map("\(.key)=\(.value)")
+          | join(",")
+        ')
+
+    # List pods
+    local pods
+    pods=$(kubectl "${kc_args[@]}" get pods -n "$ns" -l "$selector" \
+      -o custom-columns=NAME:.metadata.name --no-headers)
+
+    # Single → stdout, else → fzf
+    if [[ $(wc -l <<<"$pods") -le 1 ]]; then
+      echo "$pods"
+    else
+      echo "$pods" | fzf --header "Current context: '$context'"
+    fi
+}
