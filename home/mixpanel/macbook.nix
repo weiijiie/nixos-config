@@ -57,11 +57,21 @@
             ProxyJump = "us-west2-a-oslogin-bastion";
           };
         };
+
+        devbox-eu = {
+          hostname = "devbox-4722";
+          user = "weijie_huang";
+          forwardAgent = true;
+          extraOptions = {
+            ProxyJump = "europe-west4-a-oslogin-bastion";
+          };
+        };
       };
     };
 
     zsh.shellAliases = {
       devbox = "ssh -t devbox 'zsh -l'";
+      devbox-eu = "ssh -t devbox-eu 'zsh -l'";
     };
   };
 }
