@@ -8,18 +8,18 @@
   stdenv,
   darwin,
 }:
-rustPlatform.buildRustPackage {
+rustPlatform.buildRustPackage rec {
   pname = "code2prompt";
-  version = "20250221";
+  version = "3.0.2";
 
   src = fetchFromGitHub {
     owner = "mufeedvh";
     repo = "code2prompt";
-    rev = "a1eacf0e3f7a9fc7a252e71bac3dcaa189cf46a5";
-    hash = "sha256-sdZO8YvDZsGYUAy9NqEK16jJtV3pTcXjyRppfBNgcCs=";
+    rev = "v${version}";
+    hash = "sha256-9YbsrbExRFbsEz2GifklmUGp3YlsEUOi25+P5vPK8fs=";
   };
 
-  cargoHash = "sha256-2kCTgawmrvsJcudXamkVS8BKx3uh+9A9ikYUkRpWqVs=";
+  cargoHash = "sha256-m7s5Y5Pyvuai64l2WU0IqTyskXnYhv4NfAF3F2Gwohk=";
 
   checkType = "debug";
 
