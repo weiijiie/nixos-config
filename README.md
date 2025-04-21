@@ -2,11 +2,19 @@
 
 My NixOS configurations
 
-## Bootstrapping on WSL
+## Bootstrapping
+
+1. Clone this repository
+
+2. Install nix. [This](https://determinate.systems/posts/determinate-nix-installer/) installer works well.
+
+3. Run `nix develop` inside the repository root. That should install most of the utilities needed to do further bootstrapping bepending on the system.
+
+### WSL
 
 TODO
 
-## NixOS
+### NixOS
 
 Run:
 
@@ -16,7 +24,7 @@ Run:
 
 To apply the latest system configuration
 
-## nix-darwin
+### nix-darwin
 
 To bootstrap:
 
@@ -30,7 +38,7 @@ After setup:
 darwin-rebuild switch --flake github:weiijiie/nixos-config/main#${HOSTNAME}
 ```
 
-## home-manager
+### home-manager
 
 Run:
 
