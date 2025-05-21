@@ -21,7 +21,8 @@
       settings = {
         dynamic_background_opacity = true;
         enable_audio_bell = true;
-        scrollback_lines = 10000;
+        scrollback_lines = 16000;
+        scrollback_pager_history_size = 2048; # in MB
         background_opacity = "0.9";
         background_blur = 10;
 
