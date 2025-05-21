@@ -4,5 +4,5 @@ git-stepwise-diff() {
   git -c color.ui=always log -n 100 --format="%C(yellow)%h%C(reset) %s %C(green)(%ar)%C(reset)" "$@" |
     FZF_DEFAULT_OPTS="--bind \"ctrl-alt-j:preview-down,ctrl-alt-k:preview-up\"" fzf --ansi \
       --preview="echo {} | cut -d ' ' -f 1 | xargs -I% git diff %^ % | delta --config /dev/null" \
-      --preview-window='right:60%:wrap,<70(up,60%,wrap)'
+      --preview-window='right:60%:wrap,<70(up,60%,wrap)' "$@"
 }
