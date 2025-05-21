@@ -61,6 +61,7 @@ in
       wget
       dig
       tree
+      mosh
       jq
       yq-go
       tokei

@@ -19,6 +19,7 @@
       serverAliveCountMax = 2;
 
       extraConfig = ''
+        IgnoreUnknown UseKeychain
         UseKeychain yes
         ServerAliveCountMax 2
       '';
