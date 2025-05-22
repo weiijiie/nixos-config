@@ -59,6 +59,15 @@
           };
         };
 
+        devbox-arm = {
+          hostname = "devbox-5924";
+          user = "weijie_huang";
+          forwardAgent = true;
+          extraOptions = {
+            ProxyJump = "us-central1-b-oslogin-bastion";
+          };
+        };
+
         devbox-eu = {
           hostname = "devbox-4722";
           user = "weijie_huang";
