@@ -82,6 +82,7 @@
     zsh.shellAliases = {
       devbox = "ssh -t devbox 'zsh -l'";
       devbox-eu = "ssh -t devbox-eu 'zsh -l'";
+      devbox-arm = "ssh -t devbox-arm 'zsh -l'";
     };
   };
 }
