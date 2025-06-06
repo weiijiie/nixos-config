@@ -76,13 +76,23 @@
             ProxyJump = "europe-west4-a-oslogin-bastion";
           };
         };
+
+        devbox-idc = {
+          hostname = "devbox-6876";
+          user = "weijie_huang";
+          forwardAgent = true;
+          extraOptions = {
+            ProxyJump = "asia-south1-a-oslogin-bastion";
+          };
+        };
       };
     };
 
     zsh.shellAliases = {
       devbox = "ssh -t devbox 'zsh -l'";
-      devbox-eu = "ssh -t devbox-eu 'zsh -l'";
       devbox-arm = "ssh -t devbox-arm 'zsh -l'";
+      devbox-eu = "ssh -t devbox-eu 'zsh -l'";
+      devbox-idc = "ssh -t devbox-idc 'zsh -l'";
     };
   };
 }
