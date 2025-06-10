@@ -252,7 +252,7 @@ in
 
       shellAliases = { };
 
-      initExtraFirst = with pkgs; ''
+      initContent = with pkgs; lib.mkBefore ''
         # resolve issues where zsh-vi-mode overrides fzf key bindings
         zvm_after_init() {
           if [[ $options[zle] = on ]]; then
