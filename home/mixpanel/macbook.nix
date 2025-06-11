@@ -59,6 +59,15 @@
           };
         };
 
+        devbox24 = {
+          hostname = "devbox-7700";
+          user = "weijie_huang";
+          forwardAgent = true;
+          extraOptions = {
+            ProxyJump = "us-west2-a-oslogin-bastion";
+          };
+        };
+
         devbox-arm = {
           hostname = "devbox-5924";
           user = "weijie_huang";
@@ -90,6 +99,7 @@
 
     zsh.shellAliases = {
       devbox = "ssh -t devbox 'zsh -l'";
+      devbox24 = "ssh -t devbox24 'zsh -l'";
       devbox-arm = "ssh -t devbox-arm 'zsh -l'";
       devbox-eu = "ssh -t devbox-eu 'zsh -l'";
       devbox-idc = "ssh -t devbox-idc 'zsh -l'";
