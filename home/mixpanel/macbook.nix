@@ -80,9 +80,9 @@
     };
 
     zsh.shellAliases = {
-      devbox-old = "ssh -t devbox-old 'zsh -l'";
-      devbox = "ssh -t devbox 'zsh -l'";
-      devbox-arm = "ssh -t devbox-arm 'zsh -l'";
+      devbox-old = "ssh -t devbox-old 'cd analytics && zsh -l'";
+      devbox = "ssh -t devbox 'cd ~/analytics && zsh -l'";
+      devbox-arm = "ssh -t devbox-arm 'cd ~/analytics && zsh -l'";
     };
   };
 }
