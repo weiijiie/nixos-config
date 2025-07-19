@@ -245,20 +245,6 @@
             home = "/home/weijie_huang";
             system = "aarch64-linux";
             modules = [ ./home/mixpanel/devbox.nix ];
-          }
-          // mkConfig {
-            user = "weijie_huang";
-            host = "devbox-4722";
-            home = "/home/weijie_huang";
-            system = "x86_64-linux";
-            modules = [ ./home/mixpanel/devbox.nix ];
-          }
-          // mkConfig {
-            user = "weijie_huang";
-            host = "devbox-6876";
-            home = "/home/weijie_huang";
-            system = "x86_64-linux";
-            modules = [ ./home/mixpanel/devbox.nix ];
           };
       };
     };

@@ -50,7 +50,7 @@
           user = "weijie_huang";
         };
 
-        devbox = {
+        devbox-old = {
           hostname = "devbox-5372";
           user = "weijie_huang";
           forwardAgent = true;
@@ -59,7 +59,7 @@
           };
         };
 
-        devbox24 = {
+        devbox = {
           hostname = "devbox-7700";
           user = "weijie_huang";
           forwardAgent = true;
@@ -76,33 +76,13 @@
             ProxyJump = "us-central1-b-oslogin-bastion";
           };
         };
-
-        devbox-eu = {
-          hostname = "devbox-4722";
-          user = "weijie_huang";
-          forwardAgent = true;
-          extraOptions = {
-            ProxyJump = "europe-west4-a-oslogin-bastion";
-          };
-        };
-
-        devbox-idc = {
-          hostname = "devbox-6876";
-          user = "weijie_huang";
-          forwardAgent = true;
-          extraOptions = {
-            ProxyJump = "asia-south1-a-oslogin-bastion";
-          };
-        };
       };
     };
 
     zsh.shellAliases = {
+      devbox-old = "ssh -t devbox-old 'zsh -l'";
       devbox = "ssh -t devbox 'zsh -l'";
-      devbox24 = "ssh -t devbox24 'zsh -l'";
       devbox-arm = "ssh -t devbox-arm 'zsh -l'";
-      devbox-eu = "ssh -t devbox-eu 'zsh -l'";
-      devbox-idc = "ssh -t devbox-idc 'zsh -l'";
     };
   };
 }
