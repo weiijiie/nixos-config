@@ -62,6 +62,8 @@
 
           shellAliases = common.programs.zsh.shellAliases // {
             shadow = "kubectl get pods --selector role=lqs-shadow -o json | ${pkgs.jq}/bin/jq -r '.items[0].metadata.name'";
+            "perfflame.sh"" = "~/analytics/tools/marcus/perfflame.sh";
+            arb = "~/analytics/backend/arb/reader/arb";
           };
         };
       };
