@@ -68,6 +68,15 @@
           };
         };
 
+        devbox-spare = {
+          hostname = "devbox-9983";
+          user = "weijie_huang";
+          forwardAgent = true;
+          extraOptions = {
+            ProxyJump = "us-west2-a-oslogin-bastion";
+          };
+        };
+
         devbox-arm = {
           hostname = "devbox-5924";
           user = "weijie_huang";
@@ -82,6 +91,7 @@
     zsh.shellAliases = {
       devbox-old = "ssh -t devbox-old 'cd analytics && zsh -l'";
       devbox = "ssh -t devbox 'cd ~/analytics && zsh -l'";
+      devbox-spare = "ssh -t devbox-spare 'cd ~/analytics && zsh -l'";
       devbox-arm = "ssh -t devbox-arm 'cd ~/analytics && zsh -l'";
     };
   };
