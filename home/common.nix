@@ -250,6 +250,8 @@ in
       autosuggestion.enable = true;
       syntaxHighlighting.enable = true;
 
+      history.size = 65536;
+
       shellAliases = { };
 
       initContent = with pkgs; lib.mkBefore ''
