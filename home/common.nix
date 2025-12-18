@@ -292,6 +292,8 @@ in
 
         # kitty SSH issue workaround: https://wiki.archlinux.org/title/Kitty#Terminal_issues_with_SSH
         [ "$TERM" = "xterm-kitty" ] && alias ssh="kitty +kitten ssh"
+
+        compdef __fnmcd=cd
       '';
 
       oh-my-zsh = {
