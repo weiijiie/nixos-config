@@ -77,15 +77,6 @@
           };
         };
 
-        devbox-in = {
-          hostname = "devbox-8730";
-          user = "weijie_huang";
-          forwardAgent = true;
-          extraOptions = {
-            ProxyJump = "us-west2-a-oslogin-bastion";
-          };
-        };
-
         devbox-arm = {
           hostname = "devbox-5924";
           user = "weijie_huang";

@@ -227,6 +227,13 @@
           }
           // mkConfig {
             user = "weijie_huang";
+            host = "devbox-5372";
+            home = "/home/weijie_huang";
+            system = "x86_64-linux";
+            modules = [ ./home/mixpanel/devbox.nix ];
+          }
+          // mkConfig {
+            user = "weijie_huang";
             host = "devbox-7700";
             home = "/home/weijie_huang";
             system = "x86_64-linux";
@@ -235,13 +242,6 @@
           // mkConfig {
             user = "weijie_huang";
             host = "devbox-9983";
-            home = "/home/weijie_huang";
-            system = "x86_64-linux";
-            modules = [ ./home/mixpanel/devbox.nix ];
-          }
-          // mkConfig {
-            user = "weijie_huang";
-            host = "devbox-8730";
             home = "/home/weijie_huang";
             system = "x86_64-linux";
             modules = [ ./home/mixpanel/devbox.nix ];
