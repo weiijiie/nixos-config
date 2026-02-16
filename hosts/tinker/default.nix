@@ -152,17 +152,14 @@
       mplus-outline-fonts.githubRelease
       dina-font
       proggyfonts
-      (nerdfonts.override {
-        fonts = [
-          "CascadiaCode"
-          "CascadiaMono"
-          "IBMPlexMono"
-          "Iosevka"
-          "IosevkaTerm"
-          "IosevkaTermSlab"
-          "JetBrainsMono"
-        ];
-      })
+      nerd-fonts.fira-code
+      nerd-fonts.caskaydia-cove
+      nerd-fonts.caskaydia-mono
+      nerd-fonts.blex-mono
+      nerd-fonts.iosevka
+      nerd-fonts.iosevka-term
+      nerd-fonts.iosevka-term-slab
+      nerd-fonts.jetbrains-mono
     ];
   };
 
