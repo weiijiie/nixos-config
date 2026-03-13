@@ -3,13 +3,13 @@
 
   inputs = {
     # Nixpkgs
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     # Also see the 'unstable-packages' overlay at 'overlays/default.nix'.
 
     # Home manager
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.05";
+      url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -218,9 +218,9 @@
               ./home/macos/programs.nix
               ./home/mixpanel/macbook.nix
               {
-                programs.git = {
-                  userEmail = nixpkgs.lib.mkForce "weijie.huang@mixpanel.com";
-                  userName = nixpkgs.lib.mkForce "weijie-mxpl";
+                programs.git.settings.user = {
+                  email = nixpkgs.lib.mkForce "weijie.huang@mixpanel.com";
+                  name = nixpkgs.lib.mkForce "weijie-mxpl";
                 };
               }
             ];

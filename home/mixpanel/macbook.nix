@@ -2,29 +2,33 @@
   home.packages = [ pkgs.bazel ];
 
   programs = {
-    git = {
-      userEmail = "weijie.huang@mixpanel.com";
-      userName = "weijie-mxpl";
+    git.settings.user = {
+      email = "weijie.huang@mixpanel.com";
+      name = "weijie-mxpl";
     };
 
     ssh = {
       enable = true;
-      compression = true;
-
-      addKeysToAgent = "yes";
-      controlPath = "~/.ssh/ctrl/%C";
-      controlMaster = "auto";
-      controlPersist = "yes";
-      serverAliveInterval = 5;
-      serverAliveCountMax = 2;
+      enableDefaultConfig = false;
 
       extraConfig = ''
         IgnoreUnknown UseKeychain
         UseKeychain yes
-        ServerAliveCountMax 2
       '';
 
       matchBlocks = {
+        "*" = {
+          compression = true;
+          extraOptions = {
+            AddKeysToAgent = "yes";
+            ControlPath = "~/.ssh/ctrl/%C";
+            ControlMaster = "auto";
+            ControlPersist = "yes";
+            ServerAliveInterval = "5";
+            ServerAliveCountMax = "2";
+          };
+        };
+
         "us-central1-b-oslogin-bastion" = {
           hostname = "central-oslogin-v2-bastion.mixpanel.org";
           user = "weijie_huang";

@@ -77,7 +77,6 @@ in
       nixd
       nixfmt-rfc-style
       cachix
-      custom.code2prompt
     ])
     ++ [ outputs.packages.${system}.nvim ];
 
@@ -92,13 +91,13 @@ in
     git = {
       enable = true;
 
-      aliases = {
-        ll = "log --pretty=format:'%C(yellow)%h %C(green)%ad%Cred%d %Creset%s%Cblue [%cn]' --decorate --date=short --graph";
-        l = "log --all --oneline --graph --decorate";
-        cidiff = ''log --date=format:"%Y-%m-%d %H:%M" --pretty="%C(cyan)%h%Creset %C(blue)[%ad]%Creset: %C(green)%s%Creset"'';
-      };
+      settings = {
+        alias = {
+          ll = "log --pretty=format:'%C(yellow)%h %C(green)%ad%Cred%d %Creset%s%Cblue [%cn]' --decorate --date=short --graph";
+          l = "log --all --oneline --graph --decorate";
+          cidiff = ''log --date=format:"%Y-%m-%d %H:%M" --pretty="%C(cyan)%h%Creset %C(blue)[%ad]%Creset: %C(green)%s%Creset"'';
+        };
 
-      extraConfig = {
         merge = {
           conflictstyle = "diff3";
         };
@@ -107,26 +106,27 @@ in
           colorMoved = "default";
         };
       };
+    };
 
-      delta = {
-        enable = true;
+    delta = {
+      enable = true;
+      enableGitIntegration = true;
 
-        options = {
-          navigate = true;
-          side-by-side = true;
-          theme = "Catppuccin Macchiato";
-          features = "decorations";
+      options = {
+        navigate = true;
+        side-by-side = true;
+        theme = "Catppuccin Macchiato";
+        features = "decorations";
 
-          decorations = {
-            file-style = "lightcoral bold ul";
-            file-decoration-style = "blue ul";
-            file-modified-label = "#";
-            hunk-header-style = "line-number syntax bold";
-            hunk-header-decoration-style = "lightcoral box";
-            hunk-header-line-number-style = "lightcoral ul";
-            hunk-label = "";
-            line-numbers-zero-style = "lightslategray";
-          };
+        decorations = {
+          file-style = "lightcoral bold ul";
+          file-decoration-style = "blue ul";
+          file-modified-label = "#";
+          hunk-header-style = "line-number syntax bold";
+          hunk-header-decoration-style = "lightcoral box";
+          hunk-header-line-number-style = "lightcoral ul";
+          hunk-label = "";
+          line-numbers-zero-style = "lightslategray";
         };
       };
     };
@@ -161,7 +161,8 @@ in
 
     ssh = {
       enable = true;
-      compression = true;
+      enableDefaultConfig = false;
+      matchBlocks."*".compression = true;
     };
 
     fzf = {
