@@ -23,6 +23,8 @@
 
       copy-on-select = "clipboard";
 
+      shell-integration-features = "ssh-terminfo,ssh-env";
+
       keybind = [
         "ctrl+c=copy_to_clipboard"
         "ctrl+v=paste_from_clipboard"

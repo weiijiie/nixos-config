@@ -29,7 +29,7 @@
 
     nixvim = {
       url = "github:nix-community/nixvim";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     mac-app-util = {
@@ -173,7 +173,7 @@
                   # Home-manager requires 'pkgs' instance
                   pkgs = nixpkgs.legacyPackages.${system};
                   extraSpecialArgs = {
-                    inherit inputs outputs system;
+                    inherit inputs outputs;
                   };
                   modules = nixpkgs.lib.lists.flatten [
                     modules

@@ -58,8 +58,10 @@
 
     notify = {
       enable = true;
-      backgroundColour = "#222222";
-      topDown = false;
+      settings = {
+        background_colour = "#222222";
+        top_down = false;
+      };
     };
 
     noice = {
