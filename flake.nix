@@ -216,6 +216,7 @@
               mac-app-util.homeManagerModules.default
               ./home/common.nix
               ./home/macos/programs.nix
+              ./home/macos/ghostty.nix
               ./home/mixpanel/macbook.nix
               {
                 programs.git.settings.user = {
