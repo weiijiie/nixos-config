@@ -247,8 +247,11 @@ in
     zellij = {
       enable = true;
       enableZshIntegration = true;
+      attachExistingSession = true;
+      exitShellOnExit = true;
       settings = {
         default_mode = "locked";
+        default_shell = "zsh";
       };
       extraConfig = ''
         // Overrides: bare keys for mode switching, actions return to locked
