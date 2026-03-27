@@ -2,8 +2,8 @@
 # configured in the devbox during provisioning
 {
   outputs,
+  lib,
   pkgs,
-  system,
   ...
 }@args:
 (
@@ -27,7 +27,7 @@
             cachix
             custom.code2prompt
           ])
-          ++ [ outputs.packages.${system}.nvim ];
+          ++ [ outputs.packages.${pkgs.stdenv.hostPlatform.system}.nvim ];
       };
 
       programs = common.programs // {
@@ -39,10 +39,9 @@
         };
 
         zsh = common.programs.zsh // {
-          initExtra =
-            common.programs.zsh.initExtra
-            + "\n"
-            + ''
+          initContent = lib.mkMerge [
+            common.programs.zsh.initContent
+            (lib.mkAfter ''
               # devbox setup
               source ~/.gcpdevbox
               source ~/analytics/google-cloud/scripts/kube.sh
@@ -54,7 +53,8 @@
                     command gcloud "$@"
                 fi
               }
-            '';
+            '')
+          ];
 
           envExtra = ''
             source $HOME/analytics/.shellenv
