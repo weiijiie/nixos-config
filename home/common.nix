@@ -354,39 +354,16 @@ in
           shared_among "scroll" "search" {
             bind "Ctrl c" { ScrollToBottom; SwitchToMode "locked"; }
           }
-          // Seamless vim/zellij pane navigation via vim-zellij-navigator
-          // Ctrl+h/l in all modes (horizontal), Ctrl+j/k only when unlocked (preserves Ctrl+j for jq-complete)
-          shared {
-            bind "Ctrl h" {
-              MessagePlugin "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm" {
-                name "move_focus_or_tab";
-                payload "left";
-                move_mod "ctrl";
-              };
-            }
-            bind "Ctrl l" {
-              MessagePlugin "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm" {
-                name "move_focus_or_tab";
-                payload "right";
-                move_mod "ctrl";
-              };
-            }
+          // Ctrl+h/l for zellij pane navigation in all modes
+          locked {
+            bind "Ctrl h" { MoveFocusOrTab "left"; }
+            bind "Ctrl l" { MoveFocusOrTab "right"; }
           }
           shared_except "locked" {
-            bind "Ctrl j" {
-              MessagePlugin "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm" {
-                name "move_focus";
-                payload "down";
-                move_mod "ctrl";
-              };
-            }
-            bind "Ctrl k" {
-              MessagePlugin "https://github.com/hiasr/vim-zellij-navigator/releases/download/0.3.0/vim-zellij-navigator.wasm" {
-                name "move_focus";
-                payload "up";
-                move_mod "ctrl";
-              };
-            }
+            bind "Ctrl h" { MoveFocusOrTab "left"; }
+            bind "Ctrl j" { MoveFocus "down"; }
+            bind "Ctrl k" { MoveFocus "up"; }
+            bind "Ctrl l" { MoveFocusOrTab "right"; }
           }
         }
       '';
