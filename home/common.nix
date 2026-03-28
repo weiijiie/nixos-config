@@ -5,6 +5,11 @@
   ...
 }:
 let
+  zellij-zellaude = pkgs.fetchurl {
+    url = "https://github.com/ishefi/zellaude/releases/latest/download/zellaude.wasm";
+    hash = "sha256-BVz0mmAVN3MrbF/uz1cs5Nnuz9zdH//3wKrShuNOsoo=";
+  };
+
   zshCustomDir = pkgs.stdenv.mkDerivation {
     name = "ohmyzsh-custom-dir";
     src = ../dotfiles/ohmyzsh-custom;
@@ -246,9 +251,9 @@ in
 
     zellij = {
       enable = true;
-      enableZshIntegration = true;
-      attachExistingSession = true;
-      exitShellOnExit = true;
+      # enableZshIntegration = true;
+      # attachExistingSession = true;
+      # exitShellOnExit = true;
       settings = {
         default_mode = "locked";
         default_shell = "zsh";
@@ -480,6 +485,21 @@ in
 
     gpg.enable = true;
   };
+
+  # Zellij layout with zellaude tab bar
+  xdg.configFile."zellij/layouts/default.kdl".text = ''
+    layout {
+      default_tab_template {
+        pane size=1 borderless=true {
+          plugin location="file:${zellij-zellaude}"
+        }
+        children
+        pane size=1 borderless=true {
+          plugin location="status-bar"
+        }
+      }
+    }
+  '';
 
   # Nicely reload system units when changing configs
   systemd.user.startServices = "sd-switch";
