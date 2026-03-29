@@ -89,7 +89,14 @@ in
 
   home.sessionVariables = {
     EDITOR = "nvim";
+    RTK_TELEMETRY_DISABLED = "1";
   };
+
+  home.activation.rtkInit = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    ${
+      lib.getExe outputs.packages.${pkgs.stdenv.hostPlatform.system}.rtk
+    } init -g --auto-patch 2>/dev/null || true
+  '';
 
   # Enable home-manager
   programs.home-manager.enable = true;
