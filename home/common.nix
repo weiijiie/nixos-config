@@ -82,7 +82,10 @@ in
       nixfmt-rfc-style
       cachix
     ])
-    ++ [ outputs.packages.${pkgs.stdenv.hostPlatform.system}.nvim ];
+    ++ (with outputs.packages.${pkgs.stdenv.hostPlatform.system}; [
+      nvim
+      rtk
+    ]);
 
   home.sessionVariables = {
     EDITOR = "nvim";

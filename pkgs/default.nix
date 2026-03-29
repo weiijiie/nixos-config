@@ -8,6 +8,8 @@
 
   code2prompt = pkgs.callPackage ./rust/code2prompt.nix { };
 
+  rtk = pkgs.callPackage ./rtk.nix { };
+
   nvim = inputs.nixvim.legacyPackages.makeNixvimWithModule {
     inherit pkgs;
     module = import ../modules/nvim;

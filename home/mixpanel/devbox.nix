@@ -27,7 +27,10 @@
             cachix
             custom.code2prompt
           ])
-          ++ [ outputs.packages.${pkgs.stdenv.hostPlatform.system}.nvim ];
+          ++ (with outputs.packages.${pkgs.stdenv.hostPlatform.system}; [
+            nvim
+            rtk
+          ]);
       };
 
       programs = common.programs // {
