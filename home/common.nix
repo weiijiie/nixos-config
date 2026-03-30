@@ -348,6 +348,9 @@ in
           shared_except "locked" "entersearch" "renametab" "renamepane" {
             bind "esc" { SwitchToMode "locked"; }
           }
+          shared_except "locked" "entersearch" "renametab" "renamepane" {
+            bind "w" { ToggleFloatingPanes; SwitchToMode "locked"; }
+          }
           shared_except "locked" "entersearch" "renametab" "renamepane" "move" {
             bind "m" { SwitchToMode "move"; }
           }
