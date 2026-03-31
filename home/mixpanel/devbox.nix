@@ -26,6 +26,7 @@
             nixfmt-rfc-style
             cachix
             custom.code2prompt
+            ast-grep
           ])
           ++ (with outputs.packages.${pkgs.stdenv.hostPlatform.system}; [
             nvim
