@@ -81,6 +81,7 @@ in
       nixd
       nixfmt-rfc-style
       cachix
+      ast-grep
     ])
     ++ (with outputs.packages.${pkgs.stdenv.hostPlatform.system}; [
       nvim
