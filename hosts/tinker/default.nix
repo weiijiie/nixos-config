@@ -80,8 +80,6 @@
     enable = true;
     defaultUser = "wj";
     startMenuLaunchers = true;
-    nativeSystemd = true;
-
     wslConf = {
       automount.root = "/mnt";
     };
@@ -103,7 +101,7 @@
     # nix-ld is a workaround for remote vs-code to work, as per: https://nixos.wiki/wiki/Visual_Studio_Code#Remote_WSL
     nix-ld = {
       enable = true;
-      package = pkgs.nix-ld-rs;
+      package = pkgs.nix-ld;
     };
 
     ssh = {
@@ -145,7 +143,7 @@
     packages = with pkgs; [
       noto-fonts
       noto-fonts-cjk-sans
-      noto-fonts-emoji
+      noto-fonts-color-emoji
       liberation_ttf
       fira-code
       fira-code-symbols
