@@ -12,7 +12,52 @@ My NixOS configurations
 
 ### WSL
 
-TODO
+This sets up a full NixOS system inside WSL using [NixOS-WSL](https://github.com/nix-community/NixOS-WSL).
+
+#### Prerequisites
+
+- Windows 10 (build 2004+) or Windows 11
+- WSL enabled (`wsl --install` from an admin PowerShell if not already)
+
+#### Steps
+
+1. Download the latest NixOS-WSL tarball from the [NixOS-WSL releases](https://github.com/nix-community/NixOS-WSL/releases) page (the `nixos-wsl.tar.gz` file).
+
+2. Import it as a new WSL distro from PowerShell:
+
+   ```powershell
+   wsl --import NixOS $env:USERPROFILE\NixOS nixos-wsl.tar.gz
+   ```
+
+3. Launch the distro:
+
+   ```powershell
+   wsl -d NixOS
+   ```
+
+4. Inside the NixOS shell, clone this repo and apply the system configuration:
+
+   ```bash
+   nix-shell -p git
+   git clone https://github.com/weiijiie/nixos-config.git ~/nixos-config
+   cd ~/nixos-config
+   sudo nixos-rebuild switch --flake .#${HOSTNAME}
+   ```
+
+5. Restart the distro from PowerShell to pick up all changes:
+
+   ```powershell
+   wsl --terminate NixOS
+   wsl -d NixOS
+   ```
+
+6. Apply the home-manager configuration:
+
+   ```bash
+   cd ~/nixos-config
+   nix develop  # enter the dev shell (has home-manager)
+   home-manager switch --flake .#${USERNAME}@${HOSTNAME}
+   ```
 
 ### NixOS
 
