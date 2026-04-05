@@ -27,6 +27,10 @@
       url = "github:hercules-ci/flake-parts";
     };
 
+    llm-agents = {
+      url = "github:numtide/llm-agents.nix";
+    };
+
     nixvim = {
       url = "github:nix-community/nixvim/nixos-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -87,6 +91,7 @@
               outputs.overlays.custom # access my own packages through `pkgs.custom`
               outputs.overlays.modifications
               outputs.overlays.unstable-packages # access unstable packages through `pkgs.unstable`
+              outputs.overlays.llm-agents # access llm-agents through `pkgs.llm-agents`
             ];
           };
 

@@ -37,6 +37,7 @@ in
       outputs.overlays.custom
       outputs.overlays.modifications
       outputs.overlays.unstable-packages
+      outputs.overlays.llm-agents
 
       # You can also add overlays exported from other flakes:
       # neovim-nightly-overlay.overlays.default
@@ -82,6 +83,7 @@ in
       nixfmt-rfc-style
       cachix
       ast-grep
+      llm-agents.claude-code
     ])
     ++ (with outputs.packages.${pkgs.stdenv.hostPlatform.system}; [
       nvim
