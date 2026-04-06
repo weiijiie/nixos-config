@@ -51,23 +51,13 @@ This sets up a full NixOS system inside WSL using [NixOS-WSL](https://github.com
    wsl -d NixOS
    ```
 
-6. Apply the home-manager configuration:
-
-   ```bash
-   cd ~/nixos-config
-   nix develop  # enter the dev shell (has home-manager)
-   home-manager switch --flake .#${USERNAME}@${HOSTNAME}
-   ```
-
 ### NixOS
 
-Run:
-
 ```bash
- sudo nixos-rebuild switch --flake github:weiijiie/nixos-config/main#${HOSTNAME}
- ```
+sudo nixos-rebuild switch --flake github:weiijiie/nixos-config/main#${HOSTNAME}
+```
 
-To apply the latest system configuration
+This applies both the system and home-manager configuration.
 
 ### nix-darwin
 
@@ -83,12 +73,14 @@ After setup:
 darwin-rebuild switch --flake github:weiijiie/nixos-config/main#${HOSTNAME}
 ```
 
-### home-manager
+This applies both the system and home-manager configuration.
 
-Run:
+### home-manager (standalone)
+
+For hosts that don't run NixOS or nix-darwin (e.g. devboxes):
 
 ```bash
 home-manager switch --flake github:weiijiie/nixos-config/main#${USERNAME}@${HOSTNAME}
 ```
 
-To apply the latest home-manager configuration. If you don't have home-manager installed, try running `nix --extra-experimental-features nix-command --extra-experimental-features flakes develop github:weiijiie/nixos-config/main` first.
+If you don't have home-manager installed, run `nix --extra-experimental-features nix-command --extra-experimental-features flakes develop github:weiijiie/nixos-config/main` first.
