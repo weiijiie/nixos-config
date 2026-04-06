@@ -58,6 +58,46 @@
     }@inputs:
     let
       inherit (self) outputs;
+
+      mkHost =
+        {
+          user,
+          home,
+          modules ? [ ],
+          homeModules ? [ ],
+        }:
+        {
+          specialArgs = {
+            inherit inputs outputs;
+          };
+          modules = [
+            ./modules/nixpkgs.nix
+          ]
+          ++ modules
+          ++ [
+            {
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                extraSpecialArgs = {
+                  inherit inputs outputs;
+                };
+                users.${user}.imports = [
+                  ./home/common.nix
+                ]
+                ++ homeModules
+                ++ [
+                  {
+                    home = {
+                      username = user;
+                      homeDirectory = home;
+                    };
+                  }
+                ];
+              };
+            }
+          ];
+        };
     in
     flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
@@ -132,37 +172,58 @@
         # Available through 'nixos-rebuild --flake .#your-hostname'
         nixosConfigurations = {
           # old windows laptop
-          aldehyde = nixpkgs.lib.nixosSystem {
-            specialArgs = {
-              inherit inputs outputs;
-            };
-            modules = [ ./hosts/aldehyde ];
-          };
+          aldehyde = nixpkgs.lib.nixosSystem (mkHost {
+            user = "weijie";
+            home = "/home/weijie";
+            modules = [
+              home-manager.nixosModules.home-manager
+              ./hosts/aldehyde
+            ];
+            homeModules = [ ./home/personal.nix ];
+          });
           # framework laptop
-          tinker = nixpkgs.lib.nixosSystem {
-            specialArgs = {
-              inherit inputs outputs;
-            };
-            modules = [ ./hosts/tinker ];
-          };
+          tinker = nixpkgs.lib.nixosSystem (mkHost {
+            user = "wj";
+            home = "/home/wj";
+            modules = [
+              home-manager.nixosModules.home-manager
+              ./hosts/tinker
+            ];
+            homeModules = [ ./home/personal.nix ];
+          });
         };
 
         darwinConfigurations = {
           # work laptop
-          mixpanel = nix-darwin.lib.darwinSystem {
-            system = "aarch64-darwin";
-            specialArgs = {
-              inherit inputs outputs;
-            };
-            modules = [
-              mac-app-util.darwinModules.default
-              ./hosts/mixpanel
-            ];
-          };
+          mixpanel = nix-darwin.lib.darwinSystem (
+            {
+              system = "aarch64-darwin";
+            }
+            // mkHost {
+              user = "weijiehuang";
+              home = "/Users/weijiehuang";
+              modules = [
+                mac-app-util.darwinModules.default
+                home-manager.darwinModules.home-manager
+                ./hosts/mixpanel
+              ];
+              homeModules = [
+                mac-app-util.homeManagerModules.default
+                ./home/macos/programs.nix
+                ./home/macos/ghostty.nix
+                ./home/mixpanel/macbook.nix
+                {
+                  programs.git.settings.user = {
+                    email = nixpkgs.lib.mkForce "weijie.huang@mixpanel.com";
+                    name = nixpkgs.lib.mkForce "weijie-mxpl";
+                  };
+                }
+              ];
+            }
+          );
         };
 
-        # Standalone home-manager configuration entrypoint
-        # Available through 'home-manager --flake .#your-username@your-hostname'
+        # Standalone home-manager for non-NixOS/non-darwin hosts
         homeConfigurations =
           let
             mkConfig =
@@ -175,12 +236,12 @@
               }:
               {
                 "${user}@${host}" = home-manager.lib.homeManagerConfiguration {
-                  # Home-manager requires 'pkgs' instance
                   pkgs = nixpkgs.legacyPackages.${system};
                   extraSpecialArgs = {
                     inherit inputs outputs;
                   };
                   modules = nixpkgs.lib.lists.flatten [
+                    ./modules/nixpkgs.nix
                     modules
                     {
                       home = {
@@ -193,45 +254,6 @@
               };
           in
           mkConfig {
-            user = "wj";
-            host = "tinker";
-            home = "/home/wj";
-            system = "x86_64-linux";
-            modules = [
-              ./home/common.nix
-              ./home/personal.nix
-            ];
-          }
-          // mkConfig {
-            user = "weijie";
-            host = "aldehyde";
-            home = "/home/weijie";
-            system = "x86_64-linux";
-            modules = [
-              ./home/common.nix
-              ./home/personal.nix
-            ];
-          }
-          // mkConfig {
-            user = "weijiehuang";
-            host = "mixpanel";
-            home = "/Users/weijiehuang";
-            system = "aarch64-darwin";
-            modules = [
-              mac-app-util.homeManagerModules.default
-              ./home/common.nix
-              ./home/macos/programs.nix
-              ./home/macos/ghostty.nix
-              ./home/mixpanel/macbook.nix
-              {
-                programs.git.settings.user = {
-                  email = nixpkgs.lib.mkForce "weijie.huang@mixpanel.com";
-                  name = nixpkgs.lib.mkForce "weijie-mxpl";
-                };
-              }
-            ];
-          }
-          // mkConfig {
             user = "weijie_huang";
             host = "devbox-5372";
             home = "/home/weijie_huang";
