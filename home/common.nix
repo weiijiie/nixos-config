@@ -33,7 +33,7 @@
       gotools
       delve
       nixd
-      nixfmt-rfc-style
+      nixfmt
       cachix
       ast-grep
       llm-agents.claude-code

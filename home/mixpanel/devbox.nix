@@ -22,7 +22,7 @@
       bazel-buildtools
       delve
       nixd
-      nixfmt-rfc-style
+      nixfmt
       cachix
       custom.code2prompt
       ast-grep
