@@ -6,6 +6,7 @@
 }:
 {
   imports = [
+    ./claude-code.nix
     ./git.nix
     ./zellij.nix
     ./zsh.nix
@@ -36,7 +37,6 @@
       nixfmt
       cachix
       ast-grep
-      llm-agents.claude-code
       mdcat
     ])
     ++ (with outputs.packages.${pkgs.stdenv.hostPlatform.system}; [
@@ -49,12 +49,6 @@
     EDITOR = "nvim";
     RTK_TELEMETRY_DISABLED = "1";
   };
-
-  home.activation.rtkInit = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    ${
-      lib.getExe outputs.packages.${pkgs.stdenv.hostPlatform.system}.rtk
-    } init -g --auto-patch 2>/dev/null || true
-  '';
 
   # Enable home-manager
   programs.home-manager.enable = true;
