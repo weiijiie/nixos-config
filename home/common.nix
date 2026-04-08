@@ -11,7 +11,7 @@
     ./zsh.nix
   ];
 
-  home.packages =
+  home.packages = lib.mkDefault (
     (with pkgs; [
       coreutils
       moreutils
@@ -37,11 +37,13 @@
       cachix
       ast-grep
       llm-agents.claude-code
+      mdcat
     ])
     ++ (with outputs.packages.${pkgs.stdenv.hostPlatform.system}; [
       nvim
       rtk
-    ]);
+    ])
+  );
 
   home.sessionVariables = {
     EDITOR = "nvim";

@@ -11,7 +11,8 @@
     ../common.nix
   ];
 
-  home.packages = lib.mkForce (
+  # Replaces common's mkDefault packages; programs.* packages merge in automatically
+  home.packages =
     (with pkgs; [
       manix
       tree
@@ -26,12 +27,12 @@
       cachix
       custom.code2prompt
       ast-grep
+      mdcat
     ])
     ++ (with outputs.packages.${pkgs.stdenv.hostPlatform.system}; [
       nvim
       rtk
-    ])
-  );
+    ]);
 
   programs.ssh.enable = lib.mkForce false;
   programs.go.enable = lib.mkForce false;
@@ -53,7 +54,7 @@
       }
     '';
 
-    envExtra = ''
+    envExtra = lib.mkForce ''
       source $HOME/analytics/.shellenv
     '';
 
