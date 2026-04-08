@@ -11,8 +11,7 @@
     ../common.nix
   ];
 
-  # Replaces common's mkDefault packages; programs.* packages merge in automatically
-  home.packages =
+  basePackages =
     (with pkgs; [
       manix
       tree
