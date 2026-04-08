@@ -53,24 +53,24 @@ in
         }
         {
           id = "2";
-          type = "context-bar";
-          backgroundColor = "bgBlue";
-          rawValue = true;
+          type = "git-branch";
+          color = "magenta";
         }
         {
           id = "3";
-          type = "git-branch";
-          color = "magenta";
-          metadata.linkToGitHub = "true";
-        }
-        {
-          id = "4";
           type = "git-changes";
           color = "yellow";
-          metadata.hideNoGit = "false";
         }
       ]
-      [ ]
+      [
+        {
+          id = "4";
+          type = "context-bar";
+          metadata.display = "progress-short";
+          rawValue = true;
+          color = "brightBlue";
+        }
+      ]
       [ ]
     ];
     flexMode = "full-until-compact";
@@ -80,19 +80,24 @@ in
     inheritSeparatorColors = false;
     globalBold = false;
     powerline = {
-      enabled = true;
-      separators = [ "" ];
+      enabled = false;
+      separators = [ "" ];
       separatorInvertBackground = [ false ];
-      startCaps = [ "" ];
-      endCaps = [ "" ];
-      theme = "catppuccin";
-      autoAlign = true;
+      startCaps = [ ];
+      endCaps = [ ];
+      autoAlign = false;
     };
   };
 
   programs.claude-code = {
     enable = true;
     package = pkgs.llm-agents.claude-code;
+
+    mcpServers = {
+      nixos = {
+        command = "${pkgs.mcp-nixos}/bin/mcp-nixos";
+      };
+    };
 
     settings = {
       model = "opus";
