@@ -39,10 +39,10 @@
       ast-grep
       mdcat
     ])
-    ++ (with outputs.packages.${pkgs.stdenv.hostPlatform.system}; [
-      nvim
-      rtk
-    ])
+    ++ [
+      outputs.packages.${pkgs.stdenv.hostPlatform.system}.nvim
+      pkgs.llm-agents.rtk
+    ]
   );
 
   home.sessionVariables = {
