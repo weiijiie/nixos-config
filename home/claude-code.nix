@@ -76,7 +76,8 @@ in
     flexMode = "full-until-compact";
     compactThreshold = 60;
     colorLevel = 2;
-    defaultPadding = " ";
+    defaultPadding = "";
+    defaultSeparator = "  ";
     inheritSeparatorColors = false;
     globalBold = false;
     powerline = {
