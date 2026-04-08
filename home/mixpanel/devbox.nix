@@ -35,6 +35,7 @@
 
   programs.ssh.enable = lib.mkForce false;
   programs.go.enable = lib.mkForce false;
+  programs.claude-code.enable = lib.mkForce false;
 
   programs.git.ignores = [ "/go/.editorconfig" ];
 
