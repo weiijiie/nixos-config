@@ -10,6 +10,12 @@
     };
   };
 
+  # Brings our inline shell scripts from the 'scripts' directory under
+  # `pkgs.scripts`. Not exposed as flake packages.
+  scripts = final: _prev: {
+    scripts = import ../scripts { pkgs = final; };
+  };
+
   # This one contains whatever you want to overlay
   # You can change versions, add patches, set compilation flags, anything really.
   # https://nixos.wiki/wiki/Overlays

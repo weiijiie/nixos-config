@@ -5,6 +5,7 @@
   nixpkgs = {
     overlays = [
       outputs.overlays.custom
+      outputs.overlays.scripts
       outputs.overlays.modifications
       outputs.overlays.unstable-packages
       outputs.overlays.llm-agents

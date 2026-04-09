@@ -32,7 +32,8 @@
     ++ [
       outputs.packages.${pkgs.stdenv.hostPlatform.system}.nvim
       pkgs.llm-agents.rtk
-    ];
+    ]
+    ++ (builtins.attrValues pkgs.scripts);
 
   programs.ssh.enable = lib.mkForce false;
   programs.go.enable = lib.mkForce false;

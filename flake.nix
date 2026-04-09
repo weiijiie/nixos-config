@@ -130,6 +130,7 @@
             inherit system;
             overlays = [
               outputs.overlays.custom # access my own packages through `pkgs.custom`
+              outputs.overlays.scripts # access inline shell scripts through `pkgs.scripts`
               outputs.overlays.modifications
               outputs.overlays.unstable-packages # access unstable packages through `pkgs.unstable`
               outputs.overlays.llm-agents # access llm-agents through `pkgs.llm-agents`

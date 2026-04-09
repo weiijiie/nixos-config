@@ -45,7 +45,8 @@
       ++ [
         outputs.packages.${pkgs.stdenv.hostPlatform.system}.nvim
         pkgs.llm-agents.rtk
-      ];
+      ]
+      ++ (builtins.attrValues pkgs.scripts);
   };
 
   config = {
