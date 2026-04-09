@@ -32,7 +32,7 @@
         ngrok
         tldr
         gcc
-        bottom
+        btop
         grpc
         gotools
         delve
