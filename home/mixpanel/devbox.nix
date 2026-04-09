@@ -1,6 +1,7 @@
 # disable some of the config because it has already been
 # configured in the devbox during provisioning
 {
+  config,
   outputs,
   lib,
   pkgs,
@@ -35,7 +36,14 @@
 
   programs.ssh.enable = lib.mkForce false;
   programs.go.enable = lib.mkForce false;
-  programs.claude-code.enable = lib.mkForce false;
+
+  # Claude Code is pre-installed on devbox. Override the package to a simple
+  # passthrough to the native binary. The HM module wraps this with --mcp-config.
+  programs.claude-code.package = lib.mkForce (
+    pkgs.writeShellScriptBin "claude" ''
+      exec "$HOME/.local/bin/claude" "$@"
+    ''
+  );
 
   programs.git.ignores = [ "/go/.editorconfig" ];
 
