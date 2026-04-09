@@ -22,7 +22,9 @@ in
 
     history.size = 65536;
 
-    shellAliases = { };
+    shellAliases = {
+      nrb = "nix-rebuild";
+    };
 
     initContent = lib.mkMerge [
       (
