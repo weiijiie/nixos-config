@@ -6,6 +6,8 @@
   ...
 }:
 let
+  skillDirs = lib.filterAttrs (_: type: type == "directory") (builtins.readDir ../skills);
+
   zellaude-hook = pkgs.fetchurl {
     url = "https://raw.githubusercontent.com/ishefi/zellaude/v0.4.1/scripts/zellaude-hook.sh";
     hash = "sha256-o/PQW44U89G56P518aX9Dcr89FcmGDoz20XDpg9c+n0=";
@@ -164,6 +166,14 @@ in
         autoAlign = false;
       };
     };
+
+    home.file = lib.mapAttrs' (name: _: {
+      name = ".claude/skills/${name}";
+      value = {
+        source = ../skills/${name};
+        recursive = true;
+      };
+    }) skillDirs;
 
     programs.claude-code = {
       enable = true;
