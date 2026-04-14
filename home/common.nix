@@ -44,6 +44,7 @@
       ])
       ++ [
         outputs.packages.${pkgs.stdenv.hostPlatform.system}.nvim
+        pkgs.custom.claude-code-transcripts
         pkgs.llm-agents.rtk
       ]
       ++ (builtins.attrValues pkgs.scripts);
