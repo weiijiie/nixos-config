@@ -29,6 +29,7 @@
       custom.claude-code-transcripts
       ast-grep
       mdcat
+      jujutsu
     ])
     ++ [
       outputs.packages.${pkgs.stdenv.hostPlatform.system}.nvim

@@ -41,6 +41,7 @@
         cachix
         ast-grep
         mdcat
+        jujutsu
       ])
       ++ [
         outputs.packages.${pkgs.stdenv.hostPlatform.system}.nvim
