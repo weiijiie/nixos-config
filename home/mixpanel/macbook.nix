@@ -1,4 +1,5 @@
-{ pkgs, ...}: {
+{ pkgs, ... }:
+{
   home.packages = [ pkgs.bazel ];
 
   programs = {
@@ -67,6 +68,14 @@
           hostname = "devbox-7700";
           user = "weijie_huang";
           forwardAgent = true;
+          localForwards = [
+            {
+              bind.address = "localhost";
+              bind.port = 8080;
+              host.address = "localhost";
+              host.port = 8080;
+            }
+          ];
           extraOptions = {
             ProxyJump = "us-west2-a-oslogin-bastion";
           };
