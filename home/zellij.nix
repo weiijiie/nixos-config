@@ -2,7 +2,7 @@
 let
   zellij-zellaude = pkgs.fetchurl {
     url = "https://github.com/ishefi/zellaude/releases/latest/download/zellaude.wasm";
-    hash = "sha256-BVz0mmAVN3MrbF/uz1cs5Nnuz9zdH//3wKrShuNOsoo=";
+    hash = "sha256-HWtHklUKLQgzpr8ndxhOz5urQWwXi0nDF7XhsM2ELCQ=";
   };
 in
 {

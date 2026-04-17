@@ -55,10 +55,7 @@
     shells = [ pkgs.zsh ];
   };
 
-  # Auto upgrade nix package and the daemon service.
-  services = {
-    nix-daemon.enable = true;
-  };
+  system.primaryUser = "weijiehuang";
 
   # does not actually install homebrew - just manages it
   # need to install homebrew manually first
@@ -84,7 +81,7 @@
     packages = with pkgs; [
       noto-fonts
       noto-fonts-cjk-sans
-      noto-fonts-emoji
+      noto-fonts-color-emoji
       liberation_ttf
       fira-code
       fira-code-symbols
@@ -100,6 +97,11 @@
       nerd-fonts.iosevka-term-slab
       nerd-fonts.jetbrains-mono
     ];
+  };
+
+  users.users.weijiehuang = {
+    name = "weijiehuang";
+    home = "/Users/weijiehuang";
   };
 
   # Used for backwards compatibility, please read the changelog before changing.

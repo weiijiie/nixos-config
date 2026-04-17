@@ -18,7 +18,7 @@
       if [ -e /etc/NIXOS ]; then
         exec sudo nixos-rebuild switch --flake "$FLAKE#$HOST" "$@"
       elif [ "$(uname -s)" = "Darwin" ]; then
-        exec darwin-rebuild switch --flake "$FLAKE#$HOST" "$@"
+        exec sudo darwin-rebuild switch --flake "$FLAKE#$HOST" "$@"
       else
         exec home-manager switch --flake "$FLAKE#$USER_NAME@$HOST" "$@"
       fi
