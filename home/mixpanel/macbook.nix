@@ -1,6 +1,9 @@
 { pkgs, ... }:
 {
-  home.packages = [ pkgs.bazel ];
+  home.packages = with pkgs; [
+    bazel
+    google-cloud-sdk
+  ];
 
   programs = {
     git.settings.user = {
