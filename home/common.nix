@@ -8,6 +8,7 @@
 {
   imports = [
     ./claude-code.nix
+    ./codex.nix
     ./git.nix
     ./zellij.nix
     ./zsh.nix
