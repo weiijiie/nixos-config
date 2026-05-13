@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   outputs,
   lib,
   pkgs,
@@ -7,6 +8,7 @@
 }:
 {
   imports = [
+    inputs.hunk.homeManagerModules.default
     ./claude-code.nix
     ./codex.nix
     ./git.nix
@@ -179,6 +181,18 @@
       };
 
       gpg.enable = true;
+
+      hunk = {
+        enable = true;
+        package = inputs.hunk.packages.${pkgs.stdenv.hostPlatform.system}.hunk;
+        enableGitIntegration = false;
+        settings = {
+          theme = "midnight";
+          mode = "auto";
+          line_numbers = true;
+          exclude_untracked = true;
+        };
+      };
     };
 
     # Nicely reload system units when changing configs

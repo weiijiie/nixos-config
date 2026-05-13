@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   outputs,
   lib,
   pkgs,
@@ -7,6 +8,8 @@
 }:
 let
   skillDirs = lib.filterAttrs (_: type: type == "directory") (builtins.readDir ../skills);
+
+  hunkPkg = inputs.hunk.packages.${pkgs.stdenv.hostPlatform.system}.hunk;
 
   zellaude-hook = pkgs.fetchurl {
     url = "https://raw.githubusercontent.com/ishefi/zellaude/v0.4.1/scripts/zellaude-hook.sh";
@@ -51,7 +54,6 @@ let
       "superpowers@claude-plugins-official" = true;
       "skill-creator@claude-plugins-official" = true;
       "github@claude-plugins-official" = true;
-      "frontend-design@claude-plugins-official" = true;
       "ast-grep@ast-grep-marketplace" = true;
     };
 
@@ -167,13 +169,19 @@ in
       };
     };
 
-    home.file = lib.mapAttrs' (name: _: {
-      name = ".claude/skills/${name}";
-      value = {
-        source = ../skills/${name};
-        recursive = true;
+    home.file =
+      lib.mapAttrs' (name: _: {
+        name = ".claude/skills/${name}";
+        value = {
+          source = ../skills/${name};
+          recursive = true;
+        };
+      }) skillDirs
+      // {
+        ".claude/skills/hunk-review/SKILL.md" = {
+          source = "${hunkPkg}/skills/hunk-review/SKILL.md";
+        };
       };
-    }) skillDirs;
 
     programs.claude-code = {
       enable = true;

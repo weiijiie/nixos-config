@@ -2,6 +2,7 @@
 # configured in the devbox during provisioning
 {
   config,
+  inputs,
   outputs,
   lib,
   pkgs,
