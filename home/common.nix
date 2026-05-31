@@ -50,6 +50,7 @@
         outputs.packages.${pkgs.stdenv.hostPlatform.system}.nvim
         pkgs.custom.claude-code-transcripts
         pkgs.llm-agents.rtk
+        pkgs.llm-agents.hermes-agent
       ]
       ++ (builtins.attrValues pkgs.scripts);
   };
