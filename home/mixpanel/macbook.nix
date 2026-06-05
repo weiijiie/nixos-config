@@ -58,15 +58,6 @@
           user = "weijie_huang";
         };
 
-        devbox-old = {
-          hostname = "devbox-5372";
-          user = "weijie_huang";
-          forwardAgent = true;
-          extraOptions = {
-            ProxyJump = "us-west2-a-oslogin-bastion";
-          };
-        };
-
         devbox = {
           hostname = "devbox-7700";
           user = "weijie_huang";
@@ -80,7 +71,7 @@
             }
           ];
           extraOptions = {
-            ProxyJump = "us-west2-a-oslogin-bastion";
+            ProxyCommand = "gcloud compute start-iap-tunnel %h %p --listen-on-stdin --project=mixpanel-dev-1 --zone=us-west2-a --quiet";
           };
         };
 
@@ -89,7 +80,7 @@
           user = "weijie_huang";
           forwardAgent = true;
           extraOptions = {
-            ProxyJump = "us-west2-a-oslogin-bastion";
+            ProxyCommand = "gcloud compute start-iap-tunnel %h %p --listen-on-stdin --project=mixpanel-dev-1 --zone=us-west2-a --quiet";
           };
         };
 
@@ -98,14 +89,13 @@
           user = "weijie_huang";
           forwardAgent = true;
           extraOptions = {
-            ProxyJump = "us-central1-b-oslogin-bastion";
+            ProxyCommand = "gcloud compute start-iap-tunnel %h %p --listen-on-stdin --project=mixpanel-dev-1 --zone=us-central1-b --quiet";
           };
         };
       };
     };
 
     zsh.shellAliases = {
-      devbox-old = "ssh -t devbox-old 'cd analytics && zsh -l'";
       devbox = "ssh -t devbox 'cd ~/analytics && zsh -l'";
       devbox-spare = "ssh -t devbox-spare 'cd ~/analytics && zsh -l'";
       devbox-arm = "ssh -t devbox-arm 'cd ~/analytics && zsh -l'";
