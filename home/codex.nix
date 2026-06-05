@@ -32,7 +32,7 @@ in
       enable = true;
       package = pkgs.llm-agents.codex;
       settings = config.codexConfig.settings;
-      custom-instructions = rtkAwareness;
+      context = rtkAwareness;
     };
   };
 }

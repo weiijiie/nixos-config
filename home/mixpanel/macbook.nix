@@ -15,82 +15,69 @@
       enable = true;
       enableDefaultConfig = false;
 
-      extraConfig = ''
-        IgnoreUnknown UseKeychain
-        UseKeychain yes
-      '';
-
-      matchBlocks = {
+      settings = {
         "*" = {
-          compression = true;
-          extraOptions = {
-            AddKeysToAgent = "yes";
-            ControlPath = "~/.ssh/ctrl/%C";
-            ControlMaster = "auto";
-            ControlPersist = "yes";
-            ServerAliveInterval = "5";
-            ServerAliveCountMax = "2";
-          };
+          IgnoreUnknown = "UseKeychain";
+          UseKeychain = "yes";
+          Compression = true;
+          AddKeysToAgent = "yes";
+          ControlPath = "~/.ssh/ctrl/%C";
+          ControlMaster = "auto";
+          ControlPersist = "yes";
+          ServerAliveInterval = 5;
+          ServerAliveCountMax = 2;
         };
 
         "us-central1-b-oslogin-bastion" = {
-          hostname = "central-oslogin-v2-bastion.mixpanel.org";
-          user = "weijie_huang";
+          HostName = "central-oslogin-v2-bastion.mixpanel.org";
+          User = "weijie_huang";
         };
 
         "us-east4-a-oslogin-bastion" = {
-          hostname = "east-oslogin-v2-bastion.mixpanel.org";
-          user = "weijie_huang";
+          HostName = "east-oslogin-v2-bastion.mixpanel.org";
+          User = "weijie_huang";
         };
 
         "europe-west4-a-oslogin-bastion" = {
-          hostname = "eu-oslogin-v2-bastion.mixpanel.org";
-          user = "weijie_huang";
+          HostName = "eu-oslogin-v2-bastion.mixpanel.org";
+          User = "weijie_huang";
         };
 
         "asia-south1-a-oslogin-bastion" = {
-          hostname = "in-dev-bastion.mixpanel.org";
-          user = "weijie_huang";
+          HostName = "in-dev-bastion.mixpanel.org";
+          User = "weijie_huang";
         };
 
         "us-west2-a-oslogin-bastion" = {
-          hostname = "west-oslogin-v2-bastion.mixpanel.org";
-          user = "weijie_huang";
+          HostName = "west-oslogin-v2-bastion.mixpanel.org";
+          User = "weijie_huang";
         };
 
         devbox = {
-          hostname = "devbox-7700";
-          user = "weijie_huang";
-          forwardAgent = true;
-          localForwards = [
-            {
-              bind.address = "localhost";
-              bind.port = 8080;
-              host.address = "localhost";
-              host.port = 8080;
-            }
-          ];
-          extraOptions = {
-            ProxyCommand = "gcloud compute start-iap-tunnel %h %p --listen-on-stdin --project=mixpanel-dev-1 --zone=us-west2-a --quiet";
+          HostName = "devbox-7700";
+          User = "weijie_huang";
+          ForwardAgent = true;
+          LocalForward = {
+            bind.address = "localhost";
+            bind.port = 8080;
+            host.address = "localhost";
+            host.port = 8080;
           };
+          ProxyCommand = "gcloud compute start-iap-tunnel %h %p --listen-on-stdin --project=mixpanel-dev-1 --zone=us-west2-a --quiet";
         };
 
         devbox-spare = {
-          hostname = "devbox-9983";
-          user = "weijie_huang";
-          forwardAgent = true;
-          extraOptions = {
-            ProxyCommand = "gcloud compute start-iap-tunnel %h %p --listen-on-stdin --project=mixpanel-dev-1 --zone=us-west2-a --quiet";
-          };
+          HostName = "devbox-9983";
+          User = "weijie_huang";
+          ForwardAgent = true;
+          ProxyCommand = "gcloud compute start-iap-tunnel %h %p --listen-on-stdin --project=mixpanel-dev-1 --zone=us-west2-a --quiet";
         };
 
         devbox-arm = {
-          hostname = "devbox-5924";
-          user = "weijie_huang";
-          forwardAgent = true;
-          extraOptions = {
-            ProxyCommand = "gcloud compute start-iap-tunnel %h %p --listen-on-stdin --project=mixpanel-dev-1 --zone=us-central1-b --quiet";
-          };
+          HostName = "devbox-5924";
+          User = "weijie_huang";
+          ForwardAgent = true;
+          ProxyCommand = "gcloud compute start-iap-tunnel %h %p --listen-on-stdin --project=mixpanel-dev-1 --zone=us-central1-b --quiet";
         };
       };
     };

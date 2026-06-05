@@ -6,7 +6,6 @@
   pkg-config,
   openssl,
   stdenv,
-  darwin,
 }:
 rustPlatform.buildRustPackage rec {
   pname = "code2prompt";
@@ -28,14 +27,9 @@ rustPlatform.buildRustPackage rec {
     pkg-config
   ];
 
-  buildInputs =
-    [
-      openssl
-    ]
-    ++ lib.optionals stdenv.hostPlatform.isDarwin [
-      darwin.apple_sdk_frameworks.Security
-      darwin.apple_sdk_frameworks.AppKit
-    ];
+  buildInputs = [
+    openssl
+  ];
 
   meta = {
     description = "A CLI tool that converts your codebase into a single LLM prompt with a source tree, prompt templating, and token counting";
