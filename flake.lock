@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "agent-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1780609817,
+        "narHash": "sha256-3VnmMSI+iC46/lZIVaTYMB1jfNx4Dwoqa4koOwFrWpw=",
+        "owner": "openclaw",
+        "repo": "agent-skills",
+        "rev": "9e9443b6462aee50bb5fc790c63b6678735cba20",
+        "type": "github"
+      },
+      "original": {
+        "owner": "openclaw",
+        "repo": "agent-skills",
+        "type": "github"
+      }
+    },
     "blueprint": {
       "inputs": {
         "nixpkgs": [
@@ -654,6 +670,7 @@
     },
     "root": {
       "inputs": {
+        "agent-skills": "agent-skills",
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
         "hunk": "hunk",

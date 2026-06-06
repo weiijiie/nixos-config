@@ -17,6 +17,13 @@ python3Packages.buildPythonApplication {
 
   build-system = [ python3Packages.uv-build ];
 
+  # Upstream pins uv_build<0.10.0, but nixpkgs ships 0.10.0. Relax the upper
+  # bound so the build sees the available backend.
+  postPatch = ''
+    substituteInPlace pyproject.toml \
+      --replace-fail 'uv_build>=0.9.7,<0.10.0' 'uv_build>=0.9.7'
+  '';
+
   dependencies = with python3Packages; [
     click
     click-default-group
