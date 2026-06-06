@@ -40,6 +40,11 @@
       url = "github:hraban/mac-app-util";
     };
 
+    agent-skills = {
+      url = "github:openclaw/agent-skills";
+      flake = false;
+    };
+
     hunk = {
       url = "github:modem-dev/hunk";
       inputs.nixpkgs.follows = "nixpkgs";
