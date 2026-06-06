@@ -26,7 +26,6 @@
       nixd
       nixfmt
       cachix
-      custom.code2prompt
       custom.claude-code-transcripts
       ast-grep
       mdcat
