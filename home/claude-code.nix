@@ -8,7 +8,9 @@
 }:
 let
   skillDirs = lib.filterAttrs (_: type: type == "directory") (builtins.readDir ../skills);
-  openclawSkillDirs = lib.filterAttrs (_: type: type == "directory") (builtins.readDir "${inputs.agent-skills}/skills");
+  openclawSkillDirs = lib.filterAttrs (_: type: type == "directory") (
+    builtins.readDir "${inputs.agent-skills}/skills"
+  );
 
   hunkPkg = inputs.hunk.packages.${pkgs.stdenv.hostPlatform.system}.hunk;
 
@@ -194,6 +196,7 @@ in
     programs.claude-code = {
       enable = true;
       package = pkgs.llm-agents.claude-code;
+      rulesDir = ./claude-rules;
       mcpServers = config.claudeCodeConfig.mcpServers;
       settings = config.claudeCodeConfig.settings;
     };
