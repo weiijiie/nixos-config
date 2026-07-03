@@ -499,7 +499,9 @@ Decide per cluster:
 - new rule in the tier-2 store
 - new or updated skill for niche or bulky guidance (language- or
   purpose-specific, e.g. perf patterns), plus a one-line pointer in an
-  always-injected rules file so it loads reliably
+  always-injected rules file so it loads reliably; author or revise the
+  skill with the skill-creator skill when it is available — it exists to
+  make skills that trigger and perform well
 - environment entries: prefer rephrasing into the portable form that is
   correct everywhere, keeping the machine-specific origin as evidence
   only; if irreducibly host-specific and tier 2 is host-aware (a nix repo

@@ -196,7 +196,8 @@ store needs clean context).
    - new rule in the tier-2 store,
    - new or updated skill for niche/bulky guidance (language- or
      purpose-specific, e.g. perf patterns), backed by a one-line pointer in
-     an always-injected rule so loading is near-deterministic,
+     an always-injected rule so loading is near-deterministic; skill
+     authoring goes through the skill-creator skill when available,
    - for `environment` entries: prefer rephrasing into the portable form
      that is correct everywhere (e.g. "use `head -n N`"), keeping the
      machine-specific origin as WAL evidence; a rule that is irreducibly
