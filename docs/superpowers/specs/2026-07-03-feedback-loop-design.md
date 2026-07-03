@@ -52,6 +52,13 @@ tiers:
 ```
 
 The global instance's config points tier 2 at nixos-config and has no tier 3.
+It also has no staged tier: staging exists to validate artifacts in the
+author's sessions before a wider audience inherits them, and the global
+loop's audience is only the author — staged and committed rules would be
+injected identically, and a bad rule is self-correcting (corrections against
+it are captured as feedback). If synthesis rewrites ever prove risky enough
+to want a soak anyway, adding a staged tier to the global config is a data
+change, not a skill change.
 First invocation in an environment with no config scaffolds one
 interactively. Skill behavior differences per destination type are prose
 paragraphs in the skill, selected by the config — the capture format and
