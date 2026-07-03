@@ -336,6 +336,18 @@ exercises indirection, so its audits are the baseline, not the verdict.
 Corrections captured about the feedback system's own execution count as
 resolution errors.
 
+**Scripted mechanics.** The capture pipeline's mechanical steps — ID
+assignment, block formatting, threshold arithmetic, the structural half
+of the audit — can be encoded as scripts bundled with the skills instead
+of prose the model re-derives each run. Judgment (clustering, rule text,
+dedupe and routing decisions) stays with the model. `wal-append.sh` in
+give-feedback establishes the pattern: it owns ID assignment and
+byte-level formatting, and rejects `kind: domain` so wrong-instance
+entries are impossible at write time. **Decision gate:** script further
+steps (a threshold calculator, a wal-lint for the audit's structural
+checks) when synthesis audits report recurring process errors of the
+mechanical kind — not pre-emptively.
+
 ## Testing
 
 - Dry-run `/give-feedback` with synthetic feedback: verify fix-first

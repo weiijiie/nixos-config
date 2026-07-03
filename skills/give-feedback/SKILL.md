@@ -71,11 +71,26 @@ Routing: domain-kind clusters do not go to this WAL — store them in the
 session's project memory if available, otherwise tell the user. Everything
 else goes to the global instance.
 
-Append one block per cluster to `~/.claude/feedback/global/wal.md`
-(create with a `# Feedback WAL` first line if missing). The WAL is
-append-only: never edit or merge existing blocks. If an existing entry
-covers similar ground, reference it in relates-to instead. ID = next
-integer after the highest R### in the file.
+Append one block per cluster with the bundled script (path relative to
+this skill's directory); it owns ID assignment, the created date, and
+formatting, and prints the assigned R### ID:
+
+    scripts/wal-append.sh --title "<short title>" --kind <kind> \
+      --scope "<scope hint>" --rule "<the 1–2 line candidate rule>" \
+      --instance '<YYYY-MM-DD> <repo>: "<user words, condensed>" — <what the fix changed, one line>'
+
+The WAL is append-only: never edit or merge existing blocks by hand. If
+an existing entry covers similar ground, link it with
+`--relates-to "R012, R013"` instead. Repeat `--instance` for multiple
+occurrences in one cluster.
+
+Pass `--active` when the rule is generalizable and no equivalent line
+already exists in `~/.claude/feedback/global/active-rules.md` — that also
+appends the one-line `- R###: <rule>` to the injected file. Evidence-only
+entries (plausible one-offs, violations of already-committed rules) omit
+it: active-rules.md is injected into every session and every token costs.
+
+The resulting formats, which /synthesize-rules audits against:
 
     ## R014 — <short title>
     created: <YYYY-MM-DD> | kind: <kind> | scope: <scope hint>
@@ -85,15 +100,8 @@ integer after the highest R### in the file.
     - <YYYY-MM-DD> <repo or project>: "<user's words, condensed>" — <what
       the fix changed, one line>
 
-Then update `~/.claude/feedback/global/active-rules.md` (create with
-exactly this header line if missing):
-
     # Provisional rules (from recent feedback; obey like committed rules)
     - R014: <rule text>
-
-One line per generalizable rule, rule text only — this file is injected
-into every session and every token costs. Skip the line if an equivalent
-one already exists; the WAL evidence is enough.
 
 ## Threshold check
 
