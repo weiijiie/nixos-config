@@ -51,6 +51,16 @@ tiers:
   3. analytics repo, via manage-skills PR
 ```
 
+When a capture or synthesis run finds no config for an instance it needs,
+`/give-feedback` scaffolds one through a short interactive wizard: confirm
+the scope (global, or the project resolved from cwd), pick tier
+destinations from detected candidates (a rules dir managed in a dotfiles
+repo, `~/.claude/CLAUDE.md` sections, a team repo + promotion vehicle),
+and check injection wiring — if no SessionStart hook covers the instance's
+files, print the exact one-liner or settings snippet to add. The wizard
+writes `config.md` and never runs again for that instance unless the file
+is deleted.
+
 The global instance's config points tier 2 at nixos-config and has no tier 3.
 It also has no staged tier: staging exists to validate artifacts in the
 author's sessions before a wider audience inherits them, and the global
@@ -112,11 +122,27 @@ instances:
   fix removed 6 redundant prefixes in lqs/executor
 ```
 
-- `kind` is one of `code-style | workflow | environment | domain` and drives
-  loop routing at capture: `domain` entries go to the current project's loop,
-  everything else to the global loop. Keeping domain knowledge out of the
-  global loop is a hard rule — otherwise global rules bloat with
-  project-specific facts paid for in every unrelated session.
+- `kind` is one of:
+  - `code-style` — how the artifact should look: naming, comments,
+    structure, error handling, test shape.
+  - `workflow` — how the agent goes about work: process, verification
+    habits, tool choice, git conventions, communication.
+  - `environment` — constraints of the user's machines and toolchain that
+    make commands succeed or fail, as opposed to preferences.
+  - `domain` — knowledge about a specific codebase or system, true no
+    matter who is coding: architecture, data shapes, subsystem gotchas.
+
+  `kind` drives loop routing at capture: `domain` entries go to the current
+  project's loop, everything else to the global loop. The only boundary that
+  changes behavior is domain vs. the rest (litmus: a fact about a codebase,
+  not about how the agent works); misclassification among the other three is
+  harmless since they share a WAL and synthesis re-reads the evidence.
+  Keeping domain knowledge out of the global loop is a hard rule — otherwise
+  global rules bloat with project-specific facts paid for in every unrelated
+  session.
+  Kind describes a correction's origin, not its reach: an `environment`
+  correction may be machine-specific in origin yet still yield a global rule
+  when phrased portably (see synthesis).
 - `scope` is a hint (general / language / purpose); the destination decision
   is made at synthesis.
 - Entries judged one-off at capture time are still appended (evidence-only,
@@ -139,9 +165,11 @@ instances:
    A correction that contradicts a *staged* rule is recorded as negative
    evidence against it (this is the soak signal). Judge generalizability:
    one-offs become evidence-only entries.
-5. **Route and write** — pick the loop instance by `kind` (domain → current
-   project's loop; else global), append to that instance's `wal.md`, update
-   its `active-rules.md` for non-duplicate generalizable rules.
+5. **Route and write** — the global instance is always in play; the project
+   instance is resolved from the cwd, mirroring the injection hook's lookup.
+   Pick per cluster by `kind` (domain → project loop; else global) — one
+   invocation may write to both WALs. Append to the instance's `wal.md`,
+   update its `active-rules.md` for non-duplicate generalizable rules.
 6. **Threshold check** — per instance: suggest `/synthesize-rules` in a fresh
    session when the WAL has ≥ 10 entries, or the oldest entry is ≥ 14 days
    old and there are more than 2 entries.
@@ -155,33 +183,46 @@ store needs clean context).
 1. Read the instance's config, `wal.md`, `active-rules.md`, `staged-rules.md`
    if present, and the tier-2 store (for global: all of `home/claude-rules/`
    and pointer-backed skills).
-2. **Cluster and route** each entry, weighted by recurrence (via `relates-to`
+2. **Audit the WAL** and report a defect rate: entries in the wrong
+   instance, missing `kind`/`scope`, non-monotonic IDs, `active-rules.md`
+   lines without a backing entry or vice versa, undeduplicated near-identical
+   lines. Classify each defect as a resolution error (capture failed to
+   follow config indirection — wrong path, wrong instance, wrong
+   destination behavior) or a process error (skipped step, e.g. missed
+   dedupe). This feeds the binding-time gate in Alternatives.
+3. **Cluster and route** each entry, weighted by recurrence (via `relates-to`
    links and its own reading):
    - merge into an existing tier-2 rule,
    - new rule in the tier-2 store,
    - new or updated skill for niche/bulky guidance (language- or
      purpose-specific, e.g. perf patterns), backed by a one-line pointer in
      an always-injected rule so loading is near-deterministic,
+   - for `environment` entries: prefer rephrasing into the portable form
+     that is correct everywhere (e.g. "use `head -n N`"), keeping the
+     machine-specific origin as WAL evidence; a rule that is irreducibly
+     host-specific routes to a host-scoped rules file (tier 2 here is a nix
+     repo that builds per-host configurations, so this is a destination
+     choice, not a new loop),
    - carry forward in the WAL (insufficient evidence yet),
    - drop (stale one-off) — dropped entries are listed for the user, never
      silently discarded.
-3. **Deep evaluation** of every promoted candidate: sample real code and
+4. **Deep evaluation** of every promoted candidate: sample real code and
    recent diffs from the repos the rule targets; verify the rule would not
    flag reasonable existing code (false-positive test) and that the WAL
    instances genuinely support the generalization rather than one incident
    phrased twice.
-4. **Rewrite tier 2 holistically** — merge, re-rank, tighten, prune.
+5. **Rewrite tier 2 holistically** — merge, re-rank, tighten, prune.
    Explicitly not append-only. For the global loop tier 2 is the final
    destination (present git diff, commit on approval, remind the user to run
    `home-manager switch`). For loops with a tier 3, output lands in the
    staged tier (`staged-rules.md`, injected for the author's sessions;
    draft skills in claude-sandbox) and starts its soak.
-5. **Promotion check** — for staged artifacts from previous runs: if soaked
+6. **Promotion check** — for staged artifacts from previous runs: if soaked
    (≥ 2 weeks live with no negative evidence captured against them), suggest
    promotion. Promotion is always user-initiated; it produces the tier-3
    artifact (PR via `manage-skills`, or a CLAUDE.md section change). A staged
    artifact whose promotion PR is not yet merged is carry-forward, not done.
-6. **Compact the WAL** — remove synthesized and dropped entries, keep
+7. **Compact the WAL** — remove synthesized and dropped entries, keep
    carried-forward entries with their history, shrink `active-rules.md`.
    This is the only operation allowed to rewrite `wal.md`.
 
@@ -261,19 +302,38 @@ feedback-loop skills themselves be promoted to the team via `manage-skills`.
 - Soak validation is passive (absence of corrections), so rarely-exercised
   staged rules can soak to promotion without real evidence. The user's
   promotion review is the backstop.
+- Host-scoped routing for irreducibly machine-specific rules depends on
+  tier 2 being host-aware. nixos-config is; a teammate whose tier 2 is
+  `~/.claude/CLAUDE.md` has no host axis, so their host-specific rules stay
+  global and slightly over-broad.
 
 ## Alternatives considered
 
-**Compile-time templating.** Instead of one config-driven skill, a wizard
-skill interactively collects an environment's answers (scopes, destinations,
-wiring) and generates a concrete, specialized feedback-loop skill per
-environment. Advantage: each generated skill is simple and literal — no
-config indirection for the executing agent to follow, which tends to improve
-prose-skill adherence. Disadvantage: N generated copies drift, and engine
-improvements don't propagate without regeneration. Deferred, not rejected;
-the approaches compose (a wizard could generate the *config* for the
-runtime-config design, keeping one engine). Revisit if config-driven skill
-adherence proves unreliable in practice.
+**Compile-time templating.** Instead of the executing skill resolving
+`config.md` at runtime, the instance answers are baked into literal skill
+text ahead of time. The two designs share a source of truth (engine/template
++ answers); the difference is only binding time, so migration between them
+is mechanical. Advantage: capture runs mid-session inside unrelated work,
+and a skill with paths and instances baked in as a literal table has no
+config indirection to misresolve — the best adherence on the hot path.
+Since skill names are unique per user, generation is per-environment (one
+skill listing all of that machine's instances), not per-instance.
+
+The concrete hybrid, if adopted: the template lives in nixos-config,
+instance parameters live in nix, and the rendered SKILL.md is a build
+artifact regenerated on every home-manager switch — drift is impossible by
+construction. For teammates without nix, an interactive wizard renders the
+template and saves its answers file, so regeneration after a template
+update is one command rather than a re-interview; their copies drift only
+between regenerations. Costs: template authoring is clumsier than a plain
+SKILL.md, some nix plumbing, and a per-variant sanity pass.
+
+**Decision gate:** ship runtime-config; switch to the hybrid if the
+resolution-error rate from the synthesis WAL audit (step 2) remains
+material after a few phase 2 cycles — phase 1's single instance barely
+exercises indirection, so its audits are the baseline, not the verdict.
+Corrections captured about the feedback system's own execution count as
+resolution errors.
 
 ## Testing
 
@@ -284,7 +344,8 @@ adherence proves unreliable in practice.
 - Verify the SessionStart hook: absent files → no output; each combination
   of global/project/staged files present → valid JSON, content visible in a
   new session, correct project matching from cwd.
-- Dry-run `/synthesize-rules` against a fabricated WAL: verify routing
+- Dry-run `/synthesize-rules` against a fabricated WAL: verify the audit
+  flags and classifies deliberately planted defects, routing
   categories, dropped entries reported, compaction preserves carried-forward
   history, staged output for tier-3 loops vs. direct commit for the global
   loop, soak/promotion suggestions, and that pending-PR artifacts are
