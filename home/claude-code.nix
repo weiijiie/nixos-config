@@ -14,6 +14,40 @@ let
 
   hunkPkg = inputs.hunk.packages.${pkgs.stdenv.hostPlatform.system}.hunk;
 
+  feedback-inject = pkgs.writeShellApplication {
+    name = "claude-feedback-inject";
+    runtimeInputs = [ pkgs.jq ];
+    text = ''
+      input=$(cat)
+      cwd=$(jq -r '.cwd // empty' <<<"$input")
+
+      feedback_dir="$HOME/.claude/feedback"
+      files=("$feedback_dir/global/active-rules.md")
+
+      if [ -n "$cwd" ]; then
+        slug=$(printf '%s' "$cwd" | sed 's|[^A-Za-z0-9]|-|g')
+        files+=(
+          "$feedback_dir/projects/$slug/active-rules.md"
+          "$feedback_dir/projects/$slug/staged-rules.md"
+        )
+      fi
+
+      content=""
+      for f in "''${files[@]}"; do
+        if [ -s "$f" ]; then
+          content="$content$(cat "$f")"$'\n\n'
+        fi
+      done
+
+      if [ -z "$content" ]; then
+        exit 0
+      fi
+
+      jq -n --arg c "$content" \
+        '{hookSpecificOutput: {hookEventName: "SessionStart", additionalContext: $c}}'
+    '';
+  };
+
   zellaude-hook = pkgs.fetchurl {
     url = "https://raw.githubusercontent.com/ishefi/zellaude/v0.4.1/scripts/zellaude-hook.sh";
     hash = "sha256-o/PQW44U89G56P518aX9Dcr89FcmGDoz20XDpg9c+n0=";
@@ -89,7 +123,18 @@ let
       Notification = [ mkZellaudeHook ];
       Stop = [ mkZellaudeHook ];
       SubagentStop = [ mkZellaudeHook ];
-      SessionStart = [ mkZellaudeHook ];
+      SessionStart = [
+        {
+          matcher = "startup|clear|compact";
+          hooks = [
+            {
+              type = "command";
+              command = "${feedback-inject}/bin/claude-feedback-inject";
+            }
+          ];
+        }
+        mkZellaudeHook
+      ];
       SessionEnd = [ mkZellaudeHook ];
     };
   };
