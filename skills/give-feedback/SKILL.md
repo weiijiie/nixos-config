@@ -106,7 +106,7 @@ The resulting formats, which /synthesize-rules audits against:
 ## Threshold check
 
 Count `## R` entries and read the oldest `created:` date in `wal.md`. If
-entries >= 10, or the oldest is >= 14 days old and entries > 2, tell the
+entries >= 20, or the oldest is >= 14 days old and entries > 2, tell the
 user: "The feedback WAL is ripe (<N> entries, oldest <date>) — run
 /synthesize-rules in a fresh session."
 

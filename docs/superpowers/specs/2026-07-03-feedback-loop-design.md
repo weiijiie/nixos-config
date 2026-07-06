@@ -171,7 +171,7 @@ instances:
    invocation may write to both WALs. Append to the instance's `wal.md`,
    update its `active-rules.md` for non-duplicate generalizable rules.
 6. **Threshold check** — per instance: suggest `/synthesize-rules` in a fresh
-   session when the WAL has ≥ 10 entries, or the oldest entry is ≥ 14 days
+   session when the WAL has ≥ 20 entries, or the oldest entry is ≥ 14 days
    old and there are more than 2 entries.
 7. **Report** — one-line summary of what was fixed and what was logged where.
 
