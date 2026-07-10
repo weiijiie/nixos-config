@@ -80,6 +80,40 @@
 
   programs.git.ignores = [ "/go/.editorconfig" ];
 
+  # fff-mcp spawns one stdio server per `claude` process and does not exit when
+  # its parent dies during headless/eval runs — the orphan (reparented to init)
+  # keeps a 250ms filesystem watcher alive and, in a large repo, grows an
+  # unbounded in-memory file cache. Left unchecked they accumulate until they
+  # exhaust RAM. Reap any fff-mcp whose parent is gone.
+  systemd.user.services.fff-mcp-reaper = {
+    Unit.Description = "Reap orphaned fff-mcp processes (parent claude exited)";
+    Service = {
+      Type = "oneshot";
+      ExecStart = toString (
+        pkgs.writeShellScript "fff-mcp-reaper" ''
+          set -u
+          for pid in $(${pkgs.procps}/bin/pgrep -x fff-mcp); do
+            set -- $(${pkgs.procps}/bin/ps -o ppid=,etimes= -p "$pid" 2>/dev/null)
+            # PPID 1 means the process was reparented to init: its claude is dead.
+            [ "''${1:-}" = "1" ] || continue
+            # Skip freshly forked procs still in the parent-to-init reparent window.
+            [ "''${2:-0}" -ge 60 ] || continue
+            kill "$pid" 2>/dev/null || true
+          done
+        ''
+      );
+    };
+  };
+
+  systemd.user.timers.fff-mcp-reaper = {
+    Unit.Description = "Periodically reap orphaned fff-mcp processes";
+    Timer = {
+      OnBootSec = "2min";
+      OnUnitActiveSec = "2min";
+    };
+    Install.WantedBy = [ "timers.target" ];
+  };
+
   programs.zsh = {
     initContent = lib.mkAfter ''
       # devbox setup
