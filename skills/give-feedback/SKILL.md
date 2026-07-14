@@ -119,19 +119,30 @@ threshold notice.
 
 Runs when `~/.claude/feedback/global/config.md` is missing:
 
-1. Confirm scope with the user: global — applies to them across all repos.
-2. Ask where their curated rules live (tier 2): a rules directory managed
-   in a dotfiles repo (ask for the path), or sections in
-   `~/.claude/CLAUDE.md`.
-3. Write `~/.claude/feedback/global/config.md`:
+1.  Confirm scope with the user: global — applies to them across all repos.
+2.  Ask where their curated rules live (tier 2): a rules directory managed
+    in a dotfiles repo (ask for the path), or sections in
+    `~/.claude/CLAUDE.md`.
+3.  If tier 2 is a repo-managed rules directory, work out its promotion
+    protocol — how an edited rule reaches a live session — by reading the
+    repo, never by assuming:
+    - How files deploy: inspect the config that installs them (e.g. a
+      home-manager module). Record whether the whole directory is enumerated
+      or each file is listed individually. If you can't tell, write
+      "deployment wiring unverified" rather than a plausible-sounding claim.
+    - The repo's default branch, and whether promotion commits stay local
+      for the user to review and deploy, or may be pushed.
+4.  Write `~/.claude/feedback/global/config.md`: the header below, plus a
+    "Tier 2 promotion protocol" section recording what step 3 established
+    (omit that section when tier 2 is `~/.claude/CLAUDE.md`).
 
-       # Feedback loop config — global instance
-       scope: global
-       wal: ~/.claude/feedback/global/
-       tiers:
-         1. WAL + active-rules.md, injected at session start
-         2. <their answer> (curated; final tier)
+        # Feedback loop config — global instance
+        scope: global
+        wal: ~/.claude/feedback/global/
+        tiers:
+          1. WAL + active-rules.md, injected at session start
+          2. <their answer> (curated; final tier)
 
-4. Check wiring: if no SessionStart hook in their Claude settings reads
-   `~/.claude/feedback/`, print the hook command or settings snippet they
-   need and where to add it. Do not edit their settings yourself.
+5.  Check wiring: if no SessionStart hook in their Claude settings reads
+    `~/.claude/feedback/`, print the hook command or settings snippet they
+    need and where to add it. Do not edit their settings yourself.
