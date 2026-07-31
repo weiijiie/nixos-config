@@ -77,6 +77,9 @@ let
     model = "opus";
     effortLevel = "high";
 
+    # Retain session transcripts for 60 days (default is 30).
+    cleanupPeriodDays = 60;
+
     env = {
       CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
     };
