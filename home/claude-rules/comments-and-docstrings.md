@@ -11,24 +11,29 @@ of the current change.
   error-severity choices, gotchas (e.g. "tinyint, not bool"). Don't restate
   what the code does, don't justify the design to an imagined skeptic, and
   don't editorialize ("this is the test that earns its keep").
-- State what a thing is or does — its essence — not what it's used for, who
+- State what a thing is or does, its essence: not what it's used for, who
   calls it, or where related work happens. Don't explain what the language
   already guarantees, don't restate the signature, and don't comment a function
   short enough to just read.
+- Frame a doc comment around the semantic model: what the thing means and how
+  it behaves for a caller, rather than the mechanics that realize it (wire
+  format, storage layout, which components get wired to which). Keep a
+  mechanical detail only where the reader needs it to use the thing
+  correctly.
 - Describe behavior generally; don't enumerate specific instances of it. Drop
   redundant qualifiers.
 - Anchor claims to code in scope: name only identifiers that appear nearby,
   not internals reached indirectly, and don't volunteer general platform
   facts.
 - Put a rationale comment immediately above the statement it justifies, and
-  behavior rationale on the function implementing the behavior — cause before
-  consequence — not on the caller's doc comment.
-- Each fact lives in exactly one place — the symbol that owns it. Module
+  behavior rationale on the function implementing the behavior (cause before
+  consequence), not on the caller's doc comment.
+- Each fact lives in exactly one place, the symbol that owns it. Module
   docstrings: ≤4 lines of what + entrypoint pointer; don't duplicate
   per-symbol docstrings or write "Design:" sections (that's the PR
   description's job).
 - After any rename or refactor, sweep comments/docstrings for stale names
-  and dead references — comments are code and can be wrong.
+  and dead references; comments are code and can be wrong.
 - No markdown emphasis (**bold**) in docstrings; no comments that only make
   sense while the diff is open.
 
@@ -39,7 +44,7 @@ it isn't.
 
 ## Nice to have
 
-Preferences for when a comment is warranted, not blanket requirements — apply
+Preferences for when a comment is warranted, not blanket requirements; apply
 judgment per case.
 
 - Around a lesser-known stdlib/library call, one line stating what the

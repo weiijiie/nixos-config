@@ -2,9 +2,15 @@
 
 ## Naming
 
+These cover every place a name or a term appears: identifiers, CLI flags and
+tool names, comments, and prose in docs.
+
 - Plain words over jargon; don't coin terms the team doesn't already use.
   If a new term is unavoidable, define it once where it's introduced and
   name the symbols built on it consistently.
+- Plain language means avoiding jargon, not avoiding accurate common
+  vocabulary. Prefer the field's standard term (nodes, edges, graph) over a
+  physical metaphor invented to sound simpler (dots, lines, stroke).
 - One term per concept; don't drift between synonyms.
 - Don't bake provenance or call-site detail into a name when the plain noun
   suffices.
@@ -43,7 +49,7 @@ pre-existing files just to comply.
 - Table-driven for structurally similar cases.
 - No duplicate coverage.
 - Don't test tautological code (e.g. a switch-case mapping).
-- Do test the invariants other code depends on — not just the happy path.
+- Do test the invariants other code depends on, not just the happy path.
 
 ## Correctness
 
