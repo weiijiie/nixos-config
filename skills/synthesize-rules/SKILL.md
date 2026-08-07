@@ -64,7 +64,11 @@ the repos the rule targets — actually read them, and cite the files or
 commits examined; an invented example is not evidence. Check: (a) the
 rule would not flag reasonable existing code — the false-positive test;
 (b) the instances genuinely support the generalization rather than one
-incident phrased twice. Demote failures to carry-forward or drop, and
+incident phrased twice; (c) the rule still says something specific once
+it is portable. If stripping the domain nouns that made it actionable
+leaves generic advice, the useful version was the specific one: route it
+to project memory or a skill and drop it from tier 2 rather than
+promoting the residue. Demote failures to carry-forward or drop, and
 say why.
 
 ## 5. Rewrite tier 2 holistically
@@ -73,6 +77,11 @@ Not append-only: merge overlapping rules, re-rank by importance, tighten
 wording, prune rules the evidence says are dead. Rule text follows the
 user's own writing rules. Provisional wording from active-rules.md is a
 draft, not a constraint.
+
+Then grep the rewritten store for vocabulary specific to the repos the
+instances came from (product names, service names, internal concepts).
+Illustrative examples borrowed from an instance leak in this way even
+when the rule around them is portable.
 
 ## 6. Review, commit, deploy
 
