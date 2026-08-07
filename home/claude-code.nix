@@ -76,6 +76,7 @@ let
   claudeCodeSettings = {
     model = "opus";
     effortLevel = "high";
+    agentPushNotifEnabled = true;
 
     # Retain session transcripts for 60 days (default is 30).
     cleanupPeriodDays = 60;
