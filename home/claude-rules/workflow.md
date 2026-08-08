@@ -45,6 +45,17 @@ Notion pages, PR descriptions, wikis, and other documents the user edits too.
 - Never redirect `git add` or `git commit` stderr to /dev/null. A stale
   pathspec aborts the whole add silently.
 
+## Claude Code settings
+
+`~/.claude/settings.json` is a read-only nix symlink; never write to it. Edit
+the source in `~/nixos-config` instead (`home/claude-code.nix` for cross-host
+settings, `home/mixpanel/devbox.nix` for devbox plugins and marketplaces), and
+leave the `home-manager switch` to the user. Enabling a plugin also needs its
+marketplace declared in `extraKnownMarketplaces`.
+
+Settings nix does not manage live in `~/.claude/settings.local.json`, which is
+writable: permissions, local hooks, and telemetry env.
+
 ## Claude Code shell
 
 - Don't put tilde/home paths in shell variable assignments (VAR=~/path).
