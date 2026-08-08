@@ -57,12 +57,21 @@
           HostName = "devbox-7700";
           User = "weijie_huang";
           ForwardAgent = true;
-          LocalForward = {
-            bind.address = "localhost";
-            bind.port = 8080;
-            host.address = "localhost";
-            host.port = 8080;
-          };
+          LocalForward = [
+            {
+              bind.address = "localhost";
+              bind.port = 8080;
+              host.address = "localhost";
+              host.port = 8080;
+            }
+            # Lavish Editor: the artifact server runs on the devbox, the browser here.
+            {
+              bind.address = "localhost";
+              bind.port = 14387;
+              host.address = "localhost";
+              host.port = 14387;
+            }
+          ];
           ProxyCommand = "gcloud compute start-iap-tunnel %h %p --listen-on-stdin --project=mixpanel-dev-1 --zone=us-west2-a --quiet";
         };
 

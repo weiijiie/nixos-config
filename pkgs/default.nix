@@ -8,6 +8,8 @@
 
   claude-code-transcripts = pkgs.callPackage ./python/claude-code-transcripts.nix { };
 
+  lavish-axi = pkgs.callPackage ./lavish-axi { };
+
   nvim = inputs.nixvim.legacyPackages.makeNixvimWithModule {
     inherit pkgs;
     module = import ../modules/nvim;
