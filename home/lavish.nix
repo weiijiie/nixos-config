@@ -1,10 +1,15 @@
 {
   config,
+  lib,
   pkgs,
   ...
 }:
 let
   port = 14387;
+
+  npxFallback = ''In restricted subprocess sandboxes, CI, or agent harnesses where `npx -y` exits opaquely (for example with status 216), use an already-installed copy directly: `node "$(npm root)/lavish-axi/dist/cli.mjs" <html-file>` for a local install, `node "$(npm root -g)/lavish-axi/dist/cli.mjs" <html-file>` for a global install, or the bare `lavish-axi <html-file>` bin after installing once.'';
+
+  pathNote = "The `lavish-axi` command is already on PATH. There is no npm install to fall back to, so ignore any instruction to locate the CLI through `npm root`.";
   stateDir = "${config.home.homeDirectory}/.local/state/lavish-axi";
 
   # The server binds loopback and the browser lives on the laptop, so nothing here
@@ -28,11 +33,14 @@ let
   # exit 216. Point every invocation at the wrapper instead. Deriving the skill from
   # the package rather than checking a copy into skills/ keeps the two in step
   # across version bumps.
+  # The npx fallback advice is replaced rather than deleted so that a version bump
+  # rewording either string fails the build instead of silently reintroducing it.
   lavish-skill = pkgs.runCommand "lavish-skill" { } ''
     mkdir -p $out
     substitute ${pkgs.custom.lavish-axi}/lib/node_modules/lavish-axi/skills/lavish/SKILL.md \
       $out/SKILL.md \
-      --replace-fail "npx -y lavish-axi" "lavish-axi"
+      --replace-fail "npx -y lavish-axi" "lavish-axi" \
+      --replace-fail ${lib.escapeShellArg npxFallback} ${lib.escapeShellArg pathNote}
   '';
 in
 {
