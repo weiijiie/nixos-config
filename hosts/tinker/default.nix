@@ -43,6 +43,14 @@
     settings = {
       # Enable flakes and new 'nix' command
       experimental-features = "nix-command flakes";
+
+      # WSL2 has 15 GB RAM. Default (max-jobs = auto, cores = 0) lets many
+      # heavy C++ builds (qtbase, mesa) run in parallel, each spawning one
+      # compiler per core, which OOMs and wedges the whole VM (Wsl/Service
+      # timeout 0x8007274c). Cap concurrency so peak memory stays bounded:
+      # up to 4 builds at once, 4 cores each (16 threads total).
+      max-jobs = 4;
+      cores = 4;
     };
 
     # Deduplicate and optimize nix store
