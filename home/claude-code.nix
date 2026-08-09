@@ -244,7 +244,10 @@ in
 
     programs.claude-code = {
       enable = true;
-      package = pkgs.llm-agents.claude-code;
+      # The flake's packages output is built against llm-agents' pinned
+      # nixpkgs and cached at cache.numtide.com, so it downloads prebuilt.
+      # The shared-nixpkgs overlay would rebuild it against our nixpkgs.
+      package = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.claude-code;
       rulesDir = ./claude-rules;
       mcpServers = config.claudeCodeConfig.mcpServers;
       settings = config.claudeCodeConfig.settings;

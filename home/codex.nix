@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   outputs,
   lib,
   pkgs,
@@ -30,7 +31,9 @@ in
 
     programs.codex = {
       enable = true;
-      package = pkgs.llm-agents.codex;
+      # Cached at cache.numtide.com; the shared-nixpkgs overlay would rebuild
+      # it locally against our nixpkgs. See home/claude-code.nix.
+      package = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.codex;
       settings = config.codexConfig.settings;
       context = rtkAwareness;
     };

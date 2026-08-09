@@ -82,6 +82,7 @@
           };
           modules = [
             ./modules/nixpkgs.nix
+            ./modules/nix-settings.nix
           ]
           ++ modules
           ++ [
