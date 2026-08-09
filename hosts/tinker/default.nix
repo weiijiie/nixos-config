@@ -22,15 +22,6 @@
     "${modulesPath}/profiles/minimal.nix"
   ];
 
-  nixpkgs.config.packageOverrides = pkgs: {
-    wayland = pkgs.wayland.override {
-      # ran into issues where wayland build step tries to use graphviz to generate docs,
-      # and graphviz errors with "Could not find/open font". just skipping the documentation
-      # generation for now to address this.
-      withDocumentation = false;
-    };
-  };
-
   nix = {
     # This will add each flake input as a registry
     # To make nix3 commands consistent with your flake
