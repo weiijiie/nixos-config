@@ -59,6 +59,14 @@ let
     head -1 ${zellaude-hook} > $out
     echo "# zellaude v0.4.1" >> $out
     tail -n +2 ${zellaude-hook} >> $out
+
+    # A pipe to a server whose IPC contract differs from the client's blocks on
+    # the socket read instead of erroring, so an unbounded call strands one
+    # process per hook event.
+    substituteInPlace $out \
+      --replace-fail 'zellij pipe --name "zellaude"' \
+        '${pkgs.coreutils}/bin/timeout -k 2 5 zellij pipe --name "zellaude"'
+
     chmod +x $out
   '';
 
