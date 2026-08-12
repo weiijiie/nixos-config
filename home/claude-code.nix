@@ -202,6 +202,12 @@ in
             type = "git-changes";
             color = "yellow";
           }
+          {
+            id = "5";
+            type = "session-cost";
+            color = "green";
+            rawValue = true;
+          }
         ]
         [
           {
