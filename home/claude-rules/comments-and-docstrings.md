@@ -24,7 +24,9 @@ of the current change.
   redundant qualifiers.
 - Anchor claims to code in scope: name only identifiers that appear nearby,
   not internals reached indirectly, and don't volunteer general platform
-  facts.
+  facts. For a field or flag that another package sets, give the constraint
+  on callers (who may set it, and to what end) rather than that package's
+  internals.
 - Put a rationale comment immediately above the statement it justifies, and
   behavior rationale on the function implementing the behavior (cause before
   consequence), not on the caller's doc comment.
