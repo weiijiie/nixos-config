@@ -11,7 +11,6 @@
 {
   imports = [
     ../common.nix
-    ../lavish.nix
   ];
 
   basePackages =
