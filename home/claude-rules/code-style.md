@@ -11,7 +11,10 @@ tool names, comments, and prose in docs.
 - Plain language means avoiding jargon, not avoiding accurate common
   vocabulary. Prefer the field's standard term (nodes, edges, graph) over a
   physical metaphor invented to sound simpler (dots, lines, stroke).
-- One term per concept; don't drift between synonyms.
+- One term per concept, and one concept per term. Don't drift between
+  synonyms, and check a new term against the codebase's existing vocabulary
+  before introducing it: reusing an established name for a different thing is
+  worse than spelling out the specifics.
 - Don't bake provenance or call-site detail into a name when the plain noun
   suffices.
 
@@ -19,6 +22,8 @@ tool names, comments, and prose in docs.
 
 - Smallest footprint: prefer the minimal change; inline single-use helpers
   where appropriate; treat a ballooning diff as an indication to simplify.
+  To make existing code also run in another case, extend it in place (move a
+  line, widen a guard) rather than extracting a wrapper or a helper.
 - Minimize surface area: private unless it must be public.
 - Keep sibling functions consistent in shape and return type.
 - Encapsulate detail logic inside the function that owns it; don't leak it into
