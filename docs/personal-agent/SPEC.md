@@ -17,7 +17,7 @@ The system exists to compensate for ADHD-shaped failure modes: task paralysis fr
 
 ## 2. Principles
 
-1. **Declarative machinery, versioned state.** Everything that can be pure config lives in the Nix flake (server, services, MCP servers, bot, syncthing topology, secrets via agenix/sops-nix). Data that is inherently state (vault content, agent memory) is versioned in git so it is diffable, reviewable, and revertible — the closest honest analogue to declarative for mutable data.
+1. **Declarative machinery, versioned state.** Everything that can be pure config lives in the Nix flake (server, services, MCP servers, bot, syncthing topology; secrets are the one documented exception, decision 18). Data that is inherently state (vault content, agent memory) is versioned in git so it is diffable, reviewable, and revertible — the closest honest analogue to declarative for mutable data.
 2. **Minimal and lightweight.** No Linear/ClickUp. Tasks are markdown in the vault. Prefer deleting a component to configuring it.
 3. **Graceful degradation.** If the agent/server is down: Obsidian still works on every device (Syncthing is peer-to-peer), tasks are native checkboxes in the Obsidian app, calendar is still Google Calendar. The agent is an enhancement layer, never a single point of failure for my own data.
 4. **Trust is earned incrementally.** Start read-only / propose-first everywhere it's cheap to, loosen deliberately. Every agent write is a git commit with a meaningful message.
@@ -48,7 +48,7 @@ The system exists to compensate for ADHD-shaped failure modes: task paralysis fr
                         └─────────────────────────────────────────┘
 ```
 
-**Hub:** small NixOS VPS (Hetzner-class, ~2 vCPU / 4 GB is plenty; agent work is token-bound, syncthing + bot are featherweight). Entire box is one flake: `services.syncthing`, systemd services + timers, MCP servers, Hermes, Telegram bridge, secrets via agenix or sops-nix. Rebuildable from scratch with `nixos-rebuild switch --flake`.
+**Hub:** small NixOS VPS (Hetzner-class, ~2 vCPU / 4 GB is plenty; agent work is token-bound, syncthing + bot are featherweight). Entire box is one flake: `services.syncthing`, systemd services + timers, MCP servers, Hermes, Telegram bridge, secrets out of band (decision 18). Rebuildable from scratch with `nixos-anywhere` plus a documented secret-restore step.
 
 **Agent runtime:** Hermes (Nous Research) as the harness — messaging-first, persistent memory, cron, skills — wrapping Claude via AnthropicTransport. Provider-agnostic by construction; the model is config, not architecture. Hardening (see §6): Telegram gateway only, user-ID allowlisted; skill creation disabled or approval-gated initially.
 
@@ -58,11 +58,11 @@ The system exists to compensate for ADHD-shaped failure modes: task paralysis fr
 
 The hub is a new host in my existing flake, not a standalone repo:
 
-- **Host:** `nixosConfigurations.<hub>` via the existing `mkHost` helper + a `hosts/<hub>/` dir. Inherits overlays (`unstable`, `scripts`, `custom`, `llm-agents`), `home/common.nix`, nixvim — the hub feels like my machine. Remote deploy: `nixos-rebuild switch --flake .#<hub> --target-host`.
+- **Host:** `nixosConfigurations.io` via the existing `mkHost` helper + a `hosts/io/` dir. Inherits overlays (`unstable`, `scripts`, `custom`, `llm-agents`), `home/common.nix`, nixvim — the hub feels like my machine. Remote deploy: `nixos-rebuild switch --flake .#io --target-host`; first install via `nixos-anywhere` against `hosts/io/disko.nix`.
 - **Agent services:** `modules/nixos/agent/{hermes.nix,fastmail-mcp.nix,gcal-mcp.nix,timers.nix}`, following the exported-`nixosModules` pattern. Broken agent modules can't affect other hosts unless imported; flake checks catch eval errors across all hosts on every change.
 - **Custom code:** label-filtering Fastmail MCP wrapper as a `pkgs/` entry. Hermes packaged in `pkgs/` too if not already in the `llm-agents.nix` overlay (check at impl time).
-- **Sync topology as single source of truth:** a shared module (e.g. `modules/nixos/vault-sync.nix`) declares Syncthing device IDs, folder IDs, and paths; consumed by the hub (and available to `tinker`). The phone and the Windows Syncthing node are configured against it manually, one time — the module is the reference.
-- **Secrets:** agenix/sops-nix is net-new to the repo (no secrets layer exists yet); lands with this project, reusable by other hosts.
+- **Sync topology as single source of truth:** `modules/nixos/vault-sync.nix` declares Syncthing device IDs, folder IDs, and paths; consumed by the hub (and available to `tinker`). Its sibling `modules/nixos/vault-git.nix` owns the server-side history layer (repo + snapshot timer), which is vault machinery rather than agent machinery and so sits outside `modules/nixos/agent/`. The phone and the Windows Syncthing node are configured against it manually, one time — the module is the reference.
+- **Secrets:** deployed out of band, not committed in any form (decision 18). Revisit in Phase 1, when the first credential actually exists.
 - **Stays OUT of the repo:** vault content (Syncthing + hub-side git per §4), the `.obsidian` config repo (separate lifecycle; GitSync on the phone must not point at nixos-config), Hermes runtime state, all secrets material. AGENT.md lives in the vault (the agent needs it in context and it evolves conversationally).
 
 ## 4. Vault sync design
@@ -125,7 +125,7 @@ vault/
 | Vault | Read all; write per AGENT.md | AGENT.md contract + git review layer | 99% readable/editable; propose-first only for rewording my words. |
 | Telegram | Full duplex | Bot locked to my user ID; gateway allowlist in Hermes | The only inbound human channel. |
 
-**Credential isolation:** the Fastmail MCP runs as its own systemd service under its own user, holding the token in its own environment; Hermes talks to it over a local socket and can never read the credential. Same pattern for GCal. This is the self-hosted approximation of edge secret injection: prompt-injected agent ≠ exfiltrated token. All secrets in agenix/sops-nix, never in the vault, never in agent-readable files.
+**Credential isolation:** the Fastmail MCP runs as its own systemd service under its own user, holding the token in its own environment; Hermes talks to it over a local socket and can never read the credential. Same pattern for GCal. This is the self-hosted approximation of edge secret injection: prompt-injected agent ≠ exfiltrated token. Secrets live only on the hub, never in the repo, never in the vault, never in agent-readable files.
 
 **Hermes hardening:**
 - **Skill/memory store is security-sensitive.** It is a mutable, persistent instruction store, and the agent reads untrusted input (email, web): a prompt injection persisted into a skill file gets silently reapplied every time the skill matches. Therefore: skill creation/modification **approval-gated** (start with Hermes drafting skills but not activating them; grant write only after review works well); skill + memory directories **versioned in git** with diffs reviewed like code; a run that touched untrusted content never writes to them unreviewed.
@@ -158,6 +158,8 @@ vault/
 
 Two exe.dev features remain genuinely attractive: **edge secret injection** (agent structurally cannot read credentials) and **instant HTTPS + auth-proxied URLs** ("write me an HTML page and give me a link" / share-like-a-Google-Doc). Counterweights: the hub is a stateful pet, exe.dev's sweet spot is disposable VMs, and NixOS-the-distro fights their boot model — hosting the hub there surrenders the one-flake property.
 
+Since this was written, two things were checked. exe.dev now sells a persistent VPS product ("persistent Linux VMs with HTTPS and SSH"), so the stateful-pet objection is weaker than stated above. But their VMs boot from an OCI image (`exeuntu` by default, "run any Docker image") with the platform supplying the boot path, which is exactly what `nixos-anywhere` cannot work with: it kexecs into a RAM installer and has `disko` repartition a real disk. Their docs mention neither NixOS nor kexec. Their secret handling is also better than described here: an in-VM proxy injects auth headers on outbound HTTP so the credential never exists on the VM at all, and generic HTTP-proxy integrations suggest arbitrary APIs (JMAP, Telegram) are expressible, though that was not confirmed. Note the proxy bounds exfiltration, not abuse: a prompt-injected agent that can reach the proxy can still call through it, so the Fastmail label allowlist in the MCP wrapper is still load-bearing.
+
 Current position: **hub stays on the NixOS VPS.** The publishing story can be ~80% replicated declaratively: wildcard DNS on a domain + `services.caddy` with on-demand TLS + agent writes to `/var/www/<slug>/` → "make me a page" yields `https://<slug>.me.example.com` in seconds; basic-auth or OAuth2-proxy for private shares. What that does NOT replicate: edge secret injection, and the polish of exe.dev's sharing/auth UX.
 
 Decision deferred with a concrete scoping task (Phase 2): trial exe.dev as a **satellite** — disposable sandbox VMs the agent can spin up for risky experiments, and/or the publishing surface — and check whether their integration catalog covers Fastmail/arbitrary JMAP (if edge injection can hold the email token while the hub stays on NixOS, that hybrid is genuinely interesting). If satellites become recurring, bake a custom image rather than running setup scripts (per prior evaluation: nix-the-package-manager + home-manager work fine on their Ubuntu base; NixOS-the-distro doesn't). Kill or keep after the trial.
@@ -177,12 +179,14 @@ Decision deferred with a concrete scoping task (Phase 2): trial exe.dev as a **s
 
 ### Phase 0 — Substrate (target: first weekend)
 - [x] Commit this spec to `docs/personal-agent/SPEC.md` in nixos-config; add the pointer line to `CLAUDE.md` (§11). **This is the cutover step — all further work happens from Claude Code.**
-- [ ] Provision VPS; add `hosts/<hub>` to nixos-config via `mkHost`; add agenix/sops-nix to the flake; tailscale (optional but nice).
-- [ ] Domain + DNS (also unblocks publishing later).
-- [ ] `modules/nixos/vault-sync.nix` topology module (devices, folders, paths); hub consumes it via `services.syncthing`.
+- [x] Add `hosts/io` to nixos-config via `mkHost`, with `disko` for the disk layout. No secrets layer: Phase 0 needs no secret material (decision 18).
+- [ ] Provision VPS and install with `nixos-anywhere` (manual, `docs/personal-agent/PHASE-0.md` step 1 and 3).
+- [ ] Domain + DNS (also unblocks publishing later; manual, PHASE-0 step 2).
+- [x] `modules/nixos/vault-sync.nix` topology module (devices, folders, paths); hub consumes it via `services.syncthing`. Device IDs are filled in as each peer is paired.
 - [ ] Windows laptop: install Syncthing (auto-start as service/tray), vault folder on NTFS, pair against topology module; point Windows Obsidian at it. Verify sync works with WSL stopped.
 - [ ] Android: Syncthing app paired; Obsidian opens the synced vault.
-- [ ] Server-side vault git repo + snapshot timer. Verify: edit on phone → appears on laptop & hub → snapshot commit exists.
+- [x] Server-side vault git repo + snapshot timer (`modules/nixos/vault-git.nix`).
+- [ ] Acceptance test: edit on phone → appears on laptop & hub → snapshot commit exists, with WSL stopped.
 
 ### Phase 1 — Agent core (target: end of week 2; **the habit loop ships here**)
 - [ ] Vault skeleton per §5; write AGENT.md v1.
@@ -200,7 +204,7 @@ Decision deferred with a concrete scoping task (Phase 2): trial exe.dev as a **s
 - [ ] Propose-first loop end-to-end: proposal → Telegram ping → approve → merge commit.
 - [ ] Notion export + import + agent cleanup shakedown.
 - [ ] Weekly planning session: agent-initiated, first run.
-- [ ] Scope exe.dev satellite (§8); decide.
+- [ ] Scope exe.dev satellite (§8); decide. The sharp question is whether a NixOS system built *as* an OCI image boots as an exe.dev VM — if it does, one-flake and edge secret injection stop being mutually exclusive.
 - [ ] Publishing v0 if exe.dev is a no: caddy + wildcard subdomain + `/var/www` convention.
 
 ### Phase 3 — The secretary gets good (ongoing)
@@ -218,7 +222,7 @@ Decision deferred with a concrete scoping task (Phase 2): trial exe.dev as a **s
 ## 11. Source of truth & working process
 
 - **This file is canonical once committed** to nixos-config (e.g. `docs/personal-agent/SPEC.md`). Any copies living in chat artifacts are historical after that point.
-- **`CLAUDE.md` in the repo points here:** "the personal agent hub is specced in docs/personal-agent/SPEC.md; consult before touching `hosts/<hub>` or `modules/nixos/agent/`." Every Claude Code session in the repo then starts with full design context.
+- **`CLAUDE.md` in the repo points here:** "the personal agent hub is specced in docs/personal-agent/SPEC.md; consult before touching `hosts/io` or `modules/nixos/agent/`." Every Claude Code session in the repo then starts with full design context.
 - **Division of labor:** design/architecture thinking happens in the claude.ai Project (which holds the memory of *why* decisions were made); implementation happens in Claude Code sessions in the repo. The two do not share context automatically — this file and CLAUDE.md are the bridge.
 - **When implementation invalidates a decision:** update this spec (decision log entry with the new rationale) in the same PR/commit as the change. The spec must never describe a system that no longer exists.
 
@@ -242,3 +246,6 @@ Decision deferred with a concrete scoping task (Phase 2): trial exe.dev as a **s
 | 14 | Flashcards deferred to v2 | No active learning target yet. |
 | 15 | Hub built inside `weiijiie/nixos-config`: host via `mkHost`, services as `modules/nixos/agent/*`, MCP wrapper in `pkgs/`, shared vault-sync topology module | ~15-line host add; inherits overlays/home config; sync topology single-sourced; repo already converging on agent infra (llm-agents overlay, skills/, CLAUDE.md). Vault content, `.obsidian` repo, runtime state stay out. |
 | 16 | Spec committed to repo = canonical; CLAUDE.md pointer; design in claude.ai Project, implementation in Claude Code | The two products don't share context; repo files are the bridge; spec must track reality (updated in the same commit as invalidating changes). |
+| 17 | Hub is `io`; conventional US VPS, provider chosen at provision time; install via `disko` + `nixos-anywhere`, updates via `nixos-rebuild --target-host` | Provider migration becomes a rerun rather than a rebuild by hand, which is what makes "conventional VPS now, re-examine exe.dev later" cheap. Only `disko` becomes a flake input; `nixos-anywhere` runs via `nix run`. deploy-rs/colmena deferred until one host becomes several. Config is provider-agnostic: the `qemu-guest` profile is 11 virtio initrd modules and nothing else, so only the disk device name is provider-specific. |
+| 18 | Secrets deployed out of band, not committed in any encrypted form; no agenix/sops-nix | Deliberate break with principle 1, accepted for now. Cost, stated plainly: a from-scratch rebuild is `nixos-anywhere` plus a manual secret-restore step, so the hub is not reproducible from the flake alone. Bought with it: nothing about secret names or recipient keys is published from a public repo, and no mechanism gets designed before the credentials it holds exist. Phase 0 needs no secret material at all, so nothing is blocked; revisit in Phase 1 when the Anthropic key and Telegram token arrive, at which point exe.dev-style edge injection is also back on the table. |
+| 19 | Vault access control keyed on a dedicated `vault` user and group | Syncthing, the snapshot timer and later Hermes all need the same directory. Naming the identity after the resource keeps "who may touch the vault" answerable by group membership rather than by which service happens to run as whom (SPEC §6 credential isolation). |

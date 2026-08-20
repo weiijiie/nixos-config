@@ -18,6 +18,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/nix-darwin-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -201,6 +206,16 @@
             modules = [
               home-manager.nixosModules.home-manager
               ./hosts/tinker
+            ];
+            homeModules = [ ./home/personal.nix ];
+          });
+          # personal agent hub (VPS) - see docs/personal-agent/SPEC.md
+          io = nixpkgs.lib.nixosSystem (mkHost {
+            user = "wj";
+            home = "/home/wj";
+            modules = [
+              home-manager.nixosModules.home-manager
+              ./hosts/io
             ];
             homeModules = [ ./home/personal.nix ];
           });

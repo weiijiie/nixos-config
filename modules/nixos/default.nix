@@ -3,5 +3,6 @@
 
 {
   # List your module files here
-  # my-module = import ./my-module.nix;
+  vault-sync = import ./vault-sync.nix;
+  vault-git = import ./vault-git.nix;
 }
