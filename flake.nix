@@ -159,10 +159,16 @@
           };
 
           # Custom packages acessible through 'nix build', 'nix shell', etc
-          packages = import ./pkgs {
-            inputs = inputs';
-            inherit pkgs;
-          };
+          packages =
+            import ./pkgs {
+              inputs = inputs';
+              inherit pkgs;
+            }
+            // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
+              io-image = pkgs.callPackage ./pkgs/io-image.nix {
+                inherit (self.nixosConfigurations.io-oci.config.system.build) toplevel;
+              };
+            };
 
           devShells = import ./shell.nix { inherit self pkgs system; };
 
@@ -221,6 +227,17 @@
             modules = [
               home-manager.nixosModules.home-manager
               ./hosts/io
+            ];
+            homeModules = [ ./home/personal.nix ];
+          });
+          # the same hub, packaged as a container image for exe.dev
+          io-oci = nixpkgs.lib.nixosSystem (mkHost {
+            user = "wj";
+            home = "/home/wj";
+            modules = [
+              home-manager.nixosModules.home-manager
+              ./hosts/io
+              ./hosts/io/oci.nix
             ];
             homeModules = [ ./home/personal.nix ];
           });
