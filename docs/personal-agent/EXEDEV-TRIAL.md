@@ -3,135 +3,127 @@
 Pulled forward from SPEC §10 Phase 2. The question is narrow: **can the hub run
 on exe.dev without giving up the flake, and does that buy edge secret injection?**
 
-Budget: one month of the Personal plan ($20). Timebox: one sitting. Do not pair
-the phone or laptop against an exe.dev hub until the decision is made — that's
-the expensive manual work and it should only be done once.
+Budget: one month of the Personal plan ($20). Do not pair the phone or laptop
+against an exe.dev hub until the decision is made — that's the expensive manual
+work and it should only be done once.
 
-## Decision rule, agreed before starting
+Their docs are readable without a browser: `ssh exe.dev doc` lists slugs,
+`ssh exe.dev doc <slug>` prints one. That is the authoritative source; the
+website renders client-side and is useless to fetch.
 
-Write the answers down as you go; decide at the end, not while you're in it.
+## Findings so far
+
+Three of the four original unknowns are answered from the docs, without booting
+anything. One new blocker appeared that outranks all of them.
+
+### Answered: integrations take arbitrary hosts (was unknown #3)
+
+Not catalog-only. The generic HTTP proxy integration takes any target URL and
+injects any header:
+
+```
+integrations add http-proxy --name mirror --target https://httpbin.org/ \
+  --header prettiest-of-them-all:me --attach vm:<vm>
+```
+
+The VM then calls `http://mirror.int.exe.xyz/...` and the header is added on the
+way out. `--bearer` exists for bearer tokens, and the credential is stored
+server-side, never visible from the VM. So:
+
+- **Anthropic** (`x-api-key` header) — works. This is the secret most worth
+  getting off the box.
+- **Fastmail JMAP** (`Authorization: Bearer`) — works, via `--bearer`.
+- **Telegram** — may work after all. The token is a path segment, but `--target`
+  is a full URL, and the httpbin example shows the request path appended to the
+  target. A target of `https://api.telegram.org/bot<TOKEN>/` would put the token
+  server-side where the VM can't read it. Untested, worth ten minutes.
+
+There is also a token-mint integration type that runs OAuth client-credential
+dances server-side, which is the shape Google Calendar will need in Phase 2.
+
+### Answered: private images work (was unknown #2)
+
+Two routes: `--registry-auth=USER:TOKEN` against ghcr.io, Docker Hub, GitLab or
+ECR; or run a registry on an exe.dev VM and pull from `<vm>.exe.xyz/image:tag`.
+
+### Answered, and the model is better than assumed (was unknown #1)
+
+From `doc faq/how-exedev-works`: a VM starts from a container image, and exe.dev
+"hooks it up with a block device with the image on it." The image **seeds a
+normal persistent disk at creation**. After that it is an ordinary filesystem —
+their own editorial (`doc serverful`) is titled "Persistent disks, not
+serverless."
+
+This kills the immutable-rootfs concern entirely. It also changes the workflow:
+**you never redeploy an image.** The image is install media, exactly like
+`nixos-anywhere`, and day-2 updates are `nixos-rebuild switch --target-host`
+against the box — identical to the Hetzner plan. There is no `set-image` command
+in the CLI, which is consistent with that reading.
+
+### New blocker: no arbitrary TCP ingress
+
+The VM gets **no public IP**. exe.dev terminates TLS and proxies HTTP to your VM
+(ports 3000–9999 reachable as `https://<vm>.exe.xyz:PORT/`), and handles SSH at
+`ssh <vm>.exe.xyz`. That is the whole ingress story. VMs are also isolated from
+each other with no private network.
+
+Syncthing needs inbound TCP 22000, which is not HTTP. **Phone and laptop cannot
+dial the hub directly.** Two ways out:
+
+1. **Syncthing relays.** Syncthing falls back to public relays when a direct
+   connection isn't possible. Throughput is irrelevant for markdown, but it puts
+   third-party infrastructure in the sync path.
+2. **Tailscale.** exe.dev's own cross-VM networking doc recommends it. The hub
+   joins the tailnet, peers reach it over WireGuard, Syncthing connects normally.
+
+Tailscale is listed in SPEC §10 as "optional but nice." On exe.dev it becomes
+**load-bearing** for vault sync. That is a real cost against principle 3
+(graceful degradation): another service in the critical path.
+
+### New constraint: the kernel is theirs
+
+"You don't get to choose which kernel you're using." NixOS normally owns the
+bootloader and kernel, so on exe.dev that whole layer is bypassed:
+`hosts/io/disko.nix` and the GRUB config are dead weight, and anything depending
+on kernel modules they didn't build (zram for `zramSwap`, nftables for
+`networking.firewall`) may not work. A `hosts/io/` variant would be needed with
+the bootloader disabled. The firewall matters much less anyway with no public IP.
+
+## Decision rule, revised
 
 | Result | Verdict |
 |---|---|
-| NixOS image boots, state persists, header injection works | **Move the hub.** Strictly better than Hetzner: same flake, plus secrets off the box. |
-| Boots and persists, but integrations are catalog-only | **Stay on Hetzner.** The main prize was secret injection; HTTPS alone doesn't pay for the vendor risk. |
-| State does not survive a redeploy and there's no volume option | **Stop.** A stateful hub on an immutable rootfs is a trap. |
-| NixOS image won't boot | **Stop, don't debug it.** Running nix-on-Ubuntu instead is a different project than the one specced. |
+| NixOS image boots, and Syncthing reaches peers via Tailscale | **Move the hub.** Same flake, secrets off the box, HTTPS for free. |
+| Boots, but Syncthing can only sync via public relays | **Judgement call.** Weigh a third party in the sync path against the secret-injection win. |
+| NixOS image won't boot on their kernel | **Stop, don't debug it.** Hetzner, and revisit if they ever ship custom kernels. |
 
-## What the flake already answers, for free
+## Next: boot the image (step 3)
 
-`nixos-generators` builds a NixOS system as an OCI image with systemd as PID 1.
-Two things to know before you start:
+The image builds. `nix run github:nix-community/nixos-generators -- --flake .#io -f docker`
+produces **a rootfs tarball, not a Docker archive** — no `manifest.json`, just
+`init`, `systemd` and 367k `nix/store` entries, 1.69 GB compressed. So it needs
+`docker import` with the entrypoint set to `/init`, not `docker load`.
 
-- It is **not** the `oci` format in nixpkgs — that one is Oracle Cloud
-  Infrastructure and produces a qcow2 disk image. Wrong thing entirely.
-- The `docker` format lives in `nixos-generators` only, and its own description
-  hedges: "uses systemd to run, probably only works in podman."
+Blocker on this machine: the Docker CLI is present but no daemon is running in
+WSL. Either start Docker Desktop, or add a `dockerTools.buildImage` output to the
+flake so the OCI image is built by nix and pushed with skopeo — the second is
+more work but keeps the push reproducible and matches principle 1.
 
-That hedge is about shared-kernel containers, where systemd can't get at cgroups.
-exe.dev runs real KVM VMs with their own kernel, so the usual objection doesn't
-apply — but that's an argument, not evidence, which is what step 3 is for.
+- [ ] Build/import the image and push it to ghcr.io
+- [ ] `ssh exe.dev new --name io-hub --image ghcr.io/... --registry-auth=...`
+- [ ] **Pass:** `systemctl is-system-running` responds, and `systemctl status
+      syncthing` shows the unit up — that proves systemd came up as PID 1 under
+      their kernel and ran our units.
+- [ ] Then test Tailscale ingress before anything else, since that's the blocker.
 
-```
-nix run github:nix-community/nixos-generators -- --flake .#io -f docker
-```
+Note the image is 1.69 GB largely because `home/common.nix` brings gcc, go,
+kubectl, ngrok, delve and nvim — §3 asked for the hub to "feel like my machine."
+That reads differently for an image you push. A leaner `homeModules` set for the
+hub is worth revisiting either way.
 
-## 1. Sign up and read three specific things
+## Whichever way it goes
 
-Personal plan, $20/mo. Their docs render client-side, so I could not read them;
-these are the three answers to find before touching anything:
-
-- [ ] What the CLI is, and how to create a VM from a **custom** image.
-- [ ] Whether a custom image can come from a **private** registry, or only public
-      Docker Hub. (If public-only, the hub's image is public — it contains no
-      secrets by design, but check what it does leak: hostnames, your SSH public
-      key, the vault path.)
-- [ ] How disk persistence works across a VM being recreated or its image
-      changed. This is the answer that matters most; step 4 verifies whatever
-      the docs claim.
-
-## 2. Sanity-check the platform first
-
-- [ ] Boot their stock image (`exeuntu`, or `alpine:latest`) and SSH in.
-- [ ] Confirm the HTTPS front door works: serve anything on a port, hit the URL.
-
-**Pass:** you have a shell and a working URL inside ten minutes. If this part is
-awkward, the rest will be worse.
-
-## 3. Boot the NixOS image — unknown #2
-
-- [ ] Build it: `nix run github:nix-community/nixos-generators -- --flake .#io -f docker`
-- [ ] Load and push it to whatever registry they accept.
-- [ ] Create a VM from it.
-
-**Pass:** `systemctl is-system-running` returns `running` or `degraded`, and
-`systemctl status syncthing` shows the service up. Syncthing starting is the real
-signal — it proves systemd came up as PID 1 and ran our units, not just that the
-image unpacked.
-
-**If it fails:** capture the console output and stop. Don't debug the boot path;
-that's the trap this timebox exists to avoid.
-
-## 4. The persistence test — unknown #1, the one that decides it
-
-This is the test worth doing carefully, because a stateful pet on an immutable
-rootfs fails slowly and expensively rather than loudly.
-
-- [ ] On the running VM: `echo canary > /var/lib/vault/canary.txt`
-- [ ] Also note the Syncthing device ID:
-      `syncthing device-id --config=/var/lib/syncthing/.config/syncthing`
-- [ ] Make a trivial change to `hosts/io/default.nix` (a comment is enough),
-      rebuild the image, push it, and redeploy the VM from the new image.
-- [ ] Check: does `canary.txt` still exist? Is the device ID **the same**?
-
-**Pass:** both survive. The device ID is the sharper test — if it changes, the
-Syncthing identity is regenerated on every deploy and every peer has to re-pair.
-That alone is disqualifying.
-
-**Partial:** state is lost but they offer a separate persistent volume. Then the
-design needs `/var/lib/vault` and `/var/lib/syncthing` on that volume, which is a
-real but manageable change. Note it and keep going.
-
-**Fail:** state is lost and there's no volume. Stop.
-
-## 5. Integration test — unknown #3
-
-The prize is that a prompt-injected agent can't exfiltrate a credential that was
-never on the box. Test whether that covers *our* credentials, not their catalog's.
-
-Three services, and they do **not** behave the same way:
-
-- [ ] **Anthropic** — auth is the `x-api-key` header. This is the ideal case for
-      a header-injecting proxy, and it's the most valuable secret to get off the
-      box. Test this one first.
-- [ ] **Fastmail JMAP** — auth is `Authorization: Bearer <token>`. Also a header,
-      so it should work the same way. Confirm a generic HTTP proxy integration
-      can target an arbitrary host, since Fastmail won't be in their catalog.
-- [ ] **Telegram** — auth is a **path segment**: `api.telegram.org/bot<TOKEN>/method`.
-      A proxy that injects headers structurally cannot help here unless it also
-      rewrites paths. Expect this one to fail, and check whether they support it
-      anyway.
-
-**Pass:** Anthropic works. That's the big one.
-
-If Telegram can't be injected, its token stays on the box. That's a bounded loss:
-a leaked bot token lets someone read messages sent to the bot and post as it, but
-the Hermes gateway allowlist is on your inbound user ID, so it doesn't hand over
-the agent. Worth knowing, not worth failing the trial over.
-
-## 6. Check the limits — unknown #4
-
-- [ ] Note the transfer allowance: 200 GB/mo against Hetzner's 20 TB, overage at
-      $0.05/GB. Fine for markdown sync and a chat bot; a real ceiling if the
-      publishing story in §8 ever carries traffic.
-- [ ] Disk: 25 GB default per VM out of a 100 GB pool. Check the nix store's
-      appetite — a NixOS system with `home/common.nix` is not small, and
-      `nix.gc` is already set to weekly with a 30-day window in `hosts/io`.
-
-## 7. Decide and write it down
-
-Whichever way it goes, this ends with a decision-log entry in
-`docs/personal-agent/SPEC.md` §12 amending decisions 13 and 18, in the same
-commit as any config change. If the answer is "stay on Hetzner," that's still a
-result worth recording, so the question doesn't get reopened from scratch in
-three months.
+This ends with a decision-log entry in `SPEC.md` §12 amending decisions 13 and
+18, in the same commit as any config change. "Stay on Hetzner" is still a result
+worth recording, so the question doesn't get reopened from scratch in three
+months.
