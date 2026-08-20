@@ -115,6 +115,22 @@
         "type": "github"
       }
     },
+    "exe-dev": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1787186971,
+        "narHash": "sha256-nO3/FKEx8z5Zdeq1AKuHv/dp2Irmgd2lge2Z+UxhBr4=",
+        "owner": "boldsoftware",
+        "repo": "exe.dev",
+        "rev": "189e438047e7740537a0eee570ce06772a649f42",
+        "type": "github"
+      },
+      "original": {
+        "owner": "boldsoftware",
+        "repo": "exe.dev",
+        "type": "github"
+      }
+    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -666,6 +682,7 @@
       "inputs": {
         "agent-skills": "agent-skills",
         "disko": "disko",
+        "exe-dev": "exe-dev",
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
         "hunk": "hunk",

@@ -50,6 +50,11 @@
       flake = false;
     };
 
+    exe-dev = {
+      url = "github:boldsoftware/exe.dev";
+      flake = false;
+    };
+
     hunk = {
       url = "github:modem-dev/hunk";
       inputs.nixpkgs.follows = "nixpkgs";

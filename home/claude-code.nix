@@ -256,6 +256,11 @@ in
         ".claude/skills/hunk-review/SKILL.md" = {
           source = "${hunkPkg}/skills/hunk-review/SKILL.md";
         };
+
+        ".claude/skills/using-exe-dev" = {
+          source = "${inputs.exe-dev}/skill";
+          recursive = true;
+        };
       };
 
     programs.claude-code = {
