@@ -21,3 +21,8 @@
 - Overlays: Use for custom packages (pkgs.custom) and unstable packages (pkgs.unstable)
 - Modules: Create reusable components in modules/ directory
 - Error handling: Use nixpkgs.lib.mkIf for conditional config
+
+## Personal agent hub
+- The personal agent system (VPS hub, Hermes, vault sync, MCP services) is specced in `docs/personal-agent/SPEC.md`.
+- Read the spec before touching `hosts/<hub>/` or `modules/nixos/agent/`.
+- The spec is the source of truth for that system's design; if an implementation change invalidates a spec decision, update the spec's decision log in the same commit.
