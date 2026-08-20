@@ -51,8 +51,9 @@
     useDHCP = lib.mkDefault true;
   };
 
-  # Journal dates and brief timings key off this; revisit before Phase 1.
-  time.timeZone = "Etc/UTC";
+  # Daily-note filenames, the morning brief and snapshot timestamps all read
+  # this, so it tracks where I am rather than where the box is.
+  time.timeZone = "America/Los_Angeles";
 
   services = {
     openssh = {
