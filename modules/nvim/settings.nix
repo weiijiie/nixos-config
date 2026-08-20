@@ -69,7 +69,8 @@
 
   extraConfigLua =
     if pkgs.stdenv.hostPlatform.isLinux then
-      with pkgs; ''
+      with pkgs;
+      ''
         if vim.fn.has("wsl") == 1 then
             vim.g.clipboard = {
                 name = "wl-clipboard (wsl)",
