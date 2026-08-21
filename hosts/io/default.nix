@@ -49,6 +49,7 @@
   networking = {
     hostName = "io";
     useDHCP = lib.mkDefault true;
+    firewall.trustedInterfaces = [ "tailscale0" ];
   };
 
   # Daily-note filenames, the morning brief and snapshot timestamps all read
@@ -75,7 +76,24 @@
     };
 
     vaultGit.enable = true;
+
+    # Peers reach syncthing over the tailnet; on exe.dev there is no other
+    # inbound TCP path.
+    tailscale.enable = true;
   };
+
+  # The hub is an appliance, not a workstation: deploys come from tinker, and
+  # dev work belongs on a devbox. home/common.nix's full list is 8.4 GB of
+  # desktop tooling, which also matters where the system ships as an image
+  # (hosts/io/oci.nix).
+  home-manager.users.wj.basePackages = lib.mkForce (
+    with pkgs;
+    [
+      coreutils
+      git
+      jq
+    ]
+  );
 
   programs = {
     zsh.enable = true;

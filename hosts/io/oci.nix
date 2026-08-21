@@ -78,19 +78,6 @@ in
     install -Dm0755 ${exeShell}/bin/exe-shell /bin/exe-shell
   '';
 
-  # exe.dev caps an image's extracted contents at 10 GiB, and home/common.nix
-  # accounts for 8.4 GB of ours: an editor, three toolchains and a container
-  # stack the hub never runs. Deploys come from tinker, so the hub needs enough
-  # to read a file and inspect a unit.
-  home-manager.users.wj.basePackages = lib.mkForce (
-    with pkgs;
-    [
-      coreutils
-      git
-      jq
-    ]
-  );
-
   # NIX_PATH reaches /etc/pam/environment, which would pull a whole nixpkgs
   # checkout into the image.
   nix.nixPath = lib.mkForce [ ];
