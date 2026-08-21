@@ -11,7 +11,51 @@ Their docs are readable without a browser: `ssh exe.dev doc` lists slugs,
 `ssh exe.dev doc <slug>` prints one. That is the authoritative source; the
 website renders client-side and is useless to fetch.
 
-## Findings so far
+## Verdict: rejected for the hub
+
+The supply chain works end to end. The flake builds NixOS as a ~100-layer OCI
+image in about two minutes, GHCR hosts it privately, exe.dev pulls it with
+`--registry-auth`, honours our OCI labels (it targeted the port from
+`ExposedPorts`), and creates a VM that reports `running`.
+
+The boot contract does not. systemd never starts, so nothing serves the HTTP
+diagnostic and nothing answers exe.dev's own SSH port. Two fixes were tried and
+neither was sufficient:
+
+1. Dropping `virtualisation/docker-image.nix`. It marks the system
+   containerized, and systemd then leaves `/sys` and `/sys/fs/cgroup` to a
+   container runtime that does not exist here. Removing it was necessary
+   (NixOS stage-2 mounts neither) but did not produce a boot.
+2. Slimming the image below their 10 GiB extracted ceiling, 9.2 GB to 3.27 GB.
+   Required to create the VM at all; unrelated to the boot failure.
+
+**What actually blocks it is the absence of any diagnostic channel.** exe.dev
+offers no console and no log access, and the VM is unreachable precisely
+because the thing that would serve SSH or HTTP is the thing that failed. Each
+further attempt is a blind ~20 minute cycle against the list of units exeuntu's
+Dockerfile masks by hand, which is that same work already done for Ubuntu.
+
+Their platform supplies the kernel and seeds a disk from the image, so there is
+no initrd and no stage-1. exeuntu compensates with a wrapper that mounts cgroup2
+before systemd and roughly forty masked units. Reaching a booting NixOS means
+reproducing that, undocumented, without observability, and only then reaching
+the two unknowns that were supposed to decide the trial: Syncthing with no
+inbound TCP, and whether integrations cover our credentials.
+
+Still worth doing, asynchronously and off the critical path: ask them what a
+non-exeuntu image must provide at init. It is a short question and they are
+responsive. If the answer is small, this reopens cheaply.
+
+Two findings outlive the trial and are not about exe.dev:
+
+- Importing `virtualisation/docker-image.nix` for an image-based deploy is
+  wrong on any platform that boots real VMs from images rather than running
+  containers.
+- The hub carried 8.4 GB of desktop tooling from `home/common.nix` — an editor
+  at 4.5 GB, three toolchains, a container stack — none of which it runs.
+  Invisible on a VPS, fatal against an image ceiling.
+
+## Findings in detail
 
 Three of the four original unknowns are answered from the docs, without booting
 anything. One new blocker appeared that outranks all of them.
