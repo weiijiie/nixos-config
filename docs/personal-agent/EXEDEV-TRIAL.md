@@ -11,49 +11,55 @@ Their docs are readable without a browser: `ssh exe.dev doc` lists slugs,
 `ssh exe.dev doc <slug>` prints one. That is the authoritative source; the
 website renders client-side and is useless to fetch.
 
-## Verdict: rejected for the hub
+## Verdict: boot solved; hub location is an open decision
 
-The supply chain works end to end. The flake builds NixOS as a ~100-layer OCI
-image in about two minutes, GHCR hosts it privately, exe.dev pulls it with
-`--registry-auth`, honours our OCI labels (it targeted the port from
-`ExposedPorts`), and creates a VM that reports `running`.
+The rejection premise fell. The exe.dev repo carries a reference NixOS config
+(`nix/configuration.nix` and `nix/Dockerfile`), and it documents the boot
+contract that earlier attempts were guessing at. With `hosts/io/oci.nix` and
+`pkgs/io-image.nix` matching that contract, the hub boots to a clean
+`systemctl is-system-running` = `running` in about 15 seconds, with zero
+failed units: syncthing, the vault snapshot timer and home-manager all come
+up. Day-2 updates work with `nixos-rebuild switch --target-host`, the same
+story as the conventional-VPS plan; the image is install media only.
 
-The boot contract does not. systemd never starts, so nothing serves the HTTP
-diagnostic and nothing answers exe.dev's own SSH port. Two fixes were tried and
-neither was sufficient:
+The contract, as their reference config states it:
 
-1. Dropping `virtualisation/docker-image.nix`. It marks the system
-   containerized, and systemd then leaves `/sys` and `/sys/fs/cgroup` to a
-   container runtime that does not exist here. Removing it was necessary
-   (NixOS stage-2 mounts neither) but did not produce a boot.
-2. Slimming the image below their 10 GiB extracted ceiling, 9.2 GB to 3.27 GB.
-   Required to create the VM at all; unrelated to the boot failure.
+- The platform runs a shim (`/exe.dev/bin/exe-init`) before `/init`. It
+  configures the NIC, routes, DNS, hostname and hosts file, and serves SSH
+  with an embedded daemon. NixOS must not run DHCP, resolvconf, a hosts file
+  or its own sshd against it.
+- The system is container-marked (`profiles/docker-container.nix`,
+  `container=oci` in the image env); exe-init plays the container runtime.
+- `/etc` must be a real writable directory in the image, not the store
+  symlink `toplevel` ships, because exe-init writes into it before activation.
+- `/etc/passwd` must be seeded with the login user and an `sshd`
+  privilege-separation account, and NixOS activation must keep that account,
+  or exe-init's sshd dies when activation rewrites `/etc/passwd`.
+- The image must carry a Nix store database (`includeNixDB`); without it
+  every nix invocation on the box, home-manager activation included, rejects
+  the store paths as invalid.
+- Login shells go through a `/bin/exe-shell` wrapper because their sshd
+  supplies a conventional PATH.
 
-**What actually blocks it is the absence of any diagnostic channel.** exe.dev
-offers no console and no log access, and the VM is unreachable precisely
-because the thing that would serve SSH or HTTP is the thing that failed. Each
-further attempt is a blind ~20 minute cycle against the list of units exeuntu's
-Dockerfile masks by hand, which is that same work already done for Ubuntu.
+What earlier attempts got wrong, for the record: dropping the container
+marking was backwards, the store-symlinked `/etc` blocked exe-init in every
+attempt, our sshd and DHCP raced theirs, and disko's `fileSystems` pointed
+systemd at partitions that do not exist there.
 
-Their platform supplies the kernel and seeds a disk from the image, so there is
-no initrd and no stage-1. exeuntu compensates with a wrapper that mounts cgroup2
-before systemd and roughly forty masked units. Reaching a booting NixOS means
-reproducing that, undocumented, without observability, and only then reaching
-the two unknowns that were supposed to decide the trial: Syncthing with no
-inbound TCP, and whether integrations cover our credentials.
+Not yet answered, and now the deciding questions:
 
-Still worth doing, asynchronously and off the critical path: ask them what a
-non-exeuntu image must provide at init. It is a short question and they are
-responsive. If the answer is small, this reopens cheaply.
+- Syncthing ingress. No inbound TCP, so peers reach the hub via Tailscale or
+  public relays. Untested.
+- Whether integrations cover the credential set (Anthropic, Fastmail,
+  Telegram); the Telegram base-path idea is untested.
 
 Two findings outlive the trial and are not about exe.dev:
 
-- Importing `virtualisation/docker-image.nix` for an image-based deploy is
-  wrong on any platform that boots real VMs from images rather than running
-  containers.
-- The hub carried 8.4 GB of desktop tooling from `home/common.nix` — an editor
-  at 4.5 GB, three toolchains, a container stack — none of which it runs.
-  Invisible on a VPS, fatal against an image ceiling.
+- An image-based deploy has to match the platform's init contract exactly;
+  the same image that is correct for exe.dev (container-marked, writable
+  /etc, seeded passwd) would be wrong on a platform that boots real VMs.
+- The hub carried 8.4 GB of desktop tooling from `home/common.nix` that it
+  never runs. Invisible on a VPS, fatal against an image ceiling.
 
 ## Findings in detail
 
@@ -133,37 +139,19 @@ on kernel modules they didn't build (zram for `zramSwap`, nftables for
 `networking.firewall`) may not work. A `hosts/io/` variant would be needed with
 the bootloader disabled. The firewall matters much less anyway with no public IP.
 
-## Decision rule, revised
+## Decision rule, remaining
 
 | Result | Verdict |
 |---|---|
-| NixOS image boots, and Syncthing reaches peers via Tailscale | **Move the hub.** Same flake, secrets off the box, HTTPS for free. |
-| Boots, but Syncthing can only sync via public relays | **Judgement call.** Weigh a third party in the sync path against the secret-injection win. |
-| NixOS image won't boot on their kernel | **Stop, don't debug it.** Hetzner, and revisit if they ever ship custom kernels. |
+| Syncthing reaches peers via Tailscale | **Moving the hub is a live option.** Same flake, secrets off the box, HTTPS for free; weigh Tailscale becoming load-bearing. |
+| Syncthing can only sync via public relays | **Judgement call.** A third party in the sync path against the secret-injection win. |
 
-## Next: boot the image (step 3)
+## Next: vault-sync ingress
 
-The image builds. `nix run github:nix-community/nixos-generators -- --flake .#io -f docker`
-produces **a rootfs tarball, not a Docker archive** — no `manifest.json`, just
-`init`, `systemd` and 367k `nix/store` entries, 1.69 GB compressed. So it needs
-`docker import` with the entrypoint set to `/init`, not `docker load`.
-
-Blocker on this machine: the Docker CLI is present but no daemon is running in
-WSL. Either start Docker Desktop, or add a `dockerTools.buildImage` output to the
-flake so the OCI image is built by nix and pushed with skopeo — the second is
-more work but keeps the push reproducible and matches principle 1.
-
-- [ ] Build/import the image and push it to ghcr.io
-- [ ] `ssh exe.dev new --name io-hub --image ghcr.io/... --registry-auth=...`
-- [ ] **Pass:** `systemctl is-system-running` responds, and `systemctl status
-      syncthing` shows the unit up — that proves systemd came up as PID 1 under
-      their kernel and ran our units.
-- [ ] Then test Tailscale ingress before anything else, since that's the blocker.
-
-Note the image is 1.69 GB largely because `home/common.nix` brings gcc, go,
-kubectl, ngrok, delve and nvim — §3 asked for the hub to "feel like my machine."
-That reads differently for an image you push. A leaner `homeModules` set for the
-hub is worth revisiting either way.
+- [ ] Join the hub to the tailnet and confirm a laptop can open TCP 22000 to
+      it over Tailscale.
+- [ ] Ten-minute test of the Telegram base-path integration
+      (`--target https://api.telegram.org/bot<TOKEN>/`).
 
 ## Whichever way it goes
 
