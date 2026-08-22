@@ -67,7 +67,7 @@ Obsidian, the vault and Syncthing all live on Windows; WSL is not involved
    requirement is only that it starts without you remembering to start it.
 2. Create the vault folder on NTFS, e.g. `C:\Users\<you>\Vault`.
 3. In the web UI (`http://127.0.0.1:8384`): **Actions → Show ID**, and put that
-   ID in `modules/nixos/vault-sync.nix` as `devices.framework.id`.
+   ID in `modules/nixos/vault-sync.nix` as `devices.tinker.id`.
 4. Add the hub as a remote device using its ID from step 4.
 5. Add the folder with **Folder ID exactly `obsidian-vault`** (the label is
    cosmetic; the ID is what pairs), path `C:\Users\<you>\Vault`, shared with the

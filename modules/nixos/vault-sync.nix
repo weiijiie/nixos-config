@@ -82,8 +82,8 @@ in
       );
       default = {
         io.name = "io (hub)";
-        framework = {
-          name = "framework (windows)";
+        tinker = {
+          name = "tinker (windows)";
           id = "U2GVBAP-5WR2IYA-XZEX5Q2-KTBQGL3-6WBHESY-REPB6OU-VIPQSMP-BPK2OQH";
         };
         phone.name = "phone (android)";
