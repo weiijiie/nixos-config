@@ -86,7 +86,10 @@ in
           name = "tinker (windows)";
           id = "U2GVBAP-5WR2IYA-XZEX5Q2-KTBQGL3-6WBHESY-REPB6OU-VIPQSMP-BPK2OQH";
         };
-        phone.name = "phone (android)";
+        phone = {
+          name = "phone (android)";
+          id = "IGM3XVU-TAZFOYA-CAQ2NB5-FOOHRIH-4DKKZI6-HB4QTXD-NVT3UAR-RHAESAG";
+        };
       };
     };
 
