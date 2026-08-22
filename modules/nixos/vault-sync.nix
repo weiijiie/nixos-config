@@ -111,6 +111,7 @@ in
         "/.obsidian"
         # The history layer is hub-local and must never reach a device.
         "/.git"
+        "/.gitignore"
         "/.stversions"
         "/.trash"
       ];
