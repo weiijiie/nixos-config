@@ -46,12 +46,13 @@ marking was backwards, the store-symlinked `/etc` blocked exe-init in every
 attempt, our sshd and DHCP raced theirs, and disko's `fileSystems` pointed
 systemd at partitions that do not exist there.
 
-Not yet answered, and now the deciding questions:
+Vault-sync ingress is answered: the hub joined the tailnet and a peer opens
+TCP 22000 to it over Tailscale directly, no relays. Tailscale is thereby
+load-bearing for sync on exe.dev, the cost named in the findings below.
 
-- Syncthing ingress. No inbound TCP, so peers reach the hub via Tailscale or
-  public relays. Untested.
-- Whether integrations cover the credential set (Anthropic, Fastmail,
-  Telegram); the Telegram base-path idea is untested.
+Still untested, the last open question: whether integrations cover the
+credential set (Anthropic, Fastmail, Telegram); the Telegram base-path idea
+needs a bot token to try.
 
 Two findings outlive the trial and are not about exe.dev:
 
@@ -143,13 +144,14 @@ the bootloader disabled. The firewall matters much less anyway with no public IP
 
 | Result | Verdict |
 |---|---|
-| Syncthing reaches peers via Tailscale | **Moving the hub is a live option.** Same flake, secrets off the box, HTTPS for free; weigh Tailscale becoming load-bearing. |
+| Syncthing reaches peers via Tailscale | **Confirmed.** Moving the hub is a live option: same flake, secrets off the box, HTTPS for free; weigh Tailscale being load-bearing. |
 | Syncthing can only sync via public relays | **Judgement call.** A third party in the sync path against the secret-injection win. |
 
 ## Next: vault-sync ingress
 
-- [ ] Join the hub to the tailnet and confirm a laptop can open TCP 22000 to
-      it over Tailscale.
+- [x] Join the hub to the tailnet and confirm a laptop can open TCP 22000 to
+      it over Tailscale. Passed: direct connection from tinker to the hub's
+      tailnet address.
 - [ ] Ten-minute test of the Telegram base-path integration
       (`--target https://api.telegram.org/bot<TOKEN>/`).
 

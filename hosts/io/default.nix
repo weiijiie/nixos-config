@@ -33,6 +33,9 @@
     settings = {
       # Enable flakes and new 'nix' command
       experimental-features = "nix-command flakes";
+      # Deploys arrive over ssh as wj, whose locally-built store paths carry
+      # no signature; wheel already holds passwordless root here.
+      trusted-users = [ "@wheel" ];
     };
 
     # Deduplicate and optimize nix store
