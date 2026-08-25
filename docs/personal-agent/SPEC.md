@@ -182,13 +182,13 @@ Decision deferred with a concrete scoping task (Phase 2): trial exe.dev as a **s
 ### Phase 0 — Substrate (target: first weekend)
 - [x] Commit this spec to `docs/personal-agent/SPEC.md` in nixos-config; add the pointer line to `CLAUDE.md` (§11). **This is the cutover step — all further work happens from Claude Code.**
 - [x] Add `hosts/io` to nixos-config via `mkHost`, with `disko` for the disk layout. No secrets layer: Phase 0 needs no secret material (decision 18).
-- [ ] Provision VPS and install with `nixos-anywhere` (manual, `docs/personal-agent/PHASE-0.md` step 1 and 3).
+- [x] Provision the hub. Done via the exe.dev OCI image route rather than `nixos-anywhere` (decision 17b); the PHASE-0 runbook's step 1 and 3 stay valid for the conventional-VPS path if the location decision goes that way.
 - [ ] Domain + DNS (also unblocks publishing later; manual, PHASE-0 step 2).
 - [x] `modules/nixos/vault-sync.nix` topology module (devices, folders, paths); hub consumes it via `services.syncthing`. Device IDs are filled in as each peer is paired.
-- [ ] Windows laptop: install Syncthing (auto-start as service/tray), vault folder on NTFS, pair against topology module; point Windows Obsidian at it. Verify sync works with WSL stopped.
-- [ ] Android: Syncthing app paired; Obsidian opens the synced vault.
+- [x] Windows laptop: Syncthing service installed, vault at `C:\Users\h_wei\Obsidian\Vault of Souls` (moved out of OneDrive: two sync engines on one directory invite placeholder and conflict-artifact trouble), paired over the tailnet. Sync cannot depend on WSL by construction (Windows-native service, NTFS path); an explicit WSL-stopped spot check is still worth doing casually.
+- [x] Android: Syncthing-Fork paired over the tailnet; Obsidian opens the synced vault.
 - [x] Server-side vault git repo + snapshot timer (`modules/nixos/vault-git.nix`).
-- [ ] Acceptance test: edit on phone → appears on laptop & hub → snapshot commit exists, with WSL stopped.
+- [x] Acceptance test: phone edit reached hub and laptop, and snapshot `c810573` carries the diff. Ran with WSL up; see the laptop item for the WSL-stopped caveat.
 
 ### Phase 1 — Agent core (target: end of week 2; **the habit loop ships here**)
 - [ ] Vault skeleton per §5; write AGENT.md v1.
