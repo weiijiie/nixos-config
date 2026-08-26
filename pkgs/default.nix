@@ -6,6 +6,8 @@
 {
   vim-colors-xcode = pkgs.callPackage ./vim-colors-xcode { };
 
+  obsidian-headless = pkgs.callPackage ./obsidian-headless { };
+
   claude-code-transcripts = pkgs.callPackage ./python/claude-code-transcripts.nix { };
 
   nvim = inputs.nixvim.legacyPackages.makeNixvimWithModule {

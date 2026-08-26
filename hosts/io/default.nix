@@ -15,6 +15,8 @@
     outputs.nixosModules.vault-sync
     outputs.nixosModules.vault-git
 
+    ./ob-trial.nix
+
     # No hardware to scan on a VPS; virtio is the whole hardware story.
     "${modulesPath}/profiles/qemu-guest.nix"
   ];
