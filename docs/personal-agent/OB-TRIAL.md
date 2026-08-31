@@ -37,6 +37,14 @@ PATH.
 4. On the phone and laptop, log the Obsidian app into the same account and
    add the `ob-trial` remote vault from Sync settings.
 
+## Credential model, noted up front
+
+These credentials cannot use exe.dev edge injection (decision 18a): the auth
+token travels in request bodies and WebSocket frames, not headers, against a
+hardcoded base URL, and the end-to-end vault key must exist on the box by
+design. Option B therefore keeps decision 18's on-box out-of-band model,
+where Syncthing holds no credential at all. Weigh this in the outcome.
+
 ## What the trial must show
 
 - [ ] Hidden files stay local: put a `.git` dir and a `.gitignore` in the
