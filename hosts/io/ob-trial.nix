@@ -6,7 +6,10 @@
 {
   environment.systemPackages = [ pkgs.custom.obsidian-headless ];
 
-  systemd.tmpfiles.rules = [ "d /var/lib/ob-trial/vault 0750 vault vault -" ];
+  systemd.tmpfiles.rules = [
+    "d /var/lib/ob-trial 0750 vault vault -"
+    "d /var/lib/ob-trial/vault 0750 vault vault -"
+  ];
 
   systemd.services.ob-sync-trial = {
     description = "Obsidian Sync continuous sync (trial vault)";
