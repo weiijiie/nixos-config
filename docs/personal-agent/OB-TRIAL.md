@@ -103,10 +103,11 @@ exactly those individually, which a git repo can express and this cannot.
       better than a conflict sidecar, yet the agent must still write to its
       own file regions (§4.1); same-position collisions jumble prose.
 - [x] Behaviour under a real workload, tested 2026-09-01 with a 2,324-file
-      Notion import (201 MB): 1,683 notes and every ordinary attachment
-      arrived, but **21 files were dropped silently** by two separate
-      mechanisms, with the unit still `active` and nothing logged. See
-      "Silent exclusions" below. Syncthing has neither mechanism.
+      Notion import (4,090 files, 386 MB): the markdown and ordinary
+      attachments arrived, but files were **dropped silently** by two separate
+      mechanisms, with the unit still `active` and nothing logged. After
+      repairing extensions, 11 remain unsynced. See "Silent exclusions" below.
+      Syncthing has neither mechanism.
 - [ ] Two weeks of `ob-sync-trial` uptime without a breaking vendor change (soak started 2026-08-31; call it 2026-09-14).
 
 ## Silent exclusions
@@ -118,14 +119,18 @@ announces itself:
 - **File type.** 17 `.bin` files (5.6 MB) never left the laptop. Notion writes
   web-clipped images without a usable extension, and `.bin` is not image,
   audio, video or pdf, so it falls under `unsupported`, which is off by
-  default. Adding it to `--file-types` would carry them; renaming them to
-  their real extensions fixes both sync and Obsidian's rendering, and is the
-  better triage. Confirmed on one file: renamed `.bin` to `.jpg`, and it
-  reached the hub whole in under 20 seconds with its 2022 mtime intact.
-- **File size.** Four files over the Standard plan's 5 MB ceiling (30 MB
-  total) were refused. Measured, not assumed: the largest file that synced is
-  4.11 MB and the smallest that did not is 6.2 MB. This is a plan limit, not
-  a setting; Plus raises it to 200 MB.
+  default. Renaming to the real extension fixes both sync and Obsidian's
+  rendering and is the better triage, but only rescues files whose true type
+  is one of the four supported categories: all 16 `.bin` images crossed within
+  seconds of being renamed, while the one that was really an XHTML article did
+  not, because HTML is unsupported too. Office documents (`.doc`, `.docx`),
+  `.json` and anything else outside those four categories are excluded the
+  same way, which is not an edge case for a vault holding real material.
+- **File size.** Files over the Standard plan's 5 MB ceiling are refused.
+  Measured, not assumed: the largest file that synced is 4.11 MB and the
+  smallest that did not is 6.2 MB. This is a plan limit, not a setting; Plus
+  raises it to 200 MB. Across the finished 4,090-file import, seven files were
+  held back this way, including an 11 MB reference PDF.
 
 The exclusions themselves are defensible. The silence is the finding: notes
 reached the hub referencing images that never did, so the agent would read a
