@@ -81,25 +81,4 @@ in
   # NIX_PATH reaches /etc/pam/environment, which would pull a whole nixpkgs
   # checkout into the image.
   nix.nixPath = lib.mkForce [ ];
-
-  # The HTTPS proxy is the only ingress that does not depend on exe.dev
-  # reaching in, so it carries the boot journal: if this answers, systemd came
-  # up and ran units.
-  systemd.services.boot-report = {
-    description = "Serve the boot journal over HTTP";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "network.target" ];
-    path = [
-      pkgs.systemd
-      pkgs.python3
-    ];
-    serviceConfig.ExecStart = pkgs.writeShellScript "boot-report" ''
-      mkdir -p /var/lib/boot-report
-      cd /var/lib/boot-report
-      journalctl -b --no-pager > journal.txt 2>&1 || true
-      systemctl list-units --failed --no-pager > failed.txt 2>&1 || true
-      systemctl status --no-pager > status.txt 2>&1 || true
-      exec python3 -m http.server 8000 --bind 0.0.0.0
-    '';
-  };
 }

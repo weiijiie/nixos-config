@@ -55,8 +55,6 @@ dockerTools.streamLayeredImage {
       "PATH=/run/current-system/sw/bin:/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
     ];
     WorkingDir = "/home/wj";
-    # exe.dev picks its proxy target from the exposed ports.
-    ExposedPorts."8000/tcp" = { };
     Labels."exe.dev/login-user" = "wj";
   };
 }
