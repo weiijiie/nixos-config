@@ -64,8 +64,12 @@ so a cutover must add the hub sync unit to the §9 staleness alerting.
       (2026-08-31); reboot and redeploy still to observe.
 - [ ] Propagation latency phone → hub in continuous mode, measured, vs the
       ~30 s the beta docs imply.
-- [ ] Merge behavior: edit the same note on two devices within the sync
-      window; confirm a real merge, not a conflict copy or silent loss.
+- [x] Merge behavior, tested 2026-08-31 with deliberate same-position
+      concurrent inserts: no conflict copy, no data loss, both devices
+      converged — but the inserts interleaved mid-sentence
+      (character-position merge, no semantic awareness). Verdict: strictly
+      better than a conflict sidecar, yet the agent must still write to its
+      own file regions (§4.1); same-position collisions jumble prose.
 - [ ] Two weeks of `ob-sync-trial` uptime without a breaking vendor change (soak started 2026-08-31; call it 2026-09-14).
 
 ## Outcome
