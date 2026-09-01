@@ -52,15 +52,18 @@ so a cutover must add the hub sync unit to the §9 staleness alerting.
 
 ## What the trial must show
 
-- [ ] Hidden files stay local: put a `.git` dir and a `.gitignore` in the
-      trial vault on the hub; confirm neither reaches another device.
-      (Community-reported behavior, not documented contract.)
+- [x] Hidden files stay local. Probes planted 2026-08-31: `.git/` and
+      `.gitignore` never left the hub while a sibling `canary.md` reached the
+      laptop. (Still community-reported behavior, not documented contract;
+      re-verify after any `ob` upgrade.)
 - [ ] The token survives a hub reboot and a redeploy without re-login.
+      Service restart already re-authenticates from the stored token
+      (2026-08-31); reboot and redeploy still to observe.
 - [ ] Propagation latency phone → hub in continuous mode, measured, vs the
       ~30 s the beta docs imply.
 - [ ] Merge behavior: edit the same note on two devices within the sync
       window; confirm a real merge, not a conflict copy or silent loss.
-- [ ] Two weeks of `ob-sync-trial` uptime without a breaking vendor change.
+- [ ] Two weeks of `ob-sync-trial` uptime without a breaking vendor change (soak started 2026-08-31; call it 2026-09-14).
 
 ## Outcome
 
