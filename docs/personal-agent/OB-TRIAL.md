@@ -45,6 +45,11 @@ hardcoded base URL, and the end-to-end vault key must exist on the box by
 design. Option B therefore keeps decision 18's on-box out-of-band model,
 where Syncthing holds no credential at all. Weigh this in the outcome.
 
+The client has no token-refresh mechanism: the signin token lives until
+revoked (password change, sign-out-everywhere), and a subscription lapse
+stops sync outright. Either failure leaves the unit retry-looping silently,
+so a cutover must add the hub sync unit to the §9 staleness alerting.
+
 ## What the trial must show
 
 - [ ] Hidden files stay local: put a `.git` dir and a `.gitignore` in the
