@@ -53,6 +53,26 @@ revoked (password change, sign-out-everywhere), and a subscription lapse
 stops sync outright. Either failure leaves the unit retry-looping silently,
 so a cutover must add the hub sync unit to the §9 staleness alerting.
 
+## What syncs, as observed
+
+Two independent channels, which is why no exclusion config is needed for the
+git layer:
+
+- **Vault files** — notes plus the attachment types in `--file-types`
+  (image, audio, video, pdf by default). Dot-prefixed paths are excluded
+  wholesale: `.git/` and `.gitignore` stayed on the hub, and the laptop's
+  `.obsidian/*` never arrived. `--excluded-folders` exists for keeping
+  *visible* folders local, which nothing currently needs.
+- **Config categories** — `.obsidian` settings travel through a separate
+  opt-in channel (`--configs`: app, appearance, appearance-data, hotkey,
+  core-plugin, core-plugin-data, community-plugin, community-plugin-data),
+  currently `none` on the hub.
+
+That split suits the design: devices can share settings among themselves
+while the hub, which runs no editor, keeps configs off and receives only
+markdown and attachments. A cutover would therefore retire SPEC §4's
+separate `.obsidian` git repo and the GitSync app along with it.
+
 ## What the trial must show
 
 - [x] Hidden files stay local. Probes planted 2026-08-31: `.git/` and
