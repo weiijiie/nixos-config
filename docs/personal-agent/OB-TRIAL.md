@@ -19,12 +19,15 @@ PATH.
    ```sh
    sudo -u vault env HOME=/var/lib/ob-trial ob login --email <email>
    sudo -u vault env HOME=/var/lib/ob-trial ob sync-create-remote \
-     --name ob-trial --encryption end-to-end
+     --name Observer --encryption end-to-end
    sudo -u vault env HOME=/var/lib/ob-trial ob sync-setup \
-     --vault ob-trial --path /var/lib/ob-trial/vault --device-name io
+     --vault Observer --path /var/lib/ob-trial/vault --device-name io
    sudo -u vault env HOME=/var/lib/ob-trial ob sync-config \
      --path /var/lib/ob-trial/vault --conflict-strategy merge
    ```
+
+   The trial's remote vault is named `Observer`; it was created from the
+   desktop UI, so the `sync-create-remote` step was skipped in practice.
 
    The auth token and vault key live under `/var/lib/ob-trial` (decision 18:
    out of band, owned by `vault`).
