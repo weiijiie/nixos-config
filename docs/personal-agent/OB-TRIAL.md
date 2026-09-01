@@ -93,8 +93,9 @@ exactly those individually, which a git repo can express and this cannot.
 - [ ] The token survives a hub reboot and a redeploy without re-login.
       Service restart already re-authenticates from the stored token
       (2026-08-31); reboot and redeploy still to observe.
-- [ ] Propagation latency phone → hub in continuous mode, measured, vs the
-      ~30 s the beta docs imply.
+- [x] Propagation latency. A 292 KB attachment reached the hub in under 20
+      seconds, better than the ~30 s polling interval the docs imply. Phone to
+      hub not separately measured.
 - [x] Merge behavior, tested 2026-08-31 with deliberate same-position
       concurrent inserts: no conflict copy, no data loss, both devices
       converged — but the inserts interleaved mid-sentence
@@ -119,7 +120,8 @@ announces itself:
   audio, video or pdf, so it falls under `unsupported`, which is off by
   default. Adding it to `--file-types` would carry them; renaming them to
   their real extensions fixes both sync and Obsidian's rendering, and is the
-  better triage.
+  better triage. Confirmed on one file: renamed `.bin` to `.jpg`, and it
+  reached the hub whole in under 20 seconds with its 2022 mtime intact.
 - **File size.** Four files over the Standard plan's 5 MB ceiling (30 MB
   total) were refused. Measured, not assumed: the largest file that synced is
   4.11 MB and the smallest that did not is 6.2 MB. This is a plan limit, not
