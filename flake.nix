@@ -149,6 +149,9 @@
         {
           _module.args.pkgs = import nixpkgs {
             inherit system;
+            # Matches modules/nixpkgs.nix, so `nix build .#<pkg>` and
+            # `nix flake check` see the same package set the hosts do.
+            config.allowUnfree = true;
             overlays = [
               outputs.overlays.custom # access my own packages through `pkgs.custom`
               outputs.overlays.scripts # access inline shell scripts through `pkgs.scripts`
