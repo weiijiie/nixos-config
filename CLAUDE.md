@@ -24,5 +24,5 @@
 
 ## Personal agent hub
 - The personal agent system (VPS hub, Hermes, vault sync, MCP services) is specced in `docs/personal-agent/SPEC.md`.
-- Read the spec before touching `hosts/<hub>/` or `modules/nixos/agent/`.
+- Read the spec before touching `hosts/io/` or `modules/nixos/agent/`.
 - The spec is the source of truth for that system's design; if an implementation change invalidates a spec decision, update the spec's decision log in the same commit.

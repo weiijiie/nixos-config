@@ -134,30 +134,27 @@ Tailscale is listed in SPEC §10 as "optional but nice." On exe.dev it becomes
 ### New constraint: the kernel is theirs
 
 "You don't get to choose which kernel you're using." NixOS normally owns the
-bootloader and kernel, so on exe.dev that whole layer is bypassed:
-`hosts/io/disko.nix` and the GRUB config are dead weight, and anything depending
-on kernel modules they didn't build (zram for `zramSwap`, nftables for
-`networking.firewall`) may not work. A `hosts/io/` variant would be needed with
-the bootloader disabled. The firewall matters much less anyway with no public IP.
+bootloader and kernel, so on exe.dev that whole layer is bypassed. `hosts/io/oci.nix`
+is the variant that accounts for it: bootloader off, disko's partitions and mounts
+forced empty, firewall off (it guards nothing without a public IP), zram off. Their
+kernel does carry TUN, so Tailscale works.
 
-## Decision rule, remaining
+## Where this landed
 
-| Result | Verdict |
-|---|---|
-| Syncthing reaches peers via Tailscale | **Confirmed.** Moving the hub is a live option: same flake, secrets off the box, HTTPS for free; weigh Tailscale being load-bearing. |
-| Syncthing can only sync via public relays | **Judgement call.** A third party in the sync path against the secret-injection win. |
+Every technical question the trial was opened to answer is answered, and the
+hub has been running on exe.dev since. Peers reach Syncthing over Tailscale
+directly, with no relay in the path, so the ingress blocker above is closed at
+the cost named there: Tailscale is load-bearing for sync on this platform.
 
-## Next: vault-sync ingress
+Choosing between exe.dev and a conventional VPS is now a judgement call rather
+than a technical one, and it is deliberately still open (decision 17b). The
+trade is edge-held secrets, free HTTPS and an already-paid subscription against
+platform dependence on a young company and Tailscale in the critical path.
+Whichever way it goes, the other route stays buildable: `hosts/io/disko.nix`
+and `nixos-anywhere` on one side, `pkgs/io-image.nix` on the other.
 
-- [x] Join the hub to the tailnet and confirm a laptop can open TCP 22000 to
-      it over Tailscale. Passed: direct connection from tinker to the hub's
-      tailnet address.
-- [ ] Ten-minute test of the Telegram base-path integration
-      (`--target https://api.telegram.org/bot<TOKEN>/`).
-
-## Whichever way it goes
-
-This ends with a decision-log entry in `SPEC.md` §12 amending decisions 13 and
-18, in the same commit as any config change. "Stay on Hetzner" is still a result
-worth recording, so the question doesn't get reopened from scratch in three
-months.
+One question remains open and belongs to Phase 1, when the credentials exist:
+whether integrations cover the whole set, including the Telegram base-path idea
+(`--target https://api.telegram.org/bot<TOKEN>/`). Note that decision 18a's
+edge-injection prize does not extend to Obsidian Sync, whose credentials must
+live on the box; see `OB-TRIAL.md`.
