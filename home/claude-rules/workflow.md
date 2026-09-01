@@ -81,14 +81,16 @@ Notion pages, PR descriptions, wikis, and other documents the user edits too.
 
 ## Claude Code settings
 
-`~/.claude/settings.json` is a read-only nix symlink; never write to it. Edit
-the source in `~/nixos-config` instead (`home/claude-code.nix` for cross-host
-settings, `home/mixpanel/devbox.nix` for devbox plugins and marketplaces), and
-leave the `home-manager switch` to the user. Enabling a plugin also needs its
-marketplace declared in `extraKnownMarketplaces`.
+`~/.claude/settings.json` is a writable file that both nix and Claude Code
+write. Every `home-manager switch` merges the declared keys over it, so a key
+nix declares has to change in `~/nixos-config` (`home/claude-code.nix` for
+cross-host settings, `home/mixpanel/devbox.nix` for devbox), and the switch is
+the user's to run. Keys nix does not declare, plugins and marketplaces among
+them, survive the merge; change those in place or through `/config`, `/plugin`
+and the rest.
 
-Settings nix does not manage live in `~/.claude/settings.local.json`, which is
-writable: permissions, local hooks, and telemetry env.
+`~/.claude/settings.local.json` is outside nix entirely: permissions, local
+hooks, and telemetry env.
 
 ## Claude Code shell
 

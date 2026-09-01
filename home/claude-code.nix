@@ -81,7 +81,52 @@ let
     ];
   };
 
+  # Claude Code writes ~/.claude/settings.json itself: /config, /model,
+  # /effort and /plugin all persist there, and a write through a store symlink
+  # fails. The file therefore stays a writable regular file, and each
+  # activation merges the declared keys back over whatever Claude last wrote.
+  settings-merge = pkgs.writeShellApplication {
+    name = "claude-settings-merge";
+    runtimeInputs = [
+      pkgs.jq
+      pkgs.coreutils
+    ];
+    text = ''
+      # settings.json carries credentials in env, so neither it nor the
+      # intermediates below may be group- or world-readable.
+      umask 077
+
+      declared="$1"
+      target="$HOME/.claude/settings.json"
+      base="$target.hm-base"
+      merged="$target.hm-new"
+      trap 'rm -f "$base" "$merged"' EXIT
+
+      mkdir -p "$HOME/.claude"
+
+      if [ -s "$target" ] && jq -e . "$target" >/dev/null 2>&1; then
+        cp "$target" "$base"
+      else
+        if [ -s "$target" ]; then
+          echo "claude settings.json is not valid JSON; rebuilding it" >&2
+        fi
+        echo '{}' > "$base"
+      fi
+
+      # Read through a leftover store symlink before dropping it, or its keys
+      # are lost on the switch that converts the file.
+      if [ -L "$target" ]; then
+        rm -f "$target"
+      fi
+
+      jq -s '.[0] * .[1]' "$base" "$declared" > "$merged"
+      mv "$merged" "$target"
+    '';
+  };
+
   claudeCodeSettings = {
+    "$schema" = "https://json.schemastore.org/claude-code-settings.json";
+
     model = "opus";
     effortLevel = "high";
     agentPushNotifEnabled = true;
@@ -99,22 +144,6 @@ let
       type = "command";
       command = "ccstatusline";
       padding = 0;
-    };
-
-    enabledPlugins = {
-      "superpowers@claude-plugins-official" = true;
-      "skill-creator@claude-plugins-official" = true;
-      "github@claude-plugins-official" = true;
-      "ast-grep@ast-grep-marketplace" = true;
-    };
-
-    extraKnownMarketplaces = {
-      ast-grep-marketplace = {
-        source = {
-          source = "github";
-          repo = "ast-grep/agent-skill";
-        };
-      };
     };
 
     hooks = {
@@ -173,6 +202,16 @@ in
     };
 
     home.packages = [ pkgs.llm-agents.ccstatusline ];
+
+    # Ahead of linkGeneration: it deletes the settings.json symlink an earlier
+    # generation left, and the merge needs that file's keys.
+    home.activation.claudeCodeSettings =
+      lib.hm.dag.entryBetween [ "linkGeneration" ] [ "writeBoundary" ]
+        ''
+          run ${settings-merge}/bin/claude-settings-merge ${
+            (pkgs.formats.json { }).generate "claude-code-settings.json" config.claudeCodeConfig.settings
+          }
+        '';
 
     # Place the zellaude hook script
     xdg.configFile."zellij/plugins/zellaude-hook.sh" = {
@@ -271,7 +310,9 @@ in
       package = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.claude-code;
       rulesDir = ./claude-rules;
       mcpServers = config.claudeCodeConfig.mcpServers;
-      settings = config.claudeCodeConfig.settings;
+      # settings stays unset: the module installs it as a store symlink that
+      # linkGeneration restores over the merged file. The merge above reads
+      # claudeCodeConfig.settings directly instead.
     };
   };
 }

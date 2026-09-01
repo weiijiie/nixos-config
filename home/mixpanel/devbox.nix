@@ -48,57 +48,6 @@
     ''
   );
 
-  # Plugins and marketplaces from analytics claude-setup script, so
-  # claude plugin install doesn't need to write to the read-only settings.json.
-  programs.claude-code.settings = {
-    enabledPlugins = {
-      "slack@claude-plugins-official" = true;
-      "atlassian@claude-plugins-official" = true;
-      "notion@claude-plugins-official" = true;
-      "chronosphere-mcp@mixpanel-monorepo" = true;
-      "mixpanel-mcp@mixpanel-monorepo" = true;
-      "honeycomb@honeycomb-plugins" = true;
-      "chrome-devtools-mcp@mixpanel-monorepo" = true;
-      "pagerduty-mcp@mixpanel-monorepo" = true;
-      "linear@claude-plugins-official" = true;
-      "gh-stack@mixpanel-monorepo" = true;
-      "typescript-native-lsp@mixpanel-monorepo" = true;
-      "mixpanel-docs-mcp@mixpanel-monorepo" = true;
-    };
-    extraKnownMarketplaces = {
-      claude-plugins-official = {
-        source = {
-          source = "github";
-          repo = "anthropics/claude-plugins-official";
-        };
-      };
-      honeycomb-plugins = {
-        source = {
-          source = "github";
-          repo = "honeycombio/agent-skill";
-        };
-      };
-      mixpanel = {
-        source = {
-          source = "github";
-          repo = "mixpanel/ai-plugins";
-        };
-      };
-      duckdb-skills = {
-        source = {
-          source = "github";
-          repo = "duckdb/duckdb-skills";
-        };
-      };
-      mixpanel-monorepo = {
-        source = {
-          source = "directory";
-          path = "${config.home.homeDirectory}/analytics/.claude/monorepo-marketplace";
-        };
-      };
-    };
-  };
-
   programs.git.ignores = [ "/go/.editorconfig" ];
 
   # fff-mcp spawns one stdio server per `claude` process and does not exit when
