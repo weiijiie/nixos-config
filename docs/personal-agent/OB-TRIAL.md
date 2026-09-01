@@ -73,6 +73,17 @@ while the hub, which runs no editor, keeps configs off and receives only
 markdown and attachments. A cutover would therefore retire SPEC §4's
 separate `.obsidian` git repo and the GitSync app along with it.
 
+Category membership is fixed in the client, and two consequences follow for
+§4's config plan. In its favour, `workspace.json` and `workspace-mobile.json`
+are refused unconditionally, so the per-device UI state §4 planned to
+gitignore cannot leak at all, and plugin `main.js` travels under
+community-plugin-data, giving §4's pinned-identical-plugins property without
+a repo. Against it, the toggles are all-or-nothing per category with no
+per-file escape: plugin `data.json` is welded to `main.js` and
+`manifest.json` in community-plugin-data, and `graph.json` falls in
+core-plugin-data with every other top-level json. §4 expected to exclude
+exactly those individually, which a git repo can express and this cannot.
+
 ## What the trial must show
 
 - [x] Hidden files stay local. Probes planted 2026-08-31: `.git/` and
