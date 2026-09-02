@@ -6,6 +6,12 @@
 {
   environment.systemPackages = [ pkgs.custom.obsidian-headless ];
 
+  # Obsidian Sync keeps version history server-side and reachable only from
+  # the app, so the hub gets no audit trail from the transport itself. Point
+  # the snapshot timer at the trial vault to supply one; dot-directories are
+  # never uploaded, so .git stays hub-local without any exclusion config.
+  services.vaultGit.path = "/var/lib/ob-trial/vault";
+
   systemd.tmpfiles.rules = [
     "d /var/lib/ob-trial 0750 vault vault -"
     "d /var/lib/ob-trial/vault 0750 vault vault -"

@@ -138,6 +138,29 @@ vault with broken references and no signal that anything was missing. Weigh
 this against Syncthing, which has no type filter and no size ceiling and moved
 the same content whole.
 
+## The audit trail, supplied on the hub
+
+Obsidian Sync keeps per-file version history, but only the app can reach it:
+the protocol has `history`, `restore` and `deleted` operations and the CLI
+exposes none of them, so a headless hub gets nothing. It is also per-file
+rather than per-change, carries no messages, and lives with the account.
+
+That gap is closed by pointing `services.vaultGit` at the trial vault, which
+the module already supports since its `path` is a free option. Git and the
+transport were always orthogonal (SPEC §4's two layers); nothing about the
+history layer depended on Syncthing. Two properties make the pairing clean:
+
+- Dot-directories are never uploaded, so `.git` and the generated
+  `.gitignore` stay hub-local with no exclusion config at all. Under
+  Syncthing both needed explicit `.stignore` entries.
+- Attachments are committed rather than ignored. That is deliberate: this
+  transport has demonstrated silent exclusions, so a complete local copy with
+  history is worth more here than it would be under Syncthing. The initial
+  commit is 4,072 files and a 328 MB repo.
+
+What git cannot recover is anything that never arrived: the 11 files held
+back by type or size are absent from the hub and therefore from its history.
+
 ## Outcome
 
 Record the result as a decision-log entry amending decision 21: cut over
