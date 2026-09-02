@@ -55,12 +55,14 @@
       flake = false;
     };
 
-    # Pinned by rev: the agent runtime is a supply-chain-sensitive dependency
-    # and lookalike installers exist (SPEC section 6). Deliberately not
-    # following our nixpkgs, since upstream builds against its own pin via
-    # uv2nix and would rebuild from source otherwise.
+    # Pinned to the v0.21.0 release commit, not main: the agent runtime is a
+    # supply-chain-sensitive dependency and lookalike installers exist (SPEC
+    # section 6). Later revs add a top-level hermes_state_registry module
+    # without adding it to pyproject.toml's py-modules, so uv2nix's sealed
+    # venv omits it and the gateway dies on import. Deliberately not following
+    # our nixpkgs, since upstream builds against its own pin via uv2nix.
     hermes-agent = {
-      url = "github:NousResearch/hermes-agent/95f62ca3bfcfe788739ddd49fa6dd6b0c5568fc4";
+      url = "github:NousResearch/hermes-agent/29112bef0992";
     };
 
     hunk = {
