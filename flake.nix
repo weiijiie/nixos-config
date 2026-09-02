@@ -55,6 +55,14 @@
       flake = false;
     };
 
+    # Pinned by rev: the agent runtime is a supply-chain-sensitive dependency
+    # and lookalike installers exist (SPEC section 6). Deliberately not
+    # following our nixpkgs, since upstream builds against its own pin via
+    # uv2nix and would rebuild from source otherwise.
+    hermes-agent = {
+      url = "github:NousResearch/hermes-agent/95f62ca3bfcfe788739ddd49fa6dd6b0c5568fc4";
+    };
+
     hunk = {
       url = "github:modem-dev/hunk";
       inputs.nixpkgs.follows = "nixpkgs";
