@@ -104,22 +104,26 @@ let
 
       mkdir -p "$HOME/.claude"
 
-      if [ -s "$target" ] && jq -e . "$target" >/dev/null 2>&1; then
-        cp "$target" "$base"
-      else
-        if [ -s "$target" ]; then
-          echo "claude settings.json is not valid JSON; rebuilding it" >&2
+      if [ -s "$target" ]; then
+        if ! jq -e . "$target" > "$base" 2>/dev/null; then
+          echo "claude settings.json is not valid JSON; leaving it unchanged" >&2
+          exit 0
         fi
+      else
         echo '{}' > "$base"
       fi
 
-      # Read through a leftover store symlink before dropping it, or its keys
-      # are lost on the switch that converts the file.
-      if [ -L "$target" ]; then
-        rm -f "$target"
+      jq -s '.[0] * .[1]' "$base" "$declared" > "$merged"
+
+      # A store symlink an earlier generation left has to be replaced even when
+      # the merge itself is a no-op.
+      if [ ! -L "$target" ] && [ "$(jq -Sc . "$base")" = "$(jq -Sc . "$merged")" ]; then
+        # umask only covers the write path, so tighten a file left loose here.
+        chmod 600 "$target"
+        exit 0
       fi
 
-      jq -s '.[0] * .[1]' "$base" "$declared" > "$merged"
+      # rename(2) replaces the symlink itself rather than writing through it.
       mv "$merged" "$target"
     '';
   };
