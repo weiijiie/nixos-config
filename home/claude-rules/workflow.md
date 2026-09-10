@@ -7,6 +7,17 @@
   surrounding system. If extra digging looks warranted, say so in a sentence
   and let the user ask for it.
 
+## Design and review judgment
+
+- Calibrate the robustness bar to what the component is for. Debug, replay,
+  and dev tooling need no consistency across restarts, resharding, or
+  topology change. Before rejecting a reviewer's simplification, name the
+  narrowest property the code actually has to hold.
+- Before calling a change too complex, or cutting scope in the name of
+  simplicity, read the code and attribute its lines to purposes, then check
+  each purpose against the goal. A diffstat is not evidence of complexity,
+  and a requirement the goal depends on is not a simplification candidate.
+
 ## Tickets and PRs
 
 - When working a Linear issue, read the issue comments as well as the
@@ -36,6 +47,18 @@
 - Never assert an unchecked fact about how a system behaves or is used,
   whether in a code comment, a design justification, or a scoping decision.
   Verify it, ask, or hedge explicitly.
+- Reach for the cheapest evidence first. Read a tool's config, state, and log
+  files before grepping or disassembling its binary. Run a command with a
+  safe flag (`--help`, `--dry-run`) before inferring its behavior from
+  source. Stop and answer once the evidence is in hand.
+- A source read is not confirmation. Where a repo holds several
+  implementations of the same tool, one code path predicts nothing about
+  which one runs; run it or ask. Follow the code that resolves a name (alias
+  tables, param types, fallbacks) before reporting a name or value mismatch
+  as a bug.
+- Before writing that data is safe to delete, verify the stated recovery path
+  reproduces it. A re-fetch that returns different content is not recovery.
+  Say what is guaranteed and what is not.
 - Your own notes are not a source. Before a plan, a sequencing decision, or a
   summary turns on what a review comment, a ticket, or a doc said, re-read the
   original text rather than your paraphrase of it in a state file or a memory
@@ -45,7 +68,10 @@
   diverge from what the document proposes.
 - Don't narrow a change across a fleet of similar instances (service
   variants, clusters, configs) on an assumption about which ones matter.
-  Cover them all unless you have checked.
+  Cover them all unless you have checked. The same holds for documentation:
+  grep the repo for a checked-in runbook on the subject (docs/, README,
+  product directories) and update every copy, rather than calling an
+  external page the only one.
 - When a normalized or per-unit number shows unexplained skew across a
   population, first enumerate what the denominator leaves out (scale,
   volume, unmatched numerator terms) and test those. Reach for

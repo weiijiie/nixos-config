@@ -3,14 +3,18 @@
 ## Naming
 
 These cover every place a name or a term appears: identifiers, CLI flags and
-tool names, comments, and prose in docs.
+tool names, comments, prose in docs, and what you write in chat.
 
 - Plain words over jargon; don't coin terms the team doesn't already use.
   If a new term is unavoidable, define it once where it's introduced and
   name the symbols built on it consistently.
+- Never invent a shorthand for something the code already names. Name the
+  identifier and say what it does; a reader should not need the conversation
+  to decode the phrase. Label a thing by its name, not by a symbol.
 - Plain language means avoiding jargon, not avoiding accurate common
-  vocabulary. Prefer the field's standard term (nodes, edges, graph) over a
-  physical metaphor invented to sound simpler (dots, lines, stroke).
+  vocabulary. Prefer the field's standard term (nodes, edges, graph,
+  memoized) over a physical metaphor invented to sound simpler (dots, lines,
+  stroke) or a plainer circumlocution (remembered).
 - One term per concept, and one concept per term. Don't drift between
   synonyms, and check a new term against the codebase's existing vocabulary
   before introducing it: reusing an established name for a different thing is
@@ -29,9 +33,9 @@ tool names, comments, and prose in docs.
 - Encapsulate detail logic inside the function that owns it; don't leak it into
   the caller's control flow.
 - Don't repeat the same guard at every call site (verbosity checks and the
-  like); wrap it once in a small helper and call that.
-- Open a unit of work's logging/tracing scope at the top of the function
-  doing the work, not inline at the first logging call further down.
+  like); wrap it once in a small helper and call that. But a helper that
+  takes the identity of what it acts on as a parameter is indirection, not
+  deduplication: inline it and accept the few duplicated lines.
 - Prefer simple over clever. An implementation that looks oddly complicated usually is.
 
 ## Layout
@@ -48,6 +52,21 @@ pre-existing files just to comply.
   less.
 - Give a meaningful intermediate result its own named variable rather than
   nesting the call in a return or argument position.
+
+## Go
+
+- Use if/else if for two-branch error or outcome classification. Reserve a
+  tagless switch for three or more genuinely parallel cases.
+
+## Observability
+
+- Open a unit of work's logging/tracing scope at the top of the function
+  doing the work, not inline at the first logging call further down.
+- Inline a metric, event, or log emission at each call site rather than
+  extracting a helper that threads the metric name through a parameter.
+- Don't emit a synthetic value to make a series exist. Give the counter an
+  outcome label so its success side moves with real traffic, and make the
+  alert query no-data-proof (`or vector(0)`) instead.
 
 ## Tests
 

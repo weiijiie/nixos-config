@@ -26,10 +26,17 @@ of the current change.
   not internals reached indirectly, and don't volunteer general platform
   facts. For a field or flag that another package sets, give the constraint
   on callers (who may set it, and to what end) rather than that package's
-  internals.
+  internals. When a comment justifies defensive code, state the caller
+  contract in its general form (callers may invoke this any number of times),
+  not the one caller that happens to trigger it today.
+- Don't cite a sibling system as the reason for a choice ("as X does",
+  "matching Y"); state the reason on its own. Name another component only
+  where the duplication itself is the constraint a reader has to maintain.
 - Put a rationale comment immediately above the statement it justifies, and
   behavior rationale on the function implementing the behavior (cause before
-  consequence), not on the caller's doc comment.
+  consequence), not on the caller's doc comment. An error-severity or
+  fail-fast reason goes inline at the return, not in the function's own doc
+  comment; the doc comment carries the semantic model.
 - Each fact lives in exactly one place, the symbol that owns it. Module
   docstrings: ≤4 lines of what + entrypoint pointer; don't duplicate
   per-symbol docstrings or write "Design:" sections (that's the PR

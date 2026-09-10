@@ -14,6 +14,9 @@ and chat. Not to material you quote or transcribe verbatim.
   Keep to the subject the title names, and bring in a prior or related event
   only as compact context where it carries the explanation, never as a second
   timeline.
+- Don't present as a discovery something the conversation already
+  established. Check a branch, PR, file, or ticket against what is known and
+  name the connection; only genuinely unknown things are news.
 - In a runbook or an operational step, give the action and the decision it
   drives. Cut any clause that does not change what the operator does next;
   keep a mechanism detail only where it changes the command they run.

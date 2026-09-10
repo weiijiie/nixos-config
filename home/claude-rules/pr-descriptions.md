@@ -26,7 +26,9 @@ sections (Why, What, Test plan, Deployment plan) under plainer names.
 
 Style:
 
-- Lean towards brevity. Short sections, no walls of text.
+- Lean towards brevity. Short sections, no walls of text. Problem in two to
+  four sentences; Changes in three to five bullets; about 250 words in all;
+  no paragraph over four sentences.
 - Capture the high-level details that matter to the PR's main goal, even
   if the ticket or the diff also states them. Leave out minor details the
   code already covers (a fail-fast check on a metadata lookup, a helper's
@@ -34,4 +36,5 @@ Style:
 - Design justifications, alternatives considered, and investigation history
   belong in the ticket or the review thread, not the description.
 - Testing and rollout are operational detail; keep them brief.
+- Give a number only where it changes a decision.
 - Title: `[TICKET-NN] imperative summary`.
