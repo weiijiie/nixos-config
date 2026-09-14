@@ -90,6 +90,11 @@
       source ~/.gcpdevbox
       source ~/analytics/google-cloud/scripts/kube.sh
 
+      # Codex's github MCP server reads its bearer from this var; it cannot use
+      # OAuth. analytics/.shellenv, sourced from .zshenv, has already pulled the
+      # same gh token out of hosts.yml, so only a box without it pays for `gh`.
+      export GITHUB_MCP_TOKEN="''${GITHUB_PERSONAL_ACCESS_TOKEN:-$(gh auth token 2>/dev/null)}"
+
       function gcloud() {
         if [[ "$1" == "compute" && "$2" == "ssh" ]]; then
             TERM=xterm-256color command gcloud "$@"
