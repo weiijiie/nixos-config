@@ -104,7 +104,10 @@
       }
     '';
 
+    # The login shell is bash, so $SHELL is /bin/bash inside zsh too, and
+    # analytics/.shellenv picks its shell integration by $SHELL.
     envExtra = lib.mkForce ''
+      export SHELL=${config.programs.zsh.package}/bin/zsh
       source $HOME/analytics/.shellenv
     '';
 
