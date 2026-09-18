@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
-"""Smoke-test the installed Pi editor in a fresh terminal, without model calls.
+"""Check Vim input at startup using the installed Pi and tmux.
 
-Requires pi and tmux on PATH and the user's configured extensions installed.
-Run after Home Manager activation: python3 home/tests/pi-vim-startup.py
-Manual installed-environment check; not part of nix flake check.
-Catches an enabled Vim extension whose editor is replaced during startup.
+Run manually: python3 home/tests/pi-vim-startup.py
 """
 
 import pathlib
@@ -53,8 +50,7 @@ def main():
             )
             type_text("alpha beta")
             wait_for(lambda screen: "alpha beta" in screen, "inserted text")
-            # send-keys -l sends raw CSI-u bytes: an unambiguous Escape,
-            # regardless of tmux's extended-key format (not an Alt prefix).
+            # CSI-u distinguishes Escape from an Alt prefix.
             type_text("\x1b[27u")
             wait_for(lambda screen: "NORMAL" in screen, "Escape to enter normal mode")
             type_text("0dw")
