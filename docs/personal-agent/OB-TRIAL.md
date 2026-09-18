@@ -91,8 +91,10 @@ exactly those individually, which a git repo can express and this cannot.
       laptop. (Still community-reported behavior, not documented contract;
       re-verify after any `ob` upgrade.)
 - [ ] The token survives a hub reboot and a redeploy without re-login.
-      Service restart already re-authenticates from the stored token
-      (2026-08-31); reboot and redeploy still to observe.
+      Service restart re-authenticates from the stored token (2026-08-31), and
+      a redeploy did the same on 2026-09-17: `nixos-rebuild switch` stopped the
+      unit and it reached "Fully synced" again unattended. Reboot still to
+      observe.
 - [x] Propagation latency. A 292 KB attachment reached the hub in under 20
       seconds, better than the ~30 s polling interval the docs imply. Phone to
       hub not separately measured.
@@ -108,7 +110,10 @@ exactly those individually, which a git repo can express and this cannot.
       mechanisms, with the unit still `active` and nothing logged. After
       repairing extensions, 11 remain unsynced. See "Silent exclusions" below.
       Syncthing has neither mechanism.
-- [ ] Two weeks of `ob-sync-trial` uptime without a breaking vendor change (soak started 2026-08-31; call it 2026-09-14).
+- [x] Two weeks of `ob-sync-trial` uptime without a breaking vendor change.
+      The soak ran 2026-08-31 to 2026-09-17 on one process: systemd measured
+      2w 2d 22h wall clock for 13m 27s of CPU, with no restarts and no vendor
+      break. It ended on a deliberate redeploy, not a failure.
 
 ## Silent exclusions
 
