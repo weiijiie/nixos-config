@@ -34,6 +34,11 @@
 
     # Deployed out of band (decision 18); a Nix path literal would copy the
     # secrets into the world-readable store.
+    #
+    # Hermes reads its own dotenv, so activation merges these files into
+    # $HERMES_HOME/.env rather than systemd passing them to the process.
+    # Rotating a secret therefore takes `/run/current-system/activate` before
+    # the restart; a restart alone re-reads the old copy.
     environmentFiles = [ "/var/lib/secrets/hermes.env" ];
 
     settings = {
