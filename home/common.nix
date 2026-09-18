@@ -11,6 +11,7 @@
     inputs.hunk.homeManagerModules.default
     ./claude-code.nix
     ./codex.nix
+    ./pi.nix
     ./git.nix
     ./zellij.nix
     ./zsh.nix
