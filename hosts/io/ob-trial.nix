@@ -12,9 +12,11 @@
   # never uploaded, so .git stays hub-local without any exclusion config.
   services.vaultGit.path = "/var/lib/ob-trial/vault";
 
+  # Setgid on the vault so everything created inside it lands in the vault
+  # group, which is how the agent gets at files the sync daemon wrote.
   systemd.tmpfiles.rules = [
     "d /var/lib/ob-trial 0750 vault vault -"
-    "d /var/lib/ob-trial/vault 0750 vault vault -"
+    "d /var/lib/ob-trial/vault 2770 vault vault -"
   ];
 
   systemd.services.ob-sync-trial = {
@@ -32,6 +34,9 @@
       # ob keeps its auth token and per-path sync config under $HOME.
       Environment = "HOME=/var/lib/ob-trial";
       ExecStart = "${pkgs.custom.obsidian-headless}/bin/ob sync --continuous --path /var/lib/ob-trial/vault";
+      # Group-writable downloads, so the agent can edit a note the sync
+      # daemon fetched rather than only replace it.
+      UMask = "0007";
       Restart = "on-failure";
       RestartSec = "30s";
     };

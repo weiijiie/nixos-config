@@ -32,15 +32,22 @@
       ];
     };
 
-    # The file and terminal tools operate here; the module also writes it to
-    # config.yaml as terminal.cwd.
-    workingDirectory = config.services.vaultGit.path;
-
     # Deployed out of band (decision 18); a Nix path literal would copy the
     # secrets into the world-readable store.
+    #
+    # Hermes reads its own dotenv, so activation merges these files into
+    # $HERMES_HOME/.env rather than systemd passing them to the process.
+    # Rotating a secret therefore takes `/run/current-system/activate` before
+    # the restart; a restart alone re-reads the old copy.
     environmentFiles = [ "/var/lib/secrets/hermes.env" ];
 
     settings = {
+      # Where the file and terminal tools operate. Set here rather than via
+      # workingDirectory, which the upstream module chowns to the agent's own
+      # user and group -- that would lock the vault user out of the vault and
+      # stop both the snapshot timer and Obsidian Sync.
+      terminal.cwd = config.services.vaultGit.path;
+
       model = {
         default = "anthropic/claude-opus-4.6";
         # Direct Anthropic rather than a reseller, so the key we hold is the
@@ -64,4 +71,9 @@
       ];
     };
   };
+
+  # The module only grants the sandbox write access to workingDirectory.
+  systemd.services.hermes-agent.serviceConfig.ReadWritePaths = [
+    config.services.vaultGit.path
+  ];
 }
