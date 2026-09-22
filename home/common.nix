@@ -51,7 +51,10 @@
         outputs.packages.${pkgs.stdenv.hostPlatform.system}.nvim
         pkgs.custom.claude-code-transcripts
         pkgs.llm-agents.rtk
-        pkgs.llm-agents.hermes-agent
+        # Taken from the flake's packages output rather than the
+        # shared-nixpkgs overlay: its Python dependencies resolve only
+        # against llm-agents' own pinned nixpkgs.
+        inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.hermes-agent
       ]
       ++ (builtins.attrValues pkgs.scripts);
   };

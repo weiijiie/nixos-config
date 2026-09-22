@@ -15,7 +15,9 @@ let
     };
   };
 
-  rtkAwareness = builtins.readFile "${pkgs.llm-agents.rtk}/libexec/rtk/hooks/codex/rtk-awareness.md";
+  # The full level, because Codex takes rtk's guidance as prompt context and
+  # has no hook that could narrow it per command.
+  rtkAwareness = builtins.readFile "${pkgs.llm-agents.rtk}/libexec/rtk/hooks/rtk-awareness-full.md";
 
   # Codex writes ~/.codex/config.toml itself, project trust decisions among
   # them, and a write through a store symlink fails. The file therefore stays a
