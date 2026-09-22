@@ -48,6 +48,12 @@
     ''
   );
 
+  # The github plugin already serves this endpoint here, authenticating with the
+  # PAT analytics/.shellenv exports. Declaring it again would double the toolset.
+  programs.claude-code.mcpServers = lib.mkForce (
+    builtins.removeAttrs config.claudeCodeConfig.mcpServers [ "github" ]
+  );
+
   programs.git.ignores = [ "/go/.editorconfig" ];
 
   # fff-mcp spawns one stdio server per `claude` process and does not exit when

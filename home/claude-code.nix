@@ -190,6 +190,14 @@ let
     nixos = {
       command = "${pkgs.mcp-nixos}/bin/mcp-nixos";
     };
+
+    # Carries no Authorization header on purpose: Claude Code negotiates OAuth
+    # with GitHub and keeps the grant in its own credential store, so no token
+    # has to exist on the machine. Setting a header suppresses that flow.
+    github = {
+      type = "http";
+      url = "https://api.githubcopilot.com/mcp/";
+    };
   };
 in
 {
