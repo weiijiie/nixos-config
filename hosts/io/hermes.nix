@@ -55,6 +55,10 @@
         provider = "anthropic";
       };
 
+      # Telegram shows nothing while a turn runs, so at the 180 s default a
+      # turn of a minute or two is silent until the answer lands.
+      agent.gateway_notify_interval = 45;
+
       # A skill file is a persistent instruction store that untrusted input
       # can reach, so the agent does not get nudged into writing them while
       # the review loop is still unproven (SPEC section 6).
