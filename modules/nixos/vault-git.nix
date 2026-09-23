@@ -1,7 +1,7 @@
 # Server-side git history for the vault: the review and rollback layer.
 #
-# Human edits arrive over Syncthing with no commit attached, so a timer
-# snapshots them. The agent commits its own edits with real messages, which is
+# Human edits arrive through the sync client with no commit attached, so a
+# timer snapshots them. The agent commits its own edits with real messages, which is
 # what makes every agent change a reviewable diff (SPEC section 4).
 {
   config,
@@ -73,11 +73,8 @@ in
     ignore = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [
-        # Its own repo, with its own lifecycle (SPEC section 4).
+        # The sync client's lock, recreated on every start.
         ".obsidian/"
-        ".stfolder/"
-        ".stversions/"
-        ".stignore"
         ".trash/"
       ];
       description = "Patterns written to the vault's .gitignore.";

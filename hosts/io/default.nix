@@ -15,7 +15,6 @@
     outputs.nixosModules.vault-sync
     outputs.nixosModules.vault-git
 
-    ./ob-trial.nix
     ./hermes.nix
 
     # No hardware to scan on a VPS; virtio is the whole hardware story.
@@ -76,15 +75,10 @@
     # Lets the provider's console shut the VM down gracefully.
     qemuGuest.enable = true;
 
-    vaultSync = {
-      enable = true;
-      localDevice = "io";
-    };
+    vaultSync.enable = true;
 
     vaultGit.enable = true;
 
-    # Peers reach syncthing over the tailnet; on exe.dev there is no other
-    # inbound TCP path.
     tailscale.enable = true;
   };
 

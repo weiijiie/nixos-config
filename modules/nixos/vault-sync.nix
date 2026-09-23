@@ -1,31 +1,35 @@
-# Syncthing topology for the Obsidian vault.
+# Obsidian Sync for the vault, through the official headless client.
 #
-# Device IDs, the folder ID and the on-host path are declared here once. The
-# peers outside this flake (Windows-native Syncthing on the laptop, the Android
-# app) are paired by hand against these values.
+# Logging in and linking the remote vault are one-time manual steps
+# (docs/personal-agent/PHASE-0.md). The sync settings are declared here and
+# reapplied on every start, so a hand-run `ob sync-config` does not last.
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 let
   cfg = config.services.vaultSync;
-
-  paired = lib.filterAttrs (name: device: name != cfg.localDevice && device.id != null) cfg.devices;
-  unpaired = lib.attrNames (
-    lib.filterAttrs (name: device: name != cfg.localDevice && device.id == null) cfg.devices
-  );
+  ob = lib.getExe' cfg.package "ob";
 in
 {
   options.services.vaultSync = {
-    enable = lib.mkEnableOption "Syncthing sync of the Obsidian vault";
+    enable = lib.mkEnableOption "Obsidian Sync of the vault";
+
+    package = lib.mkOption {
+      type = lib.types.package;
+      default = pkgs.custom.obsidian-headless;
+      defaultText = lib.literalExpression "pkgs.custom.obsidian-headless";
+      description = "The `ob` client.";
+    };
 
     user = lib.mkOption {
       type = lib.types.str;
       default = "vault";
       description = ''
-        Owner of the vault and the identity Syncthing runs as. Services that
-        need vault access join this user's group rather than running as it.
+        Owner of the vault and the identity the sync client runs as. Services
+        that need vault access join this user's group rather than running as it.
       '';
     };
 
@@ -43,127 +47,88 @@ in
 
     stateDir = lib.mkOption {
       type = lib.types.path;
-      default = "/var/lib/syncthing";
-      description = "Syncthing's own config, keys and database.";
-    };
-
-    localDevice = lib.mkOption {
-      type = lib.types.str;
+      default = "/var/lib/obsidian-sync";
       description = ''
-        This host's key in `devices`. Excluded when sharing the folder, since a
-        device never shares with itself.
+        The vault user's home, where the client keeps its login token, the
+        vault's encryption key and its per-vault settings. The service stays
+        inactive until an empty `armed` file exists here.
       '';
     };
 
-    devices = lib.mkOption {
-      description = ''
-        Every device in the mesh. A null id means the device has not been paired
-        yet; it is left out of the generated config until its id is filled in.
-      '';
-      type = lib.types.attrsOf (
-        lib.types.submodule (
-          { name, ... }:
-          {
-            options = {
-              id = lib.mkOption {
-                type = lib.types.nullOr lib.types.str;
-                default = null;
-                description = "Syncthing device ID, from `syncthing device-id`.";
-              };
-
-              name = lib.mkOption {
-                type = lib.types.str;
-                default = name;
-                description = "Display name in the Syncthing UI.";
-              };
-            };
-          }
-        )
+    fileTypes = lib.mkOption {
+      type = lib.types.listOf (
+        lib.types.enum [
+          "image"
+          "audio"
+          "video"
+          "pdf"
+          "unsupported"
+        ]
       );
-      default = {
-        io.name = "io (hub)";
-        tinker = {
-          name = "tinker (windows)";
-          id = "U2GVBAP-5WR2IYA-XZEX5Q2-KTBQGL3-6WBHESY-REPB6OU-VIPQSMP-BPK2OQH";
-        };
-        phone = {
-          name = "phone (android)";
-          id = "IGM3XVU-TAZFOYA-CAQ2NB5-FOOHRIH-4DKKZI6-HB4QTXD-NVT3UAR-RHAESAG";
-        };
-      };
-    };
-
-    folder = {
-      id = lib.mkOption {
-        type = lib.types.str;
-        default = "obsidian-vault";
-        description = "Folder ID. Must match on every device.";
-      };
-
-      label = lib.mkOption {
-        type = lib.types.str;
-        default = "Obsidian Vault";
-        description = "Folder label in the Syncthing UI.";
-      };
-    };
-
-    ignorePatterns = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
+      # Anything outside these categories is otherwise dropped without a
+      # trace, leaving notes that link to files the hub never received.
       default = [
-        # Obsidian config travels as its own git repo (SPEC section 4).
-        "/.obsidian"
-        # The history layer is hub-local and must never reach a device.
-        "/.git"
-        "/.gitignore"
-        "/.stversions"
-        "/.trash"
+        "image"
+        "audio"
+        "video"
+        "pdf"
+        "unsupported"
       ];
-      description = "Syncthing ignore patterns, written to the folder's .stignore.";
+      description = "Attachment categories to sync, besides notes.";
     };
   };
 
   config = lib.mkIf cfg.enable {
-    warnings = lib.optional (unpaired != [ ]) (
-      "services.vaultSync: no device ID for "
-      + lib.concatStringsSep ", " unpaired
-      + ". Those peers do not sync until their IDs are filled in."
-    );
-
     users.users.${cfg.user} = {
       isSystemUser = true;
       inherit (cfg) group;
       home = cfg.stateDir;
-      createHome = true;
       description = "Obsidian vault owner";
     };
 
     users.groups.${cfg.group} = { };
 
+    environment.systemPackages = [ cfg.package ];
+
     systemd.tmpfiles.rules = [
-      "d ${cfg.path} 0750 ${cfg.user} ${cfg.group} -"
+      # Holds the credentials, so closed even to the vault group.
+      "d ${cfg.stateDir} 0700 ${cfg.user} ${cfg.group} -"
+      # Setgid, so files the client downloads land in the vault group.
+      "d ${cfg.path} 2770 ${cfg.user} ${cfg.group} -"
     ];
 
-    services.syncthing = {
-      enable = true;
-      inherit (cfg) user group;
-      dataDir = cfg.stateDir;
-      openDefaultPorts = true;
+    systemd.services.vault-sync = {
+      description = "Obsidian Sync of the vault";
+      wantedBy = [ "multi-user.target" ];
+      wants = [ "network-online.target" ];
+      after = [ "network-online.target" ];
+      # Starting against a vault that was never linked only retry-loops.
+      unitConfig.ConditionPathExists = "${cfg.stateDir}/armed";
 
-      # The flake is the source of truth: anything added through the web UI is
-      # reverted on restart.
-      overrideDevices = true;
-      overrideFolders = true;
+      serviceConfig = {
+        User = cfg.user;
+        Group = cfg.group;
 
-      settings = {
-        devices = lib.mapAttrs (_: device: { inherit (device) id name; }) paired;
+        # The hub runs no editor, so it syncs no editor settings.
+        ExecStartPre = lib.escapeShellArgs [
+          ob
+          "sync-config"
+          "--path"
+          cfg.path
+          "--conflict-strategy"
+          "merge"
+          "--file-types"
+          (lib.concatStringsSep "," cfg.fileTypes)
+          "--configs"
+          ""
+        ];
+        ExecStart = "${ob} sync --continuous --path ${cfg.path}";
 
-        folders.${cfg.folder.id} = {
-          inherit (cfg) path ignorePatterns;
-          inherit (cfg.folder) label;
-          devices = lib.attrNames paired;
-        };
-
-        options.urAccepted = -1;
+        # Group-writable downloads, so the agent can edit a note the client
+        # fetched rather than only replace it.
+        UMask = "0007";
+        Restart = "on-failure";
+        RestartSec = "30s";
       };
     };
   };

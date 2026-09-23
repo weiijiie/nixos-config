@@ -1,44 +1,10 @@
 # Obsidian Sync transport trial
 
-Evaluates official `obsidian-headless` (SPEC §4 option B, decision 21) on a
-scratch vault at `/var/lib/ob-trial/vault`, in parallel with the live
-Syncthing mesh. Never point it at `/var/lib/vault`: two sync engines on one
-directory conflict.
-
-The hub runs `ob sync --continuous` via the `ob-sync-trial` unit
-(`hosts/io/ob-trial.nix`), dormant until armed below. `ob` is on the hub's
-PATH.
-
-## Bootstrap (manual, once)
-
-1. Create an Obsidian account and buy a Sync subscription at obsidian.md.
-   Account creation is web-only; everything after is CLI.
-2. On the hub, as the service identity (passwords are prompted; don't pass
-   them as flags, they'd land in shell history):
-
-   ```sh
-   sudo -u vault env HOME=/var/lib/ob-trial ob login --email <email>
-   sudo -u vault env HOME=/var/lib/ob-trial ob sync-create-remote \
-     --name Observer --encryption end-to-end
-   sudo -u vault env HOME=/var/lib/ob-trial ob sync-setup \
-     --vault Observer --path /var/lib/ob-trial/vault --device-name io
-   sudo -u vault env HOME=/var/lib/ob-trial ob sync-config \
-     --path /var/lib/ob-trial/vault --conflict-strategy merge
-   ```
-
-   The trial's remote vault is named `Observer`; it was created from the
-   desktop UI, so the `sync-create-remote` step was skipped in practice.
-
-   The auth token and vault key live under `/var/lib/ob-trial` (decision 18:
-   out of band, owned by `vault`).
-3. Arm and start:
-
-   ```sh
-   sudo touch /var/lib/ob-trial/armed
-   sudo systemctl start ob-sync-trial
-   ```
-4. On the phone and laptop, log the Obsidian app into the same account and
-   add the `ob-trial` remote vault from Sync settings.
+Findings from the trial of official `obsidian-headless` (SPEC §4 option B,
+decision 21), run on a scratch vault at `/var/lib/ob-trial/vault` in parallel
+with the Syncthing mesh from 2026-08-31. It met every criterion below and the
+vault cut over on 2026-09-23 (decision 22). Setup for the live vault is in
+`PHASE-0.md`.
 
 ## Credential model, noted up front
 
@@ -90,11 +56,10 @@ exactly those individually, which a git repo can express and this cannot.
       `.gitignore` never left the hub while a sibling `canary.md` reached the
       laptop. (Still community-reported behavior, not documented contract;
       re-verify after any `ob` upgrade.)
-- [ ] The token survives a hub reboot and a redeploy without re-login.
-      Service restart re-authenticates from the stored token (2026-08-31), and
-      a redeploy did the same on 2026-09-17: `nixos-rebuild switch` stopped the
-      unit and it reached "Fully synced" again unattended. Reboot still to
-      observe.
+- [x] The token survives a hub reboot and a redeploy without re-login.
+      Service restart re-authenticates from the stored token (2026-08-31), a
+      redeploy did the same on 2026-09-17, and so did a reboot on 2026-09-23:
+      each time the unit reached "Fully synced" again unattended.
 - [x] Propagation latency. A 292 KB attachment reached the hub in under 20
       seconds, better than the ~30 s polling interval the docs imply. Phone to
       hub not separately measured.
@@ -168,6 +133,6 @@ back by type or size are absent from the hub and therefore from its history.
 
 ## Outcome
 
-Record the result as a decision-log entry amending decision 21: cut over
-(SPEC §4 rewrite, Syncthing layer deleted) or stay, with the trigger list
-for re-evaluation.
+Cut over on 2026-09-23; decision 22 records the rationale and the triggers
+for re-evaluation. The type filter above is turned off on the hub. The size
+ceiling is a plan limit and still applies.
