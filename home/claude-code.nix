@@ -48,6 +48,20 @@ let
     '';
   };
 
+  # Prints the github MCP server's request headers, authenticating as whoever
+  # `gh auth login` signed in.
+  github-mcp-headers = pkgs.writeShellApplication {
+    name = "github-mcp-headers";
+    runtimeInputs = [
+      pkgs.gh
+      pkgs.jq
+    ];
+    text = ''
+      token=$(gh auth token)
+      jq -n --arg t "$token" '{Authorization: "Bearer \($t)"}'
+    '';
+  };
+
   zellaude-hook = pkgs.fetchurl {
     url = "https://raw.githubusercontent.com/ishefi/zellaude/v0.4.1/scripts/zellaude-hook.sh";
     hash = "sha256-o/PQW44U89G56P518aX9Dcr89FcmGDoz20XDpg9c+n0=";
@@ -191,12 +205,12 @@ let
       command = "${pkgs.mcp-nixos}/bin/mcp-nixos";
     };
 
-    # Carries no Authorization header on purpose: Claude Code negotiates OAuth
-    # with GitHub and keeps the grant in its own credential store, so no token
-    # has to exist on the machine. Setting a header suppresses that flow.
+    # GitHub's authorization server has no dynamic client registration, so
+    # Claude Code cannot complete OAuth against this endpoint on its own.
     github = {
       type = "http";
       url = "https://api.githubcopilot.com/mcp/";
+      headersHelper = "${github-mcp-headers}/bin/github-mcp-headers";
     };
   };
 in

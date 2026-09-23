@@ -25,6 +25,7 @@
         moreutils
         manix
         wget
+        gh
         dig
         tree
         mosh
