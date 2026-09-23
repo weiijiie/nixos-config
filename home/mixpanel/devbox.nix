@@ -41,7 +41,8 @@
   programs.go.enable = lib.mkForce false;
 
   # Claude Code is pre-installed on devbox. Override the package to a simple
-  # passthrough to the native binary. The HM module wraps this with --mcp-config.
+  # passthrough to the native binary. The HM module wraps this in a launcher
+  # that passes --plugin-dir, which is how the declared MCP servers reach it.
   programs.claude-code.package = lib.mkForce (
     pkgs.writeShellScriptBin "claude" ''
       exec "$HOME/.local/bin/claude" "$@"
