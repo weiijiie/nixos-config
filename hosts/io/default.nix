@@ -54,7 +54,6 @@
   networking = {
     hostName = "io";
     useDHCP = lib.mkDefault true;
-    firewall.trustedInterfaces = [ "tailscale0" ];
   };
 
   # Daily-note filenames, the morning brief and snapshot timestamps all read
@@ -78,8 +77,6 @@
     vaultSync.enable = true;
 
     vaultGit.enable = true;
-
-    tailscale.enable = true;
   };
 
   # The hub is an appliance, not a workstation: deploys come from tinker, and

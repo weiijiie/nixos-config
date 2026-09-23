@@ -26,6 +26,8 @@ let
       cd ${lib.escapeShellArg cfg.path}
 
       git rev-parse --git-dir >/dev/null 2>&1 || git init -q -b main
+      # The agent commits here too, as another member of the vault group.
+      git config core.sharedRepository group
       install -m 0644 ${gitignore} .gitignore
 
       git add -A
@@ -97,6 +99,13 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    # git refuses a repo another user owns unless it is marked safe, which
+    # would keep the rest of the vault group from committing.
+    programs.git = {
+      enable = true;
+      config.safe.directory = cfg.path;
+    };
+
     systemd.services.vault-snapshot = {
       description = "Snapshot vault edits into git";
 

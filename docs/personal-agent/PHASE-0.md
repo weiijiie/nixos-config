@@ -15,7 +15,6 @@ What the flake handles, so don't set it up by hand:
   strategy, and no editor settings on the hub
 - the `vault` user and group, `/var/lib/vault` and `/var/lib/obsidian-sync`
 - the vault git repo and the 15-minute snapshot timer
-- Tailscale, and the firewall openings each platform needs
 
 A setting changed by hand with `ob sync-config` is overwritten at the next
 start of `vault-sync`.
