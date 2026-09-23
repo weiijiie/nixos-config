@@ -248,7 +248,7 @@ in
     # ccstatusline config — to edit, run `ccstatusline --config /tmp/ccstatusline.json`
     # then copy the result here.
     xdg.configFile."ccstatusline/settings.json".text = builtins.toJSON {
-      version = 3;
+      version = 4;
       lines = [
         [
           {
