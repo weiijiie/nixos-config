@@ -149,7 +149,10 @@ let
     effortLevel = "high";
     agentPushNotifEnabled = true;
 
-    permissions.defaultMode = "auto";
+    permissions = {
+      defaultMode = "auto";
+      blockReadsOutsideWorkingDirectories = false;
+    };
 
     # Retain session transcripts for 60 days (default is 30).
     cleanupPeriodDays = 60;
