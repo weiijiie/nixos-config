@@ -140,6 +140,7 @@ in
         "vision"
         "file"
         "todo"
+        "memory"
         "vault"
       ];
     };
@@ -163,6 +164,8 @@ in
       User = cfg.user;
       Group = cfg.group;
       ExecStart = lib.getExe copyMemory;
+      # Group-writable, like everything else in the vault.
+      UMask = "0007";
 
       ProtectSystem = "strict";
       ReadWritePaths = [ vault ];
