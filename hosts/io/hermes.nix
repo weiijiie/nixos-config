@@ -44,6 +44,8 @@ let
           echo "> Edits here are overwritten; change it through Telegram."
           echo
           cat ${memoryDir}/"$name"
+          # Hermes writes no final newline.
+          [ -z "$(tail -c 1 ${memoryDir}/"$name")" ] || echo
         } >"$tmp"
         chmod 0660 "$tmp"
         mv -f "$tmp" agent/memory/"$name"
@@ -109,7 +111,7 @@ in
       terminal.cwd = vault;
 
       model = {
-        default = "anthropic/claude-opus-4.6";
+        default = "anthropic/claude-opus-5-5";
         # Direct Anthropic rather than a reseller, so the key we hold is the
         # one being billed and capped.
         provider = "anthropic";
