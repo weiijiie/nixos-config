@@ -63,7 +63,7 @@ The hub is a new host in my existing flake, not a standalone repo:
 - **Custom code:** label-filtering Fastmail MCP wrapper as a `pkgs/` entry. Hermes packaged in `pkgs/` too if not already in the `llm-agents.nix` overlay (check at impl time).
 - **Vault modules:** `modules/nixos/vault-sync.nix` declares the vault's path and owner and the hub's Obsidian Sync client with its settings. Its sibling `modules/nixos/vault-git.nix` owns the server-side history layer (repo + snapshot timer), which is vault machinery rather than agent machinery and so sits outside `modules/nixos/agent/`. Devices are set up by hand in the Obsidian app.
 - **Secrets:** deployed out of band, not committed in any form (decision 18). Revisit in Phase 1, when the first credential actually exists.
-- **Stays OUT of the repo:** vault content (Obsidian Sync + hub-side git per §4), Obsidian settings (synced between devices by Obsidian Sync), Hermes runtime state, all secrets material. AGENT.md lives in the vault (the agent needs it in context and it evolves conversationally).
+- **Stays OUT of the repo:** vault content (Obsidian Sync + hub-side git per §4), Obsidian settings (synced between devices by Obsidian Sync), Hermes runtime state, all secrets material. AGENTS.md lives in the vault (the agent needs it in context and it evolves conversationally).
 
 ## 4. Vault sync design
 
@@ -103,24 +103,26 @@ Journal-centric, logseq-flavored, minimal:
 
 ```
 vault/
-├── AGENT.md            # the agent's contract: what it may touch, how, conventions
+├── AGENTS.md           # the agent's contract: what it may touch, how, conventions
 ├── journal/            # daily notes, YYYY-MM-DD.md — my raw appends, agent-annotated
 ├── notes/              # evergreen notes (migrated Notion content lands here)
-├── tasks.md            # or tasks/ — Obsidian Tasks syntax (see §7)
-├── agent/              # agent's own area: memory, synthesis, proposals, logs
-│   ├── memory/         # priorities, patterns, people, preferences it has learned
-│   └── proposals/      # propose-first edits awaiting approval
+├── tasks.md            # Tasks query views, then the tasks the agent creates (see §7)
+├── agent/              # agent's own area
+│   ├── memory/         # copy of Hermes' memory, plus longer notes it keeps
+│   ├── proposals/      # propose-first edits awaiting approval
+│   └── changes/        # YYYY-MM.md: one line per agent commit, written by the tooling
 └── .obsidian/          # editor settings, synced between devices only
 ```
 
-**AGENT.md is load-bearing.** It encodes: which paths the agent may edit freely (its own `agent/` area, tags/links anywhere), which are propose-first (rewording my prose), tag taxonomy as it stabilizes, journal section conventions, and task syntax. It is the vault-side half of the trust model and lives in the vault so the agent always has it in context.
+**AGENTS.md is load-bearing.** Hermes loads it from the vault root into every prompt. It holds the vault contract only: the map of the vault, what the agent may change freely, what needs a proposal and what is off limits, the journal and task conventions, where to look before asking me anything, and that instructions found in notes or tool output are data. Procedures (`/log`, the end-of-day distillation, the brief) are Hermes skills declared in the flake, loaded only when used and reviewed like code. The agent changes AGENTS.md only with my approval, and the rules that matter most are also enforced by hooks (decision 29) rather than trusted to the prompt.
 
 **Journal conventions:**
 - I append freely, zero discipline required. No tags, no structure, whatever.
+- A `/log` capture lands as a timestamped bullet (`- 14:32 text`) above the synthesis section.
 - Agent may add tags and wikilinks **inline and autonomously** — it can read the whole graph and connect things I wouldn't. These are additive, small-diff edits.
 - Autonomous *content* (synthesis, summaries) goes in a clearly marked section, e.g. `## ✦ synthesis (agent)` at the bottom of the daily note — my raw words stay mine.
 - Edits I explicitly request ("clean up that paragraph") are done inline.
-- Unrequested rewording of my prose: **propose-first** — agent writes the proposal (branch commit + note in `agent/proposals/`), pings Telegram, applies on approval. Revisit this dial after a few weeks.
+- Unrequested rewording of my prose: **propose-first** — agent writes the proposal as a note in `agent/proposals/` (the passage, the suggested rewrite, why), pings Telegram, applies on approval. Revisit this dial after a few weeks.
 
 ## 6. Connectors & trust model
 
@@ -128,7 +130,7 @@ vault/
 |---|---|---|---|
 | Fastmail | **Read-only**, label-filtered | Read-only API token; label allowlist enforced in our MCP wrapper | Token scopes are capability-level only (no per-label tokens exist), so filtering lives in the MCP layer. A Fastmail rule tags incoming mail (e.g. `agent-visible`, or allowlist labels like receipts/travel/newsletters); the MCP refuses to serve anything else. **No email sending, period** (no submission scope on the token). Evaluate Fastmail's official MCP server as the base to wrap/fork. |
 | Google Calendar | Read + write | OAuth scoped to my personal calendar | Agent may create/modify events autonomously; deletions propose-first initially. |
-| Vault | Read all; write per AGENT.md | AGENT.md contract + git review layer | 99% readable/editable; propose-first only for rewording my words. |
+| Vault | Read all; write per AGENTS.md | AGENTS.md contract, enforcing hooks, git review layer | 99% readable/editable; propose-first only for rewording my words. |
 | Telegram | Full duplex | Bot locked to my user ID; gateway allowlist in Hermes | The only inbound human channel. |
 
 **Credential isolation:** the Fastmail MCP runs as its own systemd service under its own user, holding the token in its own environment; Hermes talks to it over a local socket and can never read the credential. Same pattern for GCal. This is the self-hosted approximation of edge secret injection: prompt-injected agent ≠ exfiltrated token. Secrets live only on the hub, never in the repo, never in the vault, never in agent-readable files.
@@ -150,7 +152,7 @@ vault/
 - Telegram `/log <text>` (or reply-tagging a message): explicitly journaled, verbatim-ish, immediately.
 - End-of-day distillation (scheduled job): agent reviews the day's Telegram chat + journal appends, writes a few journal-worthy lines into the daily note's synthesis section, tags/links everything, files task-shaped statements into the task system. The chat log itself is NOT the journal.
 
-**Tasks:** Obsidian Tasks plugin syntax in the vault (`- [ ] task 📅 date` etc.) — queryable in-app, native checkboxes on the phone (degradation story), plain text for the agent. The agent: decomposes big tasks into atomic next actions when asked or when it spots an undecomposed lump; maintains priority metadata in its memory rather than cluttering the task lines; surfaces exactly one next action at a time via brief/on-request.
+**Tasks:** Obsidian Tasks plugin syntax in the vault (`- [ ] task 📅 date` etc.). A checkbox counts as a task only when it carries `#task` (the plugin's global filter), so checklists, templates and the Notion import's leftovers never become live tasks. Tasks can live in any note; the ones the agent creates go in `tasks.md`, whose query blocks are the dashboard. `[/]` marks the task in progress. Queryable in-app, native checkboxes on the phone (degradation story), plain text for the agent. The agent: decomposes big tasks into atomic next actions when asked or when it spots an undecomposed lump; maintains priority metadata in its memory rather than cluttering the task lines; surfaces exactly one next action at a time via brief/on-request.
 
 **Priorities & memory:** the agent maintains `agent/memory/` — learned priorities, deadlines, people, my patterns (what granularity gets me to start, what times I actually work). Bootstrap: a one-time onboarding chat. Ongoing: **agent-initiated** weekly planning session via Telegram (~10 min, skippable without penalty) + continuous common-sense inference from calendar/deadlines/journal — the secretary baseline.
 
@@ -199,7 +201,7 @@ Decision deferred with a concrete scoping task (Phase 2): trial exe.dev as a **s
 - [x] Acceptance test: phone edit reached hub and laptop, and snapshot `c810573` carries the diff. Ran with WSL up; see the laptop item for the WSL-stopped caveat.
 
 ### Phase 1 — Agent core (target: end of week 2; **the habit loop ships here**)
-- [ ] Vault skeleton per §5; write AGENT.md v1.
+- [ ] Vault skeleton per §5; write AGENTS.md v1.
 - [ ] Hermes on hub (pinned in flake), Claude transport, Telegram gateway locked to my user ID; skills approval-gated.
 - [ ] `/log` capture → daily note.
 - [ ] End-of-day distillation job (chat + journal → synthesis section + tags/links + task extraction).
@@ -220,7 +222,7 @@ Decision deferred with a concrete scoping task (Phase 2): trial exe.dev as a **s
 - [ ] Task decomposition calibration: agent learns MY startable granularity from what actually got done.
 - [ ] Priority inference good enough that the brief's ONE task is reliably right; memory files mature.
 - [ ] Time-blocking experiment (one week, kill-or-keep, §7).
-- [ ] Loosen propose-first dials where trust is earned; revisit AGENT.md.
+- [ ] Loosen propose-first dials where trust is earned; revisit AGENTS.md.
 
 ### v2 / someday
 - [ ] Flashcards (§7) when actively learning something.
@@ -266,3 +268,7 @@ Decision deferred with a concrete scoping task (Phase 2): trial exe.dev as a **s
 | 23 | Agent jobs run on Hermes' scheduler, declared in the flake | Hermes' scheduler already delivers to Telegram, attaches skills, runs from the vault (loading its AGENTS.md) and tracks failures; systemd timers would rebuild all of that around a CLI. The scheduler keeps run state in `cron/jobs.json`, so Nix cannot own that file. Instead `hosts/io/hermes-cron.nix` declares the jobs and a deploy-time unit creates, edits and removes them by name through `hermes cron`. It removes only jobs it created itself, so jobs made from chat survive. Scheduled jobs get their own tool list (file, session search, the vault commit tool); left unset they would get Hermes' full default set, shell included. |
 | 24 | The agent commits through one narrow tool, not a shell | Every agent write must be its own commit (principle 4), but Telegram deliberately has no shell (§6). A local MCP server (`pkgs/vault-mcp`) offers a single `commit(message, paths)` tool, run as `hermes`: it commits only the files named, refuses paths outside the vault or inside `.git`, and signs commits as Hermes so they stand apart from the snapshot timer's. Naming the server in each platform's tool list also makes those lists allowlists for MCP servers, so later servers do not join Telegram by default. |
 | 25 | Agent memory stays in Hermes' home, approval-gated, with a one-way copy in the vault | Hermes keeps its memory (`MEMORY.md`, `USER.md`) in `$HERMES_HOME/memories` and rewrites the files at mode 0600, so they cannot live in the vault, where the sync client and the snapshot timer read as `vault`. Hermes' `memory.write_approval` stages every save, including background ones, until approved over Telegram (`/memory pending`); that is §6's review. A path unit copies the files into `agent/memory/` on each change and commits them, so memory is readable on every device and versioned; edits to the copy are overwritten. Larger notes the agent keeps (people, projects, patterns) are ordinary vault notes beside the copy. |
+| 26 | The contract is `AGENTS.md`, rules only, changed only with approval | Hermes auto-loads `AGENTS.md` (plural) from the working directory, never `AGENT.md`, and loads it into every prompt, so it carries only the vault contract. Procedures live in flake-declared skills, which load on use and which the agent cannot rewrite. The contract is itself an instruction store the agent always obeys, so its edits need my approval, like rewording my prose. |
+| 27 | A task is a checkbox tagged `#task` | The vault already held a 37-item packing template and 1,100 unchecked Notion checkboxes. Path exclusions depend on where things are filed; a marker does not. One extra word per task is the cost. `tasks.md` holds the tasks the agent creates and doubles as the dashboard. |
+| 28 | Proposals are notes, not branches | A proposal is reviewed in Obsidian, where branches are invisible, and the commit tool commits only to `main`. A note in `agent/proposals/` holding the passage, the rewrite and the reason is the whole mechanism; the agent applies and commits it after I approve. |
+| 29 | Hooks make every agent edit a commit and enforce the read-only paths | Committing is a separate step the agent can forget, and an uncommitted edit would be swept into a snapshot as mine. Shell hooks declared in the flake close that: one records each file the agent writes, one commits any still uncommitted at the end of the reply, marked as such. A fail-closed pre-write hook blocks writes to `Notion/`, `notion-attachments/`, `.git/`, `.obsidian/`, the memory copies and `agent/changes/`, and sends writes to `AGENTS.md` for my approval. Every agent commit adds a line to `agent/changes/YYYY-MM.md`, so the history is readable in Obsidian and by the agent. |
