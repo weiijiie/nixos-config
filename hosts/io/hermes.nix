@@ -92,6 +92,10 @@ in
     # $HERMES_HOME/.env rather than systemd passing them to the process.
     # Rotating a secret therefore takes `/run/current-system/activate` before
     # the restart; a restart alone re-reads the old copy.
+    #
+    # Holds ANTHROPIC_API_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_ALLOWED_USERS and
+    # TELEGRAM_HOME_CHANNEL (the same user ID). `/sethome` cannot stand in for
+    # the last: Hermes refuses to write its own config when Nix manages it.
     environmentFiles = [ "/var/lib/secrets/hermes.env" ];
 
     # The agent's only way to commit its vault edits: one tool, scoped to the
