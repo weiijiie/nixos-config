@@ -1,14 +1,65 @@
 # The agent runtime (SPEC sections 3 and 6).
 #
 # Upstream ships the NixOS module, so this only supplies policy: which model,
-# which credentials, which directory the agent works in, and what it is
-# allowed to do from Telegram.
+# which credentials, which directory the agent works in, what it is allowed
+# to do from Telegram, and the copy of its memory kept in the vault.
 {
   inputs,
   config,
+  lib,
   pkgs,
   ...
 }:
+let
+  cfg = config.services.hermes-agent;
+  vault = config.services.vaultGit.path;
+  memoryDir = "${cfg.stateDir}/.hermes/memories";
+
+  # Everything the agent commits carries this identity, so its changes stand
+  # apart from the snapshot timer's.
+  agentGitIdentity = {
+    GIT_AUTHOR_NAME = "Hermes";
+    GIT_AUTHOR_EMAIL = "hermes@io";
+    GIT_COMMITTER_NAME = "Hermes";
+    GIT_COMMITTER_EMAIL = "hermes@io";
+  };
+
+  copyMemory = pkgs.writeShellApplication {
+    name = "hermes-memory-copy";
+    runtimeInputs = [
+      pkgs.git
+      pkgs.coreutils
+    ];
+    text = ''
+      cd ${lib.escapeShellArg vault}
+      mkdir -p agent/memory
+
+      copied=()
+      for name in MEMORY.md USER.md; do
+        [ -e ${memoryDir}/"$name" ] || continue
+
+        tmp=$(mktemp -p agent/memory .copy.XXXXXX)
+        {
+          echo "> Copy of the agent's memory, refreshed whenever it changes."
+          echo "> Edits here are overwritten; change it through Telegram."
+          echo
+          cat ${memoryDir}/"$name"
+        } >"$tmp"
+        chmod 0660 "$tmp"
+        mv -f "$tmp" agent/memory/"$name"
+
+        copied+=("agent/memory/$name")
+      done
+
+      [ ''${#copied[@]} -gt 0 ] || exit 0
+      git add -- "''${copied[@]}"
+      if git diff --cached --quiet -- "''${copied[@]}"; then
+        exit 0
+      fi
+      git commit -q --only -m "memory: update" -- "''${copied[@]}"
+    '';
+  };
+in
 {
   imports = [ inputs.hermes-agent.nixosModules.default ];
 
@@ -41,12 +92,21 @@
     # the restart; a restart alone re-reads the old copy.
     environmentFiles = [ "/var/lib/secrets/hermes.env" ];
 
+    # The agent's only way to commit its vault edits: one tool, scoped to the
+    # files it names, rather than a shell.
+    mcpServers.vault = {
+      command = lib.getExe pkgs.custom.vault-mcp;
+      env = agentGitIdentity // {
+        VAULT_PATH = vault;
+      };
+    };
+
     settings = {
       # Where the file and terminal tools operate. Set here rather than via
       # workingDirectory, which the upstream module chowns to the agent's own
       # user and group -- that would lock the vault user out of the vault and
       # stop both the snapshot timer and Obsidian Sync.
-      terminal.cwd = config.services.vaultGit.path;
+      terminal.cwd = vault;
 
       model = {
         default = "anthropic/claude-opus-4.6";
@@ -59,6 +119,11 @@
       # turn of a minute or two is silent until the answer lands.
       agent.gateway_notify_interval = 45;
 
+      # Memory is loaded into every prompt, so a save waits for approval over
+      # Telegram (`/memory pending`) rather than landing unreviewed (SPEC
+      # section 6).
+      memory.write_approval = true;
+
       # A skill file is a persistent instruction store that untrusted input
       # can reach, so the agent does not get nudged into writing them while
       # the review loop is still unproven (SPEC section 6).
@@ -67,17 +132,45 @@
       # Telegram is the only inbound human channel and the likeliest path for
       # injected instructions, so it starts without a shell, without skill
       # authoring and without cron. Widen once the review loop has earned it.
+      #
+      # Naming an MCP server here makes the list an allowlist for servers
+      # too; otherwise every enabled server joins it.
       platform_toolsets.telegram = [
         "web"
         "vision"
         "file"
         "todo"
+        "vault"
       ];
     };
   };
 
+  # A one-way copy, so memory is readable from any device and versioned with
+  # the vault; Hermes itself keeps the files in its own home at mode 0600.
+  systemd.paths.hermes-memory-copy = {
+    description = "Watch the agent's memory for changes";
+    wantedBy = [ "paths.target" ];
+    pathConfig.PathChanged = memoryDir;
+  };
+
+  systemd.services.hermes-memory-copy = {
+    description = "Copy the agent's memory into the vault";
+    environment = agentGitIdentity // {
+      HOME = "/var/empty";
+    };
+    serviceConfig = {
+      Type = "oneshot";
+      User = cfg.user;
+      Group = cfg.group;
+      ExecStart = lib.getExe copyMemory;
+
+      ProtectSystem = "strict";
+      ReadWritePaths = [ vault ];
+      PrivateTmp = true;
+      NoNewPrivileges = true;
+    };
+  };
+
   # The module only grants the sandbox write access to workingDirectory.
-  systemd.services.hermes-agent.serviceConfig.ReadWritePaths = [
-    config.services.vaultGit.path
-  ];
+  systemd.services.hermes-agent.serviceConfig.ReadWritePaths = [ vault ];
 }

@@ -16,6 +16,7 @@
     outputs.nixosModules.vault-git
 
     ./hermes.nix
+    ./hermes-cron.nix
 
     # No hardware to scan on a VPS; virtio is the whole hardware story.
     "${modulesPath}/profiles/qemu-guest.nix"
