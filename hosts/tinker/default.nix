@@ -83,6 +83,10 @@
     };
   };
 
+  # The agent starts empty on every WSL boot, so the first ssh afterwards
+  # loads the key instead of each later one asking for the passphrase.
+  home-manager.users.wj.programs.ssh.settings."*".AddKeysToAgent = "yes";
+
   environment = {
     systemPackages = with pkgs; [
       python3
