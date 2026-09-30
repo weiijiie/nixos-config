@@ -157,8 +157,6 @@ let
     # Retain session transcripts for 60 days (default is 30).
     cleanupPeriodDays = 60;
 
-    # Keep the default Co-Authored-By commit trailer; drop the PR footer and
-    # the claude.ai session link.
     attribution = {
       pr = "";
       sessionUrl = false;
