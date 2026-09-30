@@ -70,6 +70,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Pinned to a release tag because main also carries nightly builds. Not
+    # following our nixpkgs: upstream builds with its own Rust and Zig pins.
+    fff = {
+      url = "github:dmtrKovalenko/fff/v0.11.0";
+    };
+
     pre-commit-hooks = {
       url = "github:cachix/git-hooks.nix";
     };
