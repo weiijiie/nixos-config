@@ -13,6 +13,7 @@ let
   );
 
   hunkPkg = inputs.hunk.packages.${pkgs.stdenv.hostPlatform.system}.hunk;
+  fffMcpPkg = inputs.fff.packages.${pkgs.stdenv.hostPlatform.system}.fff-mcp;
 
   feedback-inject = pkgs.writeShellApplication {
     name = "claude-feedback-inject";
@@ -206,6 +207,13 @@ let
   claudeCodeMcpServers = {
     nixos = {
       command = "${pkgs.mcp-nixos}/bin/mcp-nixos";
+    };
+
+    # Upgrades come from bumping the flake input, so the startup update check
+    # only produces noise.
+    fff = {
+      command = "${fffMcpPkg}/bin/fff-mcp";
+      args = [ "--no-update-check" ];
     };
 
     # GitHub's authorization server has no dynamic client registration, so
