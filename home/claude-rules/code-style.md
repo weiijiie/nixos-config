@@ -21,6 +21,10 @@ tool names, comments, prose in docs, and what you write in chat.
   worse than spelling out the specifics.
 - Don't bake provenance or call-site detail into a name when the plain noun
   suffices.
+- When a concept has several representations in scope (its name, its
+  directory, an index), the identifier says which one it holds: `runName`
+  and `runDir`, never a bare `run` or `dir`. A longer name that
+  disambiguates beats a short one that doesn't.
 
 ## Structure
 
@@ -70,6 +74,10 @@ pre-existing files just to comply.
 
 ## Tests
 
+- Cover a behavior change with a test through the entry point the behavior
+  serves, not a unit test per helper. Unit-test a helper only for cases the
+  entry point can't reach or can't enumerate cheaply (parsing edge cases,
+  boundary arithmetic).
 - Table-driven for structurally similar cases.
 - No duplicate coverage.
 - Don't test tautological code (e.g. a switch-case mapping).

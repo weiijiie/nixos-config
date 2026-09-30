@@ -29,7 +29,9 @@
 - Default new work to a fresh branch off the latest upstream default branch,
   and name that branch when you offer to commit. Never push onto a branch
   whose PR is open for review, even for the same ticket or the same files.
-  Only land on an existing PR's branch when the user names it.
+  Only land on an existing PR's branch when the user names it. When a
+  scratch edit turns out to be a real fix, move it to such a branch in the
+  same turn; don't leave it uncommitted on the default-branch checkout.
 - Don't couple a PR onto an open one just because the two touch the same
   files. An observability or metrics change ships separately from a behavior
   fix unless one genuinely needs the other's code.
@@ -46,7 +48,15 @@
 
 - Never assert an unchecked fact about how a system behaves or is used,
   whether in a code comment, a design justification, or a scoping decision.
-  Verify it, ask, or hedge explicitly.
+  Verify it, ask, or hedge explicitly. When a shared artifact scopes an
+  option out, say how deeply it was investigated; one docs line or a single
+  probe does not make a firm out-of-scope call.
+- An inference stays labeled as one until it is checked. That includes
+  blaming a failure on a difference between variants from a few
+  observations, naming which service runs a workload from which product
+  submits it, and repeating a subagent's reading of patterns as fact. Don't
+  call an existing setting wrong ("inverted", "mis-set") before reading its
+  history; say what is unusual about it instead.
 - Reach for the cheapest evidence first. Read a tool's config, state, and log
   files before grepping or disassembling its binary. Run a command with a
   safe flag (`--help`, `--dry-run`) before inferring its behavior from
@@ -100,6 +110,10 @@ Notion pages, PR descriptions, wikis, and other documents the user edits too.
   conflicts you already resolved. When a base is rewritten, rebase the whole
   chain. Look for a stack helper (the `gh stack` extension, the gh-stack
   skill) before hand-rolling this.
+- When opening a PR on top of another open PR's branch, register the pair as
+  a stack at creation: `gh stack link <bottom-PR> <top-PR>` (PR numbers, so
+  nothing is pushed), then `gh stack checkout <stack#>` for local tracking.
+  Setting `--base` alone is not a stack.
 - After committing a multi-step change, verify `git status` is clean for the
   touched paths before reporting done.
 - Never redirect `git add` or `git commit` stderr to /dev/null. A stale

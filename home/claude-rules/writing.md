@@ -17,6 +17,9 @@ and chat. Not to material you quote or transcribe verbatim.
 - Don't present as a discovery something the conversation already
   established. Check a branch, PR, file, or ticket against what is known and
   name the connection; only genuinely unknown things are news.
+- Cite code by the shortest unambiguous path: a bare filename when it is
+  unique in context, a repo-relative path when several packages share the
+  name (views.py, client.go).
 - In a runbook or an operational step, give the action and the decision it
   drives. Cut any clause that does not change what the operator does next;
   keep a mechanism detail only where it changes the command they run.
