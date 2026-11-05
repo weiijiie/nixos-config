@@ -8,6 +8,17 @@ and chat. Not to material you quote or transcribe verbatim.
 - Short sentences with one idea each; define every term of art at first use
   or drop it; state the point before its qualifications; concrete numbers
   over abstract phrasing.
+- State facts flatly. No rhetorical setups ("X doesn't do A. It does B:"),
+  colon reveals, or punchy contrast framing. A reply in a review thread is a
+  few short plain claims; leave out API field names, parentheticals, and
+  command pointers unless the reader needs them to act.
+- Name things by their human-readable names. Give a ticket or PR its title
+  or a short plain name next to the ID at first mention. In prose docs, name
+  Slack channels and users; leave the raw ID to the machine config that
+  consumes it.
+- When a line turns out wrong or unsupported, first ask whether it is needed
+  at all. If the fact already lives elsewhere in the document, delete the
+  line rather than reword it.
 - A document is about its subject, not about itself. Don't name the style or
   format convention you wrote in, and don't reference or correct a version you
   have already replaced; a revision reads as the current state of knowledge.

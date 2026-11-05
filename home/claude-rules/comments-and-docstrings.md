@@ -37,6 +37,12 @@ of the current change.
   consequence), not on the caller's doc comment. An error-severity or
   fail-fast reason goes inline at the return, not in the function's own doc
   comment; the doc comment carries the semantic model.
+- A comment justifying a threshold or config value is one line giving the
+  plain reason, and that reason must hold at the value it justifies. Leave
+  it out when the value already shows the choice; mechanics and pointers to
+  other components belong in the PR description.
+- When moving, exporting, or generalizing a function, keep its doc comment
+  and add only the sentence the new signature needs.
 - Each fact lives in exactly one place, the symbol that owns it. Module
   docstrings: ≤4 lines of what + entrypoint pointer; don't duplicate
   per-symbol docstrings or write "Design:" sections (that's the PR
