@@ -2,10 +2,14 @@
 
 ## Scope
 
-- Answer the question that was asked, at the scope it was asked. A narrow
-  syntax or how-to question gets the answer, not an investigation of the
-  surrounding system. If extra digging looks warranted, say so in a sentence
-  and let the user ask for it.
+- Answer the question that was asked, at the scope and time window it was
+  asked. A narrow syntax or how-to question gets the answer, not an
+  investigation of the surrounding system. If extra digging looks warranted,
+  say so in a sentence and let the user ask for it.
+- When the user names a skill, or passes a token you can't place (an ID, a
+  hash, a code), invoke the skill or fetch what the token references before
+  answering. Don't substitute a procedure or a definition of your own; if a
+  step fails, re-read the skill for the step you skipped.
 
 ## Design and review judgment
 
@@ -17,6 +21,10 @@
   simplicity, read the code and attribute its lines to purposes, then check
   each purpose against the goal. A diffstat is not evidence of complexity,
   and a requirement the goal depends on is not a simplification candidate.
+- Before proposing to loosen, demote, or remove an alert, show both that its
+  pages gave nothing to act on and that the underlying condition did not hurt
+  customers or an SLA. A new threshold chosen because it would have silenced
+  past pages is not evidence.
 
 ## Tickets and PRs
 
@@ -26,6 +34,9 @@
 - Read a PR's live state (draft or ready, base, open or closed) with
   `gh pr view` at the moment you act on it, never from a memory note or an
   earlier session's claim, and never repeat a remembered status back as fact.
+  Describe review state from `reviewRequests` and `latestReviews`;
+  `reviewDecision=REVIEW_REQUIRED` means not yet approved, not that no
+  reviewer is assigned.
 - Default new work to a fresh branch off the latest upstream default branch,
   and name that branch when you offer to commit. Never push onto a branch
   whose PR is open for review, even for the same ticket or the same files.
@@ -54,9 +65,12 @@
 - An inference stays labeled as one until it is checked. That includes
   blaming a failure on a difference between variants from a few
   observations, naming which service runs a workload from which product
-  submits it, and repeating a subagent's reading of patterns as fact. Don't
-  call an existing setting wrong ("inverted", "mis-set") before reading its
-  history; say what is unusual about it instead.
+  submits it (or which caller sent a request from a label named after one
+  service), naming which team owns code from where a ticket was routed
+  (check CODEOWNERS or the team's own statement), and repeating a
+  subagent's reading of patterns as fact. Don't call an existing setting
+  wrong ("inverted", "mis-set") before reading its history; say what is
+  unusual about it instead.
 - Reach for the cheapest evidence first. Read a tool's config, state, and log
   files before grepping or disassembling its binary. Run a command with a
   safe flag (`--help`, `--dry-run`) before inferring its behavior from
@@ -66,6 +80,15 @@
   which one runs; run it or ask. Follow the code that resolves a name (alias
   tables, param types, fallbacks) before reporting a name or value mismatch
   as a bug.
+- Before stating how a result arises or how many times an operation runs
+  (per request, per shard), re-derive it from the actual mechanism: trace the
+  loop that calls it and check a count metric if one exists. A plausible story
+  built from the callee alone is not an explanation.
+- When the user reports a symptom ("X instead of Y"), observe the current
+  state first to confirm which way it goes and where it comes from, across
+  every settings layer, not only the one you manage. Test the mechanism you
+  blame before proposing a fix; a fix that only makes one writer win (force,
+  overwrite) is a band-aid.
 - Before writing that data is safe to delete, verify the stated recovery path
   reproduces it. A re-fetch that returns different content is not recovery.
   Say what is guaranteed and what is not.
@@ -94,10 +117,24 @@ Notion pages, PR descriptions, wikis, and other documents the user edits too.
 
 - Fetch the live version and merge your change into it before writing. Never
   push a stale local snapshot over one.
+- Before reviewing, diffing, or merging a document the user edits, find its
+  most recently modified copy instead of reusing an ID or path from earlier in
+  the session. Users duplicate and re-import.
+- When you move or strip files from a branch, update every shared artifact
+  that links to them in the same pass. Point repo links at a branch that
+  outlives review; a pull request branch is deleted on merge.
 - Content missing between your writes is not evidence of a tool error. The
   user may have deleted it deliberately. Confirm, or check the edit history,
   before restoring anything you did not just write. A clobbered GitHub PR body
   is recoverable from the GraphQL `userContentEdits` field.
+
+## Reporting
+
+- Count an item done only when nothing is left on our side: no unsent reply,
+  no uninvestigated cause, no fix without an owner. Mitigated, deduplicated,
+  or drafted is not done.
+- When citing logs or console views as evidence, give the query text, the
+  project, and the time range. Don't hand-build console URLs; they break.
 
 ## Git
 
