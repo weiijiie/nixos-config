@@ -15,20 +15,31 @@ let
   vault = config.services.vaultGit.path;
   memoryDir = "${cfg.stateDir}/.hermes/memories";
 
-  # Everything the agent commits carries this identity, so its changes stand
+  vaultTools = lib.getExe pkgs.custom.vault-tools;
+  # Everything the agent commits is signed Hermes, so its changes stand
   # apart from the snapshot timer's.
-  agentGitIdentity = {
-    GIT_AUTHOR_NAME = "Hermes";
-    GIT_AUTHOR_EMAIL = "hermes@io";
-    GIT_COMMITTER_NAME = "Hermes";
-    GIT_COMMITTER_EMAIL = "hermes@io";
-  };
+  vaultArgs = [
+    "--vault"
+    vault
+    "--identity"
+    "Hermes <hermes@io>"
+  ];
+  hookCommand = lib.escapeShellArgs (
+    [ vaultTools ]
+    ++ vaultArgs
+    ++ [
+      "--state"
+      "${cfg.stateDir}/.hermes/vault-edits"
+      "hook"
+    ]
+  );
+  fileWrites = "^(write_file|patch)$";
 
   copyMemory = pkgs.writeShellApplication {
     name = "hermes-memory-copy";
     runtimeInputs = [
-      pkgs.git
       pkgs.coreutils
+      pkgs.custom.vault-tools
     ];
     text = ''
       cd ${lib.escapeShellArg vault}
@@ -54,11 +65,8 @@ let
       done
 
       [ ''${#copied[@]} -gt 0 ] || exit 0
-      git add -- "''${copied[@]}"
-      if git diff --cached --quiet -- "''${copied[@]}"; then
-        exit 0
-      fi
-      git commit -q --only -m "memory: update" -- "''${copied[@]}"
+      vault-tools ${lib.escapeShellArgs vaultArgs} \
+        commit --message "memory: update" "''${copied[@]}"
     '';
   };
 in
@@ -101,10 +109,8 @@ in
     # The agent's only way to commit its vault edits: one tool, scoped to the
     # files it names, rather than a shell.
     mcpServers.vault = {
-      command = lib.getExe pkgs.custom.vault-mcp;
-      env = agentGitIdentity // {
-        VAULT_PATH = vault;
-      };
+      command = vaultTools;
+      args = vaultArgs ++ [ "mcp" ];
     };
 
     settings = {
@@ -124,6 +130,28 @@ in
       # Telegram shows nothing while a turn runs, so at the 180 s default a
       # turn of a minute or two is silent until the answer lands.
       agent.gateway_notify_interval = 45;
+
+      # Every agent edit becomes an attributed commit, and the read-only
+      # vault paths hold whatever the prompt says (SPEC decision 30).
+      hooks = {
+        pre_tool_call = [
+          {
+            matcher = fileWrites;
+            command = hookCommand;
+            fail_closed = true;
+          }
+        ];
+        post_tool_call = [
+          {
+            matcher = fileWrites;
+            command = hookCommand;
+          }
+        ];
+        on_session_end = [ { command = hookCommand; } ];
+      };
+      # The gateway has no terminal to ask on; the hooks are store paths
+      # declared here, so consent is the review of this file.
+      hooks_auto_accept = true;
 
       # Memory is loaded into every prompt, so a save waits for approval over
       # Telegram (`/memory pending`) rather than landing unreviewed (SPEC
@@ -164,9 +192,6 @@ in
 
   systemd.services.hermes-memory-copy = {
     description = "Copy the agent's memory into the vault";
-    environment = agentGitIdentity // {
-      HOME = "/var/empty";
-    };
     serviceConfig = {
       Type = "oneshot";
       User = cfg.user;
