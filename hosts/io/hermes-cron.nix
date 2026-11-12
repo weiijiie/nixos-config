@@ -77,9 +77,10 @@ in
 {
   services.hermes-agent.settings = {
     # Left unset, a scheduled job gets Hermes' full default toolset, shell
-    # included. Jobs read the day's conversations and the vault, and commit
-    # what they write.
+    # included. Jobs read the day's conversations, the vault and the web, and
+    # commit what they write.
     platform_toolsets.cron = [
+      "web"
       "file"
       "session_search"
       "vault"

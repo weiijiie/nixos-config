@@ -136,8 +136,9 @@ in
       skills.creation_nudge_interval = 0;
 
       # Telegram is the only inbound human channel and the likeliest path for
-      # injected instructions, so it starts without a shell, without skill
-      # authoring and without cron. Widen once the review loop has earned it.
+      # injected instructions, so it has no shell and no skill authoring.
+      # Scheduling is allowed: a job runs with the narrower cron toolset and
+      # reports back to Telegram, where a stray one is visible.
       #
       # Naming an MCP server here makes the list an allowlist for servers
       # too; otherwise every enabled server joins it.
@@ -147,6 +148,7 @@ in
         "file"
         "todo"
         "memory"
+        "cronjob"
         "vault"
       ];
     };
