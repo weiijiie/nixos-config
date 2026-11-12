@@ -94,3 +94,38 @@ def test_cli_commit(vault, capsys):
 
     assert capsys.readouterr().out.strip() == vault._git("rev-parse", "--short", "HEAD")
     assert "new.md" in head_files(vault)
+
+
+from vault_tools import guard
+
+
+@pytest.mark.parametrize(
+    "path, action",
+    [
+        ("Notion/a.md", "block"),
+        ("notion-attachments/x.png", "block"),
+        (".obsidian/app.json", "block"),
+        (".git/config", "block"),
+        ("agent/changes/2026-09.md", "block"),
+        ("agent/memory/USER.md", "block"),
+        ("agent/memory/MEMORY.md", "block"),
+        ("AGENTS.md", "approve"),
+        ("journal/2026-09-25.md", None),
+        ("agent/memory/people.md", None),
+        ("Notionish.md", None),
+        ("/etc/passwd", None),
+    ],
+)
+def test_guard(vault, path, action):
+    decision = guard(vault, path)
+    assert (decision or {}).get("action") == action
+
+
+def test_guard_absolute_path_inside_vault(vault):
+    assert guard(vault, str(vault.root / "Notion" / "a.md"))["action"] == "block"
+
+
+def test_guard_follows_symlinks(vault):
+    (vault.root / "Notion").mkdir()
+    (vault.root / "sneaky").symlink_to(vault.root / "Notion")
+    assert guard(vault, "sneaky/a.md")["action"] == "block"

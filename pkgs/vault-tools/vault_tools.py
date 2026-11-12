@@ -14,6 +14,13 @@ GIT = "@git@"
 
 CHANGES_DIR = Path("agent/changes")
 
+# Paths the agent may never write, relative to the vault root (AGENTS.md).
+BLOCKED_DIRS = ("Notion", "notion-attachments", ".git", ".obsidian",
+                "agent/changes")
+BLOCKED_FILES = ("agent/memory/MEMORY.md", "agent/memory/USER.md")
+# Paths the agent may write only with the owner's approval.
+APPROVAL_FILES = ("AGENTS.md",)
+
 
 class Vault:
     """A vault checkout, committed to under one git identity."""
@@ -88,6 +95,24 @@ class Vault:
             capture_output=True,
             text=True,
         )
+
+
+def guard(vault, path):
+    """The decision on a file write: block, ask for approval, or allow (None)."""
+    try:
+        name = vault.relative(path).as_posix()
+    except ValueError:
+        return None
+
+    if name in BLOCKED_FILES or any(
+        name == d or name.startswith(d + "/") for d in BLOCKED_DIRS
+    ):
+        return {"action": "block",
+                "message": f"{name} is read-only for the agent (AGENTS.md)."}
+    if name in APPROVAL_FILES:
+        return {"action": "approve",
+                "message": f"The agent wants to change {name}."}
+    return None
 
 
 def _parse_identity(identity):
