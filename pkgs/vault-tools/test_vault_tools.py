@@ -84,3 +84,13 @@ def test_names_are_literal_not_globs(vault):
 def test_rejects_bad_requests(vault, message, paths, error):
     with pytest.raises(ValueError, match=error):
         vault.commit(message, paths)
+
+
+def test_cli_commit(vault, capsys):
+    (vault.root / "new.md").write_text("x\n")
+
+    vault_tools.main(["--vault", str(vault.root), "--identity", IDENTITY,
+                      "commit", "--message", "Add new", "new.md"])
+
+    assert capsys.readouterr().out.strip() == vault._git("rev-parse", "--short", "HEAD")
+    assert "new.md" in head_files(vault)

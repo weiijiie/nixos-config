@@ -97,9 +97,51 @@ def _parse_identity(identity):
     return match.group(1), match.group(2)
 
 
+def serve(vault):
+    """Serve the commit tool over stdio."""
+    # Imported here: hooks start a fresh process on every file write.
+    from mcp.server.fastmcp import FastMCP
+
+    server = FastMCP("vault")
+
+    @server.tool()
+    def commit(message: str, paths: list[str]) -> str:
+        """Commit files in the vault to git, with a message saying what changed.
+
+        List every file this change created, edited, renamed or deleted, as
+        paths relative to the vault root. Only those files are committed;
+        other pending changes in the vault are left alone. Returns the new
+        commit's short hash.
+        """
+        commit_hash = vault.commit(message, paths)
+        if commit_hash is None:
+            raise ValueError("those files have no changes to commit")
+        return commit_hash
+
+    server.run()
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="vault-tools")
-    parser.parse_args(argv)
+    parser.add_argument("--vault", required=True, help="the vault root")
+    parser.add_argument("--identity", required=True,
+                        help='git identity for commits, "Name <email>"')
+    parser.add_argument("--state",
+                        help="where hooks record the files each session wrote")
+    commands = parser.add_subparsers(dest="command", required=True)
+    commands.add_parser("mcp", help="serve the commit tool over stdio")
+    commit = commands.add_parser("commit", help="commit files and log it")
+    commit.add_argument("--message", required=True)
+    commit.add_argument("paths", nargs="+")
+    args = parser.parse_args(argv)
+
+    vault = Vault(args.vault, args.identity)
+    if args.command == "mcp":
+        serve(vault)
+    elif args.command == "commit":
+        commit_hash = vault.commit(args.message, args.paths)
+        if commit_hash:
+            print(commit_hash)
 
 
 if __name__ == "__main__":
