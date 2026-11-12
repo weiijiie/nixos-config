@@ -6,8 +6,10 @@ from the command line; run `vault-tools --help`.
 
 import argparse
 import datetime
+import json
 import re
 import subprocess
+import sys
 from pathlib import Path
 
 GIT = "@git@"
@@ -20,6 +22,8 @@ BLOCKED_DIRS = ("Notion", "notion-attachments", ".git", ".obsidian",
 BLOCKED_FILES = ("agent/memory/MEMORY.md", "agent/memory/USER.md")
 # Paths the agent may write only with the owner's approval.
 APPROVAL_FILES = ("AGENTS.md",)
+
+SWEEP_MESSAGE = "Agent edit the agent did not commit itself"
 
 
 class Vault:
@@ -63,6 +67,12 @@ class Vault:
         self._git("commit", "--quiet", "--only", "--message", message,
                   "--", *relative, changes)
         return self._git("rev-parse", "--short", "HEAD")
+
+    def known(self, relative):
+        """Whether the file exists or git tracks it (a deletion to commit)."""
+        return (self.root / relative).exists() or bool(
+            self._git("ls-files", "--", relative)
+        )
 
     def _committable(self, path):
         relative = self.relative(path)
@@ -115,6 +125,52 @@ def guard(vault, path):
     return None
 
 
+def hook(vault, state, payload):
+    """Handle one Hermes shell-hook event; return a directive or None."""
+    event = payload.get("hook_event_name")
+    path = (payload.get("tool_input") or {}).get("path", "")
+    session = _session_file(state, payload)
+
+    if event == "pre_tool_call":
+        return guard(vault, path)
+    if event == "post_tool_call":
+        record(vault, session, path)
+    elif event == "on_session_end":
+        sweep(vault, session)
+    return None
+
+
+def record(vault, session, path):
+    """Note that this session wrote path, for the sweep."""
+    try:
+        name = vault.relative(path).as_posix()
+    except ValueError:
+        return
+    session.parent.mkdir(parents=True, exist_ok=True)
+    with session.open("a", encoding="utf-8") as f:
+        f.write(name + "\n")
+
+
+def sweep(vault, session):
+    """Commit whatever this session wrote and left uncommitted.
+
+    The record is removed only after a successful commit, so a failure
+    (another commit holding the index lock) retries on the next reply.
+    """
+    if not session.exists():
+        return
+    written = sorted(set(session.read_text(encoding="utf-8").split("\n")) - {""})
+    left = [name for name in written if vault.known(name)]
+    if left:
+        vault.commit(SWEEP_MESSAGE, left)
+    session.unlink()
+
+
+def _session_file(state, payload):
+    session = payload.get("session_id") or "unknown"
+    return Path(state) / (re.sub(r"[^A-Za-z0-9_.-]", "_", session) + ".paths")
+
+
 def _parse_identity(identity):
     match = re.fullmatch(r"\s*(.+?)\s*<([^>]+)>\s*", identity)
     if not match:
@@ -158,6 +214,7 @@ def main(argv=None):
     commit = commands.add_parser("commit", help="commit files and log it")
     commit.add_argument("--message", required=True)
     commit.add_argument("paths", nargs="+")
+    commands.add_parser("hook", help="handle one Hermes hook event from stdin")
     args = parser.parse_args(argv)
 
     vault = Vault(args.vault, args.identity)
@@ -167,6 +224,12 @@ def main(argv=None):
         commit_hash = vault.commit(args.message, args.paths)
         if commit_hash:
             print(commit_hash)
+    elif args.command == "hook":
+        if not args.state:
+            parser.error("hook needs --state")
+        decision = hook(vault, args.state, json.load(sys.stdin))
+        if decision:
+            json.dump(decision, sys.stdout)
 
 
 if __name__ == "__main__":

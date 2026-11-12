@@ -129,3 +129,67 @@ def test_guard_follows_symlinks(vault):
     (vault.root / "Notion").mkdir()
     (vault.root / "sneaky").symlink_to(vault.root / "Notion")
     assert guard(vault, "sneaky/a.md")["action"] == "block"
+
+
+import io
+import json
+
+from vault_tools import SWEEP_MESSAGE, hook
+
+
+def fire(vault, state, event, **payload):
+    return hook(vault, state, {"hook_event_name": event, "session_id": "s:1", **payload})
+
+
+def test_sweep_commits_what_the_agent_left(vault, tmp_path):
+    state = tmp_path / "state"
+    (vault.root / "new.md").write_text("x\n")
+    fire(vault, state, "post_tool_call", tool_name="write_file",
+         tool_input={"path": "new.md"})
+
+    fire(vault, state, "on_session_end")
+
+    assert vault._git("log", "-1", "--format=%s") == SWEEP_MESSAGE
+    assert "new.md" in head_files(vault)
+    assert not list(state.iterdir())
+
+
+def test_sweep_skips_what_the_agent_committed(vault, tmp_path):
+    state = tmp_path / "state"
+    (vault.root / "new.md").write_text("x\n")
+    fire(vault, state, "post_tool_call", tool_name="write_file",
+         tool_input={"path": "new.md"})
+    vault.commit("Add new", ["new.md"])
+    before = vault._git("rev-parse", "HEAD")
+
+    fire(vault, state, "on_session_end")
+
+    assert vault._git("rev-parse", "HEAD") == before
+
+
+def test_sweep_ignores_writes_that_never_happened(vault, tmp_path):
+    state = tmp_path / "state"
+    fire(vault, state, "post_tool_call", tool_name="write_file",
+         tool_input={"path": "Notion/blocked.md"})
+    before = vault._git("rev-parse", "HEAD")
+
+    fire(vault, state, "on_session_end")
+
+    assert vault._git("rev-parse", "HEAD") == before
+
+
+def test_pre_tool_call_returns_the_guard_decision(vault, tmp_path):
+    decision = fire(vault, tmp_path / "state", "pre_tool_call",
+                    tool_name="write_file", tool_input={"path": "Notion/a.md"})
+    assert decision["action"] == "block"
+
+
+def test_cli_hook_reads_stdin(vault, tmp_path, monkeypatch, capsys):
+    payload = {"hook_event_name": "pre_tool_call", "session_id": "s",
+               "tool_name": "patch", "tool_input": {"path": "AGENTS.md"}}
+    monkeypatch.setattr("sys.stdin", io.StringIO(json.dumps(payload)))
+
+    vault_tools.main(["--vault", str(vault.root), "--identity", IDENTITY,
+                      "--state", str(tmp_path / "state"), "hook"])
+
+    assert json.loads(capsys.readouterr().out)["action"] == "approve"
