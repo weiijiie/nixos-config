@@ -205,6 +205,8 @@
               inherit pkgs;
               module = import ./modules/nvim;
             };
+
+            vault-tools = config.packages.vault-tools.tests;
           };
         };
 

@@ -8,7 +8,7 @@
 
   obsidian-headless = pkgs.callPackage ./obsidian-headless { };
 
-  vault-mcp = pkgs.callPackage ./vault-mcp { };
+  vault-tools = pkgs.callPackage ./vault-tools { };
 
   claude-code-transcripts = pkgs.callPackage ./python/claude-code-transcripts.nix { };
 
